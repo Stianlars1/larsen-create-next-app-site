@@ -1,0 +1,118 @@
+.specimen {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+@media (max-width: 48rem) {
+  .specimen {
+    grid-template-columns: 1fr;
+  }
+}
+
+.column {
+  display: grid;
+  gap: var(--space-4);
+  align-content: start;
+}
+
+.panel {
+  margin: 0;
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--surface-1);
+}
+
+.caption {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+  color: hsl(var(--foreground) / 0.8);
+  margin-bottom: var(--space-5);
+}
+
+.caption span {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+}
+
+/* ---------------- Spacing ladder ---------------- */
+
+.ladder {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.rung {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 6rem 2rem;
+  align-items: center;
+  gap: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.bar {
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: hsl(var(--brand-blue));
+  transition: width var(--duration-slow) var(--ease-out);
+}
+
+.rung code {
+  color: var(--ink-faint);
+}
+
+.px {
+  text-align: right;
+  color: hsl(var(--foreground) / 0.5);
+}
+
+/* ---------------- Type ---------------- */
+
+.type {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.typeHeading {
+  margin: 0;
+  font-size: var(--text-lg);
+  line-height: var(--leading-heading);
+  letter-spacing: var(--tracking-display);
+}
+
+.typeBody {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--ink-muted);
+  max-width: 34ch;
+}
+
+.typeLabel {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* ---------------- Radii ---------------- */
+
+.radii {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.radius {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--hairline-strong);
+  background: var(--surface-2);
+}

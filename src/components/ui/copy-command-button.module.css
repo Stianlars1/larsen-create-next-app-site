@@ -1,49 +1,45 @@
+/*
+ * A quiet ghost button. It sits inside a command pill, so it should read as
+ * an affordance rather than a call to action - the command is the hero.
+ */
 .button {
-    display: inline-flex;
-    min-width: 7rem;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    border: 1px solid hsl(var(--foreground));
-    border-radius: var(--radius-lg);
-    padding: var(--space-4) var(--space-5);
-    font-size: var(--text-sm);
-    font-weight: 600;
-    transition:
-        background-color var(--duration-fast) ease,
-        color var(--duration-fast) ease,
-        transform var(--duration-press) var(--ease-out);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-press) var(--ease-out);
 }
 
 .button svg {
-    width: 1rem;
-    height: 1rem;
-}
-
-@media (hover: hover) and (pointer: fine) {
-    .button:hover {
-        background: hsl(var(--foreground));
-        color: hsl(var(--background));
-    }
+  width: 13px;
+  height: 13px;
 }
 
 .button:active {
-    transform: scale(var(--press-scale));
+  transform: scale(var(--press-scale));
 }
 
 .button:focus-visible {
-    outline: 2px solid hsl(var(--ring));
-    outline-offset: 3px;
+  outline: 2px solid hsl(var(--brand-blue));
+  outline-offset: 2px;
 }
 
-@media (max-width: 520px) {
-    .button {
-        width: 100%;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .button {
-        transition: none;
-    }
+@media (hover: hover) and (pointer: fine) {
+  .button:hover {
+    color: hsl(var(--foreground) / 0.9);
+    background: var(--surface-2);
+    border-color: var(--hairline);
+  }
 }

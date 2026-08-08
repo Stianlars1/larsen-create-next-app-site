@@ -1,63 +1,79 @@
 .hero {
   position: relative;
-  padding-block: var(--space-8) var(--space-7);
+  padding-block: clamp(4rem, 9vw, 7rem) clamp(2rem, 4vw, 3rem);
   overflow: hidden;
 }
 
-/* A single soft accent wash - the page is dark, the brand colour carries it */
+/* One soft wash behind the headline - the only gradient on the page */
 .hero::before {
   content: "";
   position: absolute;
-  inset-inline: 0;
-  top: -30%;
-  height: 70%;
+  left: 50%;
+  top: -22rem;
+  width: 60rem;
+  height: 40rem;
+  transform: translateX(-50%);
   background: radial-gradient(
-    50% 60% at 50% 50%,
-    hsl(var(--brand-blue) / 0.16),
-    transparent 70%
+    45% 50% at 50% 50%,
+    hsl(var(--brand-blue) / 0.14),
+    transparent 72%
   );
   pointer-events: none;
 }
 
 .inner {
   position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1fr);
+  gap: clamp(var(--space-6), 5vw, var(--space-8));
+  align-items: center;
+}
+
+@media (max-width: 60rem) {
+  .inner {
+    grid-template-columns: 1fr;
+    gap: var(--space-7);
+  }
+}
+
+.text {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--space-4);
-}
-
-.eyebrow {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-label);
-  color: hsl(var(--brand-blue));
-  padding: var(--space-1) var(--space-3);
-  border: var(--border-width) solid hsl(var(--brand-blue) / 0.3);
-  border-radius: var(--radius-full);
-  background: hsl(var(--brand-blue) / 0.08);
 }
 
 .title {
-  font-size: var(--text-4xl);
-  line-height: var(--leading-heading);
-  letter-spacing: var(--tracking-display);
-  max-width: 18ch;
+  font-size: var(--text-3xl);
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  font-weight: 500;
   margin: 0;
-  text-wrap: balance;
+  /* Wraps to three lines at most - pretty avoids a lonely last word */
+  max-width: 15ch;
+  text-wrap: pretty;
 }
 
-.title em {
-  font-style: normal;
-  color: hsl(var(--brand-blue));
+@media (min-width: 60rem) {
+  .title {
+    max-width: 13ch;
+  }
 }
 
 .lead {
-  max-width: var(--width-prose);
-  font-size: var(--text-lg);
-  line-height: var(--leading-body);
-  color: hsl(var(--foreground) / 0.62);
-  margin: 0;
+  margin: var(--space-5) 0 0;
+  max-width: 42ch;
+  font-size: var(--text-md);
+  line-height: 1.55;
+  color: var(--ink-muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+  max-width: 100%;
 }
 
 .commandRow {
@@ -65,14 +81,13 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
-  border: var(--border-width) solid var(--card-border);
+  border: 1px solid var(--hairline);
   border-radius: var(--radius-full);
-  background: hsl(var(--gray-1));
-  margin-top: var(--space-2);
+  background: var(--surface-1);
+  min-width: 0;
   max-width: 100%;
 }
 
-/* The command scrolls inside the pill rather than pushing the button away */
 .command {
   flex: 1;
   min-width: 0;
@@ -86,7 +101,44 @@
   display: none;
 }
 
-/* Below the pill's comfortable width, stack instead of squeezing */
+.dollar {
+  color: hsl(var(--brand-blue));
+  margin-right: var(--space-2);
+}
+
+.links {
+  display: flex;
+  gap: var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.links a {
+  color: var(--ink-muted);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .links a:hover {
+    color: var(--ink);
+  }
+}
+
+.version {
+  margin: var(--space-6) 0 0;
+  font-size: var(--text-sm);
+  color: var(--ink-faint);
+}
+
+.version strong {
+  color: hsl(var(--foreground) / 0.75);
+  font-weight: 500;
+}
+
+.visual {
+  min-width: 0;
+}
+
 @media (max-width: 30rem) {
   .commandRow {
     flex-direction: column;
@@ -94,61 +146,5 @@
     border-radius: var(--radius-lg);
     padding: var(--space-3);
     gap: var(--space-3);
-  }
-}
-
-.prompt {
-  color: hsl(var(--brand-blue));
-  margin-right: var(--space-2);
-}
-
-.facts {
-  list-style: none;
-  padding: 0;
-  margin: var(--space-4) 0 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-  gap: var(--space-4);
-  width: 100%;
-  max-width: 48rem;
-}
-
-.facts li {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding-left: var(--space-4);
-  border-left: 2px solid hsl(var(--brand-blue) / 0.4);
-}
-
-.facts strong {
-  font-size: var(--text-lg);
-  font-weight: 600;
-}
-
-.facts span {
-  font-size: var(--text-sm);
-  color: hsl(var(--foreground) / 0.55);
-}
-
-.links {
-  display: flex;
-  gap: var(--space-5);
-  margin-top: var(--space-3);
-  font-size: var(--text-sm);
-}
-
-.links a {
-  color: hsl(var(--foreground) / 0.7);
-  text-decoration: none;
-  border-bottom: var(--border-width) solid hsl(var(--foreground) / 0.2);
-  padding-bottom: 2px;
-  transition: color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .links a:hover {
-    color: hsl(var(--foreground));
-    border-bottom-color: hsl(var(--brand-blue));
   }
 }

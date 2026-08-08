@@ -1,49 +1,66 @@
-import { FeatureSection } from "./feature-section";
-import { PROMPT_STEPS } from "@/lib/content";
+import { PROMPT_STEPS, type PromptStep } from "@/lib/content";
 import styles from "./prompt-flow.module.css";
 
 /**
- * Every prompt the CLI asks, in order, with the flag that answers it and why
- * the question exists. Nothing in the flow is left undocumented.
+ * Every prompt the CLI asks, with the flag that answers it. Seven questions,
+ * plus three follow-ups that only appear if you ask for a custom palette -
+ * shown nested rather than numbered, because that is how the flow behaves.
  */
 export function PromptFlow() {
   return (
-    <FeatureSection
-      id="flow"
-      eyebrow="The interactive flow"
-      title="Seven questions, and a flag for every one"
-      lead="Press enter through the whole thing and you get a considered default. Answer them and you get your project. Pass flags and it runs unattended."
-      tinted
-    >
-      <ol className={styles.steps}>
-        {PROMPT_STEPS.map((step, index) => (
-          <li key={step.id} className={styles.step} data-conditional={step.conditional ? "true" : undefined}>
-            <div className={styles.marker} aria-hidden="true">
-              {String(index + 1).padStart(2, "0")}
-            </div>
+    <section className="section" id="flow">
+      <div className="page">
+        <p className="label">The flow</p>
+        <h2 className="headline">Seven questions. Every one has a flag.</h2>
+        <p className="lead">
+          Press enter through all of them for a considered default, or pass flags and skip the
+          terminal entirely.
+        </p>
 
-            <div className={styles.content}>
-              <h3 className={styles.question}>
-                {step.question}
-                {step.conditional && <span className={styles.conditional}>{step.conditional}</span>}
-              </h3>
+        <ol className={styles.steps}>
+          {PROMPT_STEPS.map((step, index) => (
+            <li key={step.id}>
+              <Step step={step} index={index + 1} />
+              {step.followUps && (
+                <ul className={styles.followUps}>
+                  {step.followUps.map((followUp) => (
+                    <li key={followUp.id}>
+                      <Step step={followUp} nested />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  );
+}
 
-              <ul className={styles.choices}>
-                {step.choices.map((choice) => (
-                  <li key={choice.label} data-default={choice.isDefault ? "true" : undefined}>
-                    <span className={styles.choiceLabel}>{choice.label}</span>
-                    {choice.hint && <span className={styles.choiceHint}>{choice.hint}</span>}
-                  </li>
-                ))}
-              </ul>
+function Step({ step, index, nested }: { step: PromptStep; index?: number; nested?: boolean }) {
+  return (
+    <article className={styles.step} data-nested={nested ? "true" : undefined}>
+      <div className={styles.marker} aria-hidden="true">
+        {nested ? "└" : String(index).padStart(2, "0")}
+      </div>
 
-              <p className={styles.why}>{step.why}</p>
+      <div className={styles.content}>
+        <h3 className={styles.question}>{step.question}</h3>
 
-              <code className={styles.flag}>{step.flag}</code>
-            </div>
-          </li>
-        ))}
-      </ol>
-    </FeatureSection>
+        <ul className={styles.choices}>
+          {step.choices.map((choice) => (
+            <li key={choice.label} data-default={choice.isDefault ? "true" : undefined}>
+              {choice.label}
+              {choice.hint && <em>{choice.hint}</em>}
+            </li>
+          ))}
+        </ul>
+
+        <p className={styles.why}>{step.why}</p>
+      </div>
+
+      <code className={styles.flag}>{step.flag}</code>
+    </article>
   );
 }

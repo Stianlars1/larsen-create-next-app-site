@@ -34,17 +34,17 @@ export type PromptStep = {
   flag: string;
   /** One line on why the question exists at all. */
   why: string;
-  /** Only asked when the previous answer opens it. */
-  conditional?: string;
+  /** Follow-up questions, only asked when this answer opens them. */
+  followUps?: PromptStep[];
 };
 
 export const PROMPT_STEPS: PromptStep[] = [
   {
     id: "name",
     question: "What is your app named?",
-    choices: [{ label: "my-app", hint: "any valid npm package name", isDefault: true }],
+    choices: [{ label: "my-app", hint: "lowercase, digits, . _ -", isDefault: true }],
     flag: "pass the name as an argument",
-    why: "Validated against npm's naming rules, and refuses a directory that already has files in it.",
+    why: "Becomes both the folder and the name in package.json, so it is checked for the characters those allow - and refuses a directory that already has files in it.",
   },
   {
     id: "palette",
@@ -53,43 +53,42 @@ export const PROMPT_STEPS: PromptStep[] = [
       { label: "No", hint: "ship the Larsen Utvikling theme", isDefault: true },
       { label: "Yes", hint: "generate from your brand color" },
     ],
-    flag: "--hex <color> / (omit for the default theme)",
-    why: "Say no and you get a considered black-and-white theme with a blue accent. Say yes and the whole palette is derived from your color.",
-  },
-  {
-    id: "hex",
-    question: "Enter your HEX color",
-    conditional: "when you chose a custom palette",
-    choices: [{ label: "#4DA0FF", hint: "with or without the #" }],
-    flag: "--hex 4DA0FF",
-    why: "One color in. A 12-step accent scale, a 12-step gray scale, semantic colors and both modes out.",
-  },
-  {
-    id: "preset",
-    question: "Choose framework/style",
-    conditional: "when you chose a custom palette",
-    choices: [
-      { label: "shadcn/ui", hint: "semantic tokens + scales", isDefault: true },
-      { label: "Radix Colors", hint: "accent + gray scales" },
-      { label: "CSS Variables", hint: "accent + gray scales" },
+    flag: "--hex <color> · omit it for the default theme",
+    why: "Say no and you get a considered black-and-white theme with a blue accent. Say yes and three follow-up questions shape the whole palette.",
+    followUps: [
+      {
+        id: "hex",
+        question: "Enter your HEX color",
+        choices: [{ label: "#4DA0FF", hint: "with or without the #" }],
+        flag: "--hex 4DA0FF",
+        why: "One color in. A 12-step accent scale, a 12-step gray scale, semantic colors and both modes out.",
+      },
+      {
+        id: "preset",
+        question: "Choose framework/style",
+        choices: [
+          { label: "shadcn/ui", hint: "semantic tokens + scales", isDefault: true },
+          { label: "Radix Colors", hint: "accent + gray scales" },
+          { label: "CSS Variables", hint: "accent + gray scales" },
+        ],
+        flag: "--preset shadcn | radix | css-variables",
+        why: "Decides which token names exist - and the generated docs and starter CSS are rewritten to match.",
+      },
+      {
+        id: "format",
+        question: "Choose color format",
+        choices: [
+          { label: "HSL Values", hint: "212 100% 65%", isDefault: true },
+          { label: "HEX" },
+          { label: "RGB" },
+          { label: "HSL" },
+          { label: "OKLAB" },
+          { label: "OKLCH" },
+        ],
+        flag: "--format hsl-values | hex | rgb | hsl | oklab | oklch",
+        why: "HSL values keep alpha composition available. Any other format and the docs switch to the color-mix idiom instead.",
+      },
     ],
-    flag: "--preset shadcn | radix | css-variables",
-    why: "Your choice decides which token names exist - and the generated docs and starter CSS are rewritten to match.",
-  },
-  {
-    id: "format",
-    question: "Choose color format",
-    conditional: "when you chose a custom palette",
-    choices: [
-      { label: "HSL Values", hint: "212 100% 65% - allows hsl(var(--x) / alpha)", isDefault: true },
-      { label: "HEX" },
-      { label: "RGB" },
-      { label: "HSL" },
-      { label: "OKLAB" },
-      { label: "OKLCH" },
-    ],
-    flag: "--format hsl-values | hex | rgb | hsl | oklab | oklch",
-    why: "HSL values keep alpha composition available. Pick any other and the docs switch to the color-mix idiom instead.",
   },
   {
     id: "linter",

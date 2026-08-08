@@ -1,283 +1,76 @@
-/* Shared building blocks for the deep sections */
-
-.split {
+.cliVisual {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-6);
-  align-items: start;
-  margin-top: var(--space-6);
-}
-
-@media (max-width: 56rem) {
-  .split {
-    grid-template-columns: 1fr;
-  }
-}
-
-.stack {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  min-width: 0;
-}
-
-.subhead {
-  font-size: var(--text-xl);
-  margin: 0 0 var(--space-3);
-  letter-spacing: -0.01em;
-}
-
-.prose {
-  margin: 0;
-  color: hsl(var(--foreground) / 0.6);
-  line-height: var(--leading-body);
-  max-width: 60ch;
-}
-
-.prose code,
-.bullets code {
-  font-size: 0.9em;
-  padding: 0.1em 0.35em;
-  border-radius: var(--radius-sm);
-  background: hsl(var(--foreground) / 0.08);
-}
-
-.bullets {
-  margin: var(--space-4) 0 0;
-  padding-left: var(--space-5);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  color: hsl(var(--foreground) / 0.6);
-  line-height: var(--leading-body);
-  max-width: 60ch;
-}
-
-.bullets li::marker {
-  color: hsl(var(--brand-blue));
-}
-
-.footnote {
-  margin: var(--space-5) 0 0;
-  color: hsl(var(--foreground) / 0.5);
-  font-size: var(--text-sm);
-  max-width: var(--width-prose);
-}
-
-.footnote a {
-  color: hsl(var(--brand-blue));
-}
-
-/* ---------------- Colour notes ---------------- */
-
-.notes {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-  gap: var(--space-4);
-  margin-top: var(--space-6);
-}
-
-.notes article {
-  padding: var(--space-4);
-  border: var(--border-width) solid var(--card-border);
-  border-radius: var(--radius-lg);
-  background: var(--card);
-}
-
-.notes h3 {
-  margin: 0 0 var(--space-2);
-  font-size: var(--text-base);
-}
-
-.notes p {
-  margin: 0;
-  font-size: var(--text-sm);
-  color: hsl(var(--foreground) / 0.58);
-  line-height: var(--leading-body);
-}
-
-.notes code {
-  font-size: 0.9em;
-  color: hsl(var(--brand-blue));
-}
-
-/* ---------------- Design system files ---------------- */
-
-.files {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
-  gap: var(--space-4);
-}
-
-.file {
-  padding: var(--space-5);
-  border: var(--border-width) solid var(--card-border);
-  border-radius: var(--card-radius);
-  background: var(--card);
-}
-
-.file h3 {
-  margin: 0 0 var(--space-2);
-  font-size: var(--text-base);
-}
-
-.file h3 code {
-  color: hsl(var(--brand-blue));
-}
-
-.fileRole {
-  margin: 0;
-  font-size: var(--text-sm);
-  color: hsl(var(--foreground) / 0.58);
-  line-height: var(--leading-body);
-}
-
-.tokenList {
-  margin: var(--space-4) 0 0;
-  display: flex;
-  flex-direction: column;
   gap: var(--space-3);
 }
 
-.tokenList div {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.tokenList dt {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
-  color: hsl(var(--foreground) / 0.42);
-}
-
-.tokenList dd {
-  margin: 0;
-  font-size: var(--text-sm);
-  color: hsl(var(--foreground) / 0.72);
-  line-height: var(--leading-tight);
-}
-
-/* ---------------- Docs ---------------- */
-
-.docs {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  gap: var(--space-4);
-}
-
-.doc {
-  padding: var(--space-5);
-  border: var(--border-width) solid var(--card-border);
-  border-radius: var(--card-radius);
-  background: var(--card);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.docName {
-  font-size: var(--text-xs);
-  color: hsl(var(--brand-blue));
-}
-
-.doc h3 {
-  margin: 0;
-  font-size: var(--text-base);
-}
-
-.doc p {
-  margin: 0;
-  font-size: var(--text-sm);
-  color: hsl(var(--foreground) / 0.58);
-  line-height: var(--leading-body);
-}
-
-/* ---------------- Skills ---------------- */
-
-.skills {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
-  gap: var(--space-3);
-}
-
-.skills li {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-4);
-  border: var(--border-width) solid var(--card-border);
-  border-radius: var(--radius-lg);
-  background: var(--card);
-  position: relative;
-}
-
-.skills li[data-recommended="true"] {
-  border-color: hsl(var(--brand-blue) / 0.35);
-}
-
-.skills code {
-  font-size: var(--text-sm);
-  color: hsl(var(--foreground) / 0.95);
-}
-
-.skills span {
-  font-size: var(--text-sm);
-  color: hsl(var(--foreground) / 0.52);
-}
-
-.skills em {
-  position: absolute;
-  top: var(--space-3);
-  right: var(--space-4);
-  font-style: normal;
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
-  color: hsl(var(--brand-blue));
-}
-
-/* ---------------- Flags table ---------------- */
-
+/* A ruled table, not a boxed one - same treatment as the prompt flow */
 .flags {
   width: 100%;
   border-collapse: collapse;
   font-size: var(--text-sm);
+  margin-bottom: var(--section-space);
+}
+
+.flags caption {
+  text-align: left;
+  padding-bottom: var(--space-4);
 }
 
 .flags th,
 .flags td {
   text-align: left;
-  padding: var(--space-2) var(--space-3);
-  border-bottom: var(--border-width) solid hsl(var(--border) / 0.6);
-  vertical-align: top;
-}
-
-.flags thead th {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
-  color: hsl(var(--foreground) / 0.42);
-  font-weight: 400;
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--hairline);
+  vertical-align: baseline;
 }
 
 .flags tbody th {
   font-weight: 400;
-  white-space: nowrap;
+  width: 16rem;
+  padding-right: var(--space-4);
 }
 
 .flags tbody th code {
-  color: hsl(var(--brand-blue));
+  color: hsl(var(--brand-blue) / 0.85);
   font-size: var(--text-xs);
 }
 
 .flags td {
-  color: hsl(var(--foreground) / 0.6);
+  color: var(--ink-muted);
+}
+
+@media (max-width: 40rem) {
+  .flags,
+  .flags tbody,
+  .flags tr,
+  .flags th,
+  .flags td {
+    display: block;
+    width: auto;
+  }
+
+  .flags tr {
+    padding-block: var(--space-3);
+    border-top: 1px solid var(--hairline);
+  }
+
+  .flags th,
+  .flags td {
+    border: none;
+    padding: 0;
+  }
+}
+
+.footnote {
+  margin: 0 0 var(--section-space);
+  font-size: var(--text-sm);
+  color: var(--ink-faint);
+}
+
+.footnote code {
+  color: hsl(var(--foreground) / 0.7);
+}
+
+.footnote a {
+  color: hsl(var(--brand-blue));
 }

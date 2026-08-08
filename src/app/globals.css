@@ -14,28 +14,36 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  /* Page type scale */
+  /* Type scale - restrained on purpose. Confidence reads as small and tight,
+     not large and loud. */
   --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.375rem;
-  --text-2xl: 1.75rem;
-  --text-3xl: 2.25rem;
-  --text-4xl: clamp(2.5rem, 6vw, 4rem);
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-md: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.75rem;
+  --text-2xl: clamp(2rem, 3.6vw, 2.75rem);
+  --text-3xl: clamp(2.75rem, 6vw, 4.25rem);
 
-  /* Page layout */
-  --page-width: 76rem;
+  /* Layout */
+  --page-width: 68rem;
   --page-gutter: var(--space-5);
+  --section-space: clamp(5rem, 11vw, 9rem);
 
-  /* Card surfaces - a hair above the page so edges read without heavy borders */
-  --card: hsl(var(--gray-2));
-  --card-border: hsl(var(--border));
-  --card-border-hover: hsl(var(--foreground) / 0.22);
-  --card-radius: 1.25rem;
+  /* Surfaces. Depth comes from a lifted background, not an outline on
+     everything - a border is reserved for things that genuinely have an edge. */
+  --surface-1: hsl(0 0% 100% / 0.024);
+  --surface-2: hsl(0 0% 100% / 0.04);
+  --hairline: hsl(0 0% 100% / 0.07);
+  --hairline-strong: hsl(0 0% 100% / 0.13);
+
+  /* Text tiers */
+  --ink: hsl(var(--foreground));
+  --ink-muted: hsl(var(--foreground) / 0.56);
+  --ink-faint: hsl(var(--foreground) / 0.38);
 }
 
-/* The page is dark-first: the brand is black and white, and code belongs on dark */
+/* Dark-first: the brand is black and white, and code belongs on dark */
 :root {
   color-scheme: dark;
 }
@@ -49,19 +57,23 @@ body {
   font-family: var(--font-sans);
   font-size: var(--text-base);
   min-height: 100dvh;
+  /* A hair off pure black keeps large flat areas from banding */
+  background: hsl(0 0% 3.5%);
 }
 
 code,
 kbd,
 pre {
   font-family: var(--font-mono);
+  font-feature-settings: "ss01";
 }
 
 ::selection {
-  background: hsl(var(--brand-blue) / 0.28);
+  background: hsl(var(--brand-blue) / 0.3);
 }
 
-/* Layout helpers */
+/* ---------------- Layout primitives ---------------- */
+
 .page {
   width: 100%;
   max-width: var(--page-width);
@@ -70,28 +82,36 @@ pre {
 }
 
 .section {
-  padding-block: var(--space-8);
+  padding-block: var(--section-space);
 }
 
-.eyebrow {
+/* A section header: a small label, a tight headline, one line of prose.
+   Every section uses the same shape so the page has a spine. */
+.label {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  letter-spacing: var(--tracking-label);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: hsl(var(--foreground) / 0.5);
+  color: var(--ink-faint);
+  margin: 0;
 }
 
-.sectionTitle {
-  font-size: var(--text-3xl);
-  letter-spacing: var(--tracking-display);
-  line-height: var(--leading-heading);
-  margin-block: var(--space-3) var(--space-2);
+.headline {
+  font-size: var(--text-2xl);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  font-weight: 500;
+  margin: var(--space-4) 0 0;
+  max-width: 22ch;
+  text-wrap: balance;
 }
 
-.sectionLead {
-  max-width: var(--width-prose);
-  color: hsl(var(--foreground) / 0.62);
-  font-size: var(--text-lg);
+.lead {
+  margin: var(--space-4) 0 0;
+  max-width: 52ch;
+  color: var(--ink-muted);
+  font-size: var(--text-md);
+  line-height: 1.55;
 }
 
 @media (prefers-reduced-motion: reduce) {

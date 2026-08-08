@@ -1,0 +1,52 @@
+.list {
+  list-style: none;
+  margin: var(--space-7) 0 0;
+  padding: 0;
+}
+
+.list {
+  max-width: 46rem;
+}
+
+.list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 1.5rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--hairline);
+  font-size: var(--text-sm);
+}
+
+.list li:last-child {
+  border-bottom: 1px solid var(--hairline);
+}
+
+@media (max-width: 44rem) {
+  .list li {
+    grid-template-columns: 1fr;
+    gap: var(--space-1);
+  }
+
+  .arrow {
+    display: none;
+  }
+}
+
+/* The old way is struck through - the page is making a claim, so it should
+   look like one rather than a neutral comparison */
+.before {
+  color: var(--ink-faint);
+  text-decoration: line-through;
+  text-decoration-color: hsl(var(--foreground) / 0.22);
+}
+
+.arrow {
+  color: hsl(var(--brand-blue) / 0.7);
+  text-align: center;
+  font-size: var(--text-xs);
+}
+
+.after {
+  color: hsl(var(--foreground) / 0.88);
+}

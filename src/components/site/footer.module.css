@@ -1,6 +1,5 @@
 .footer {
-  border-top: var(--border-width) solid hsl(var(--border) / 0.6);
-  padding-block: var(--space-8) var(--space-6);
+  padding-block: var(--section-space) var(--space-7);
   position: relative;
   overflow: hidden;
 }
@@ -8,10 +7,12 @@
 .footer::before {
   content: "";
   position: absolute;
-  inset-inline: 0;
-  bottom: -40%;
-  height: 80%;
-  background: radial-gradient(50% 60% at 50% 50%, hsl(var(--brand-blue) / 0.12), transparent 70%);
+  left: 50%;
+  bottom: -26rem;
+  width: 54rem;
+  height: 40rem;
+  transform: translateX(-50%);
+  background: radial-gradient(45% 50% at 50% 50%, hsl(var(--brand-blue) / 0.1), transparent 72%);
   pointer-events: none;
 }
 
@@ -22,36 +23,44 @@
   align-items: center;
   gap: var(--space-5);
   text-align: center;
-  padding-bottom: var(--space-8);
+  padding-bottom: var(--section-space);
 }
 
 .ctaTitle {
   margin: 0;
-  font-size: var(--text-3xl);
-  letter-spacing: var(--tracking-display);
+  font-size: var(--text-2xl);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  font-weight: 500;
 }
 
 .commandRow {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  flex-wrap: wrap;
-  justify-content: center;
   padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
-  border: var(--border-width) solid var(--card-border);
+  border: 1px solid var(--hairline);
   border-radius: var(--radius-full);
-  background: hsl(var(--gray-1));
+  background: var(--surface-1);
   max-width: 100%;
+  min-width: 0;
 }
 
 .commandRow code {
   font-size: var(--text-sm);
   overflow-x: auto;
   white-space: nowrap;
+  scrollbar-width: none;
+  min-width: 0;
+}
+
+.commandRow code::-webkit-scrollbar {
+  display: none;
 }
 
 .commandRow code span {
   color: hsl(var(--brand-blue));
+  margin-right: var(--space-2);
 }
 
 .meta {
@@ -62,9 +71,9 @@
   justify-content: space-between;
   gap: var(--space-4);
   padding-top: var(--space-5);
-  border-top: var(--border-width) solid hsl(var(--border) / 0.6);
+  border-top: 1px solid var(--hairline);
   font-size: var(--text-sm);
-  color: hsl(var(--foreground) / 0.5);
+  color: var(--ink-faint);
 }
 
 .meta nav {
@@ -74,17 +83,27 @@
 }
 
 .meta a {
-  color: hsl(var(--foreground) / 0.7);
+  color: var(--ink-muted);
   text-decoration: none;
   transition: color var(--duration-fast) var(--ease-out);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .meta a:hover {
-    color: hsl(var(--brand-blue));
+    color: var(--ink);
   }
 }
 
 .meta p {
   margin: 0;
+}
+
+@media (max-width: 30rem) {
+  .commandRow {
+    flex-direction: column;
+    align-items: stretch;
+    border-radius: var(--radius-lg);
+    padding: var(--space-3);
+    gap: var(--space-3);
+  }
 }

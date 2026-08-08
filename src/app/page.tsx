@@ -1,6 +1,6 @@
 import { Hero } from "@/components/site/hero";
 import { Footer } from "@/components/site/footer";
-import { BentoGrid } from "@/components/bento/bento-grid";
+import { Manifest } from "@/components/site/manifest";
 import { PromptFlow } from "@/components/features/prompt-flow";
 import {
   CliSection,
@@ -8,6 +8,7 @@ import {
   DocsSection,
   MotionSection,
   SkillsSection,
+  ThemeSection,
   TokensSection,
   TreeSection,
 } from "@/components/features/sections";
@@ -17,12 +18,13 @@ export default function Page() {
     <>
       <Hero />
       <main>
-        {/* At a glance */}
-        <BentoGrid />
+        {/* What it replaces, stated once and plainly */}
+        <Manifest />
 
-        {/* Then the same ground in depth, one section per capability */}
+        {/* Then each capability gets room, in the order you meet it */}
         <PromptFlow />
         <ColourSection />
+        <ThemeSection />
         <TokensSection />
         <MotionSection />
         <DocsSection />
