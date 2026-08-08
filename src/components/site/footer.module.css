@@ -1,0 +1,90 @@
+.footer {
+  border-top: var(--border-width) solid hsl(var(--border) / 0.6);
+  padding-block: var(--space-8) var(--space-6);
+  position: relative;
+  overflow: hidden;
+}
+
+.footer::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: -40%;
+  height: 80%;
+  background: radial-gradient(50% 60% at 50% 50%, hsl(var(--brand-blue) / 0.12), transparent 70%);
+  pointer-events: none;
+}
+
+.cta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  text-align: center;
+  padding-bottom: var(--space-8);
+}
+
+.ctaTitle {
+  margin: 0;
+  font-size: var(--text-3xl);
+  letter-spacing: var(--tracking-display);
+}
+
+.commandRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  border: var(--border-width) solid var(--card-border);
+  border-radius: var(--radius-full);
+  background: hsl(var(--gray-1));
+  max-width: 100%;
+}
+
+.commandRow code {
+  font-size: var(--text-sm);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.commandRow code span {
+  color: hsl(var(--brand-blue));
+}
+
+.meta {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-top: var(--space-5);
+  border-top: var(--border-width) solid hsl(var(--border) / 0.6);
+  font-size: var(--text-sm);
+  color: hsl(var(--foreground) / 0.5);
+}
+
+.meta nav {
+  display: flex;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+}
+
+.meta a {
+  color: hsl(var(--foreground) / 0.7);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .meta a:hover {
+    color: hsl(var(--brand-blue));
+  }
+}
+
+.meta p {
+  margin: 0;
+}

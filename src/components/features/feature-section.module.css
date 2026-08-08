@@ -1,0 +1,13 @@
+.section {
+  padding-block: var(--space-8);
+  border-top: var(--border-width) solid hsl(var(--border) / 0.6);
+}
+
+.section[data-tinted="true"] {
+  background: hsl(var(--gray-1) / 0.5);
+}
+
+.header {
+  max-width: var(--width-content);
+  margin-bottom: var(--space-6);
+}

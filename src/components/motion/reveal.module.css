@@ -1,0 +1,57 @@
+/*
+ * Shared scroll-reveal utility.
+ *
+ * Emil's rules applied:
+ *   • ease-out cubic-bezier(0.23, 1, 0.32, 1) — strong "punch" on enter
+ *   • opacity + translateY + slight blur — blur masks the midpoint, so the
+ *     reveal reads as a single morph rather than two visible states overlapping
+ *   • never start from scale(0) — things don't appear from nothing
+ *   • one-way (enter only) — users only see it the first scroll past
+ *   • single canonical motion — sections never override timing; consistency
+ *     reads as craft, per-section variation reads as oversight
+ */
+.reveal {
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+
+    transition:
+        opacity 700ms var(--ease-out),
+        transform 700ms var(--ease-out),
+        filter 500ms var(--ease-out);
+    will-change: transform, opacity, filter;
+}
+
+.reveal[data-revealed='false'] {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(6px);
+}
+
+.reveal[data-revealed='true'] {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+}
+
+/* fillCell — when the Reveal is itself a grid cell child, it must stretch so
+ * the actual card inside reaches the cell's full height and can shrink below
+ * its intrinsic min-content width. */
+.reveal[data-fill='true'] {
+    display: flex;
+    height: 100%;
+    min-width: 0;
+}
+
+.reveal[data-fill='true'] > * {
+    width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .reveal,
+    .reveal[data-revealed='false'],
+    .reveal[data-revealed='true'] {
+        opacity: 1;
+        transform: none;
+        filter: none;
+        transition: none;
+    }
+}

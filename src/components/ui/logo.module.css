@@ -1,0 +1,7 @@
+.squircle {
+    fill: hsl(var(--foreground));
+}
+
+.block {
+    fill: hsl(var(--background));
+}
