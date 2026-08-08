@@ -1,9 +1,99 @@
-<!-- BEGIN:nextjs-agent-rules -->
+# AGENTS.md
 
-# This is NOT the Next.js you know
+Rules for working on the landing page at `create-next-app.larsenutvikling.no`.
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+## What this repo is
 
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+The marketing and demo site for
+[`@larsen-utvikling/create-next-app`](https://github.com/Stianlars1/larsen-create-next-app).
+It exists to explain that package - it is not the product.
 
-<!-- END:nextjs-agent-rules -->
+**To understand the product, read
+[PROJECT.md in the package repo](https://github.com/Stianlars1/larsen-create-next-app/blob/main/PROJECT.md).**
+It is the source of truth for every prompt, flag, token and file. Do not
+describe the CLI's behaviour on this site from memory - check it there, or in
+the CLI source.
+
+## The two rules that shape everything here
+
+**1. The page is built with the design system it is selling.**
+`src/styles/design-system/` is a copy of what the package ships -
+`core.css`, `theme.css`, `motion.css`, `base.css`, unchanged. Page-level
+concerns (type scale, layout widths, surfaces) live in `src/app/globals.css`.
+If a change needs a token the template does not have, that is a signal to add
+it page-level, not to edit the design system copy.
+
+**2. The demo runs the real engine.**
+`src/lib/palette.ts` imports
+`@larsen-utvikling/create-next-app/palette/index.js` from the installed
+package. What a visitor generates is byte-for-byte what `npx` writes - this has
+been verified by diffing both outputs for the same seed. Never reimplement or
+copy the engine; that property is the whole point.
+
+## Content accuracy
+
+`src/lib/content.ts` is the single source of truth for the page: every prompt,
+choice, flag, token and file. Components render from it, so a capability
+cannot ship in the CLI and quietly go missing here.
+
+When the CLI changes, update `content.ts` first, then the components.
+
+Two claims have already shipped wrong and been corrected - "validated against
+npm's naming rules" (it is the package's own regex) and "seven questions"
+beside a list of ten (seven top-level, three follow-ups). **Check factual
+statements against the CLI source, do not infer them.**
+
+## Design direction
+
+Restraint over decoration. The reference points are Linear, Vercel, Raycast and
+Emil Kowalski's site.
+
+- **Borders are rare.** Depth comes from a lifted background (`--surface-1`,
+  `--surface-2`) and space. An earlier version had 40 bordered cards and read
+  as generic; it is down to 3. Do not reintroduce a uniform card grid.
+- **The rhythm is editorial:** a small label, a tight headline, one line of
+  prose, then a visual that is allowed to be large. `FeatureBlock` implements
+  it. Alternate `side` and `stacked`.
+- **Type is small and tight.** 15px body. Headlines are `font-weight: 500` with
+  negative tracking, not huge and bold.
+- **Copy is short.** One line where one line will do.
+- **Motion:** Motion (Framer) for orchestration - `whileInView`, sequences,
+  layout. CSS transitions for anything high-cardinality, like the palette
+  swatches, where animating fifty elements would stutter.
+- **Ambient loops pause offscreen.** `useInViewLoop` drives them and stops when
+  the element is not visible.
+
+## Non-negotiables
+
+- **Never Tailwind.**
+- **Only `-` as a dash.** Never `—` or `–`.
+- **Everything is English.** This site is for an international audience;
+  larsenutvikling.no is the Norwegian one.
+- **Clarify, do not guess.** Ask Stian with concrete options when a decision
+  has more than one defensible answer.
+- **Nothing is measured before consent.** Vercel Analytics is cookie-free and
+  always on; GA4 only mounts after the banner is accepted and only when
+  `NEXT_PUBLIC_GA_MEASUREMENT_ID` is set.
+
+## Gotchas
+
+- `getComputedStyle` on an offscreen element can return the pre-transition
+  value, because the browser stalls transitions there. Verify against the
+  inline style, or disable the transition before measuring.
+- `react-hooks/set-state-in-effect` will reject state updates driven from an
+  effect. Drive generation from the interaction that asked for it, and read
+  external state (media queries, consent) with `useSyncExternalStore`.
+
+## Commands
+
+```bash
+npm run dev
+npm run build
+npm run lint
+npx tsc --noEmit
+```
+
+## Deployment
+
+Vercel, from `main`. The domain and `NEXT_PUBLIC_GA_MEASUREMENT_ID` are set in
+the Vercel dashboard - there is no config for them in this repo.
