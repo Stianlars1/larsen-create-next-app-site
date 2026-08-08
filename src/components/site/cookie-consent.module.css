@@ -1,0 +1,85 @@
+.banner {
+  position: fixed;
+  inset-inline: var(--space-4);
+  bottom: var(--space-4);
+  z-index: var(--z-toast);
+  margin-inline: auto;
+  max-width: 34rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--card-border);
+  border-radius: var(--card-radius);
+  background: hsl(var(--gray-2));
+  box-shadow: 0 12px 40px hsl(0 0% 0% / 0.45);
+
+  /* Enters from slightly below and never from scale(0) */
+  animation: enter var(--duration-enter) var(--ease-out) both;
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--enter-distance)) scale(var(--enter-scale));
+  }
+}
+
+.text {
+  margin: 0;
+  flex: 1 1 16rem;
+  font-size: var(--text-sm);
+  color: hsl(var(--foreground) / 0.7);
+  line-height: var(--leading-body);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.actions button {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  border: var(--border-width) solid transparent;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-press) var(--ease-out);
+}
+
+.actions button:active {
+  transform: scale(var(--press-scale));
+}
+
+.decline {
+  background: none;
+  border-color: var(--card-border);
+  color: hsl(var(--foreground) / 0.7);
+}
+
+.accept {
+  background: hsl(var(--brand-blue));
+  color: hsl(0 0% 4%);
+  font-weight: 500;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .decline:hover {
+    border-color: hsl(var(--foreground) / 0.35);
+  }
+
+  .accept:hover {
+    background: hsl(var(--brand-blue) / 0.85);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .banner {
+    animation: none;
+  }
+}
