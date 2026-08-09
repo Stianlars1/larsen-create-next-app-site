@@ -41,6 +41,22 @@
      border shorthands invalid at computed-value time and drew no edge at all. */
   --card-border: var(--hairline);
 
+  /*
+   * The accent, split by role.
+   *
+   * --brand-blue paints text and focus rings, so it has to stay readable on a
+   * near-black page. --brand-solid paints surfaces - fills, borders, the two
+   * gradient washes - where the colour itself is the point and nothing has to
+   * be read through it.
+   *
+   * They are the same value in the shipped theme, because that seed's own
+   * accent-9 is already legible. They separate only when a visitor generates a
+   * palette: see BRAND_TOKENS in components/theme/site-theme.tsx, where solid
+   * takes accent-9 (the colour they typed) and blue takes accent-11 (the
+   * scale's readable-on-dark step, 9:1 or better for every seed).
+   */
+  --brand-solid: var(--brand-blue);
+
   /* Text tiers */
   --ink: hsl(var(--foreground));
   --ink-muted: hsl(var(--foreground) / 0.56);
@@ -73,7 +89,7 @@ pre {
 }
 
 ::selection {
-  background: hsl(var(--brand-blue) / 0.3);
+  background: hsl(var(--brand-solid) / 0.3);
 }
 
 /* ---------------- Layout primitives ---------------- */

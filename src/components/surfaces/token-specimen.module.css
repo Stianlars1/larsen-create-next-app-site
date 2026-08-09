@@ -58,7 +58,7 @@
 .bar {
   height: 6px;
   border-radius: var(--radius-full);
-  background: hsl(var(--brand-blue));
+  background: hsl(var(--brand-solid));
   transition: width var(--duration-slow) var(--ease-out);
 }
 

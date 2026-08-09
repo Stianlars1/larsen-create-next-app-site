@@ -32,13 +32,18 @@ const DEFAULT_SEED = "#4da0ff";
  * declarations across fourteen stylesheets read --brand-blue, so a custom seed
  * has to bring its own or the page keeps a blue accent sitting on a red theme.
  *
- * accent-11 carries --brand-blue. The page uses that token both as text on the
- * near-black background and as a solid fill under near-black text, and step 11
- * is the scale's readable-on-dark step: across the five demo seeds it measures
- * between 9.0:1 and 10.8:1 in both roles. Step 9 is what the baked
- * --brand-blue literally is (212 100% 65% is #4DA0FF's dark accent-9), but its
- * lightness tracks the seed - 3.5:1 for #7C3AED, 19.9:1 for #FFFFFF - so it
- * cannot hold a text role for an arbitrary colour.
+ * The accent is split by role rather than mapped to one step, because one step
+ * cannot serve both. accent-11 carries --brand-blue, which paints text and
+ * focus rings: it is the scale's readable-on-dark step, measuring 9.0:1 to
+ * 10.8:1 across the five demo seeds. accent-9 carries --brand-solid, which
+ * paints fills, borders and the two gradient washes: it is literally the colour
+ * the visitor typed, and nothing has to be read through it.
+ *
+ * Step 9 is what the baked --brand-blue already is (212 100% 65% is #4DA0FF's
+ * dark accent-9), which is why the two are the same value until somebody
+ * generates a palette. It cannot hold the text role for an arbitrary seed
+ * though - its lightness tracks the seed, measuring 3.5:1 for #7C3AED against
+ * 19.9:1 for white.
  *
  * -soft and -subtle take steps 5 and 3, which is where the baked pair already
  * sits: 213 52% 25% against accent-5's 211 81% 25%, and 213 50% 16% against
@@ -46,6 +51,7 @@ const DEFAULT_SEED = "#4da0ff";
  */
 const BRAND_TOKENS: Record<string, string> = {
   "brand-blue": "accent-11",
+  "brand-solid": "accent-9",
   "brand-blue-soft": "accent-5",
   "brand-blue-subtle": "accent-3",
 };

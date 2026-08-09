@@ -40,7 +40,7 @@
   width: 18px;
   height: 18px;
   border-radius: var(--radius-sm);
-  background: hsl(var(--brand-blue));
+  background: hsl(var(--brand-solid));
   flex-shrink: 0;
 }
 
@@ -68,7 +68,7 @@
   height: 26px;
   width: 84px;
   border-radius: var(--radius-sm);
-  background: hsl(var(--brand-blue));
+  background: hsl(var(--brand-solid));
 }
 
 .themeGhost {
@@ -123,8 +123,8 @@
 
 .skill[data-on="true"] {
   opacity: 1;
-  border-color: hsl(var(--brand-blue) / 0.28);
-  background: hsl(var(--brand-blue) / 0.07);
+  border-color: hsl(var(--brand-solid) / 0.28);
+  background: hsl(var(--brand-solid) / 0.07);
 }
 
 .skill code {
@@ -213,7 +213,7 @@
   left: 0;
   width: 15%;
   border-radius: var(--radius-full);
-  background: hsl(var(--brand-blue));
+  background: hsl(var(--brand-solid));
   transition-property: transform;
   transition-timing-function: var(--ease-out);
 }

@@ -91,7 +91,7 @@
   width: 5px;
   height: 5px;
   border-radius: var(--radius-full);
-  background: hsl(var(--brand-blue));
+  background: hsl(var(--brand-solid));
   flex-shrink: 0;
 }
 

@@ -126,7 +126,7 @@
     width: 100%;
     height: 100%;
     border-radius: inherit;
-    background: hsl(var(--brand-blue));
+    background: hsl(var(--brand-solid));
     transform-origin: top;
   }
 

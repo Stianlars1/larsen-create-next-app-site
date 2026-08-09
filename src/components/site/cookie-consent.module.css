@@ -63,7 +63,7 @@
 }
 
 .accept {
-  background: hsl(var(--brand-blue));
+  background: hsl(var(--brand-solid));
   color: hsl(0 0% 4%);
   font-weight: 500;
 }
@@ -74,7 +74,7 @@
   }
 
   .accept:hover {
-    background: hsl(var(--brand-blue) / 0.85);
+    background: hsl(var(--brand-solid) / 0.85);
   }
 }
 

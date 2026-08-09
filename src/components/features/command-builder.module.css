@@ -96,7 +96,7 @@
 }
 
 .input:focus-within {
-  border-color: hsl(var(--brand-blue) / 0.6);
+  border-color: hsl(var(--brand-solid) / 0.6);
 }
 
 .input[data-invalid="true"] {
@@ -159,8 +159,8 @@
 
 .segmented button[data-active="true"] {
   color: var(--ink);
-  border-color: hsl(var(--brand-blue) / 0.55);
-  background: hsl(var(--brand-blue) / 0.12);
+  border-color: hsl(var(--brand-solid) / 0.55);
+  background: hsl(var(--brand-solid) / 0.12);
 }
 
 .segmented button:focus-visible {
@@ -206,8 +206,8 @@
 
 .chip[data-active="true"] {
   color: var(--ink);
-  border-color: hsl(var(--brand-blue) / 0.4);
-  background: hsl(var(--brand-blue) / 0.1);
+  border-color: hsl(var(--brand-solid) / 0.4);
+  background: hsl(var(--brand-solid) / 0.1);
 }
 
 .chip:focus-visible {

@@ -12,7 +12,7 @@
   width: 54rem;
   height: 40rem;
   transform: translateX(-50%);
-  background: radial-gradient(45% 50% at 50% 50%, hsl(var(--brand-blue) / 0.1), transparent 72%);
+  background: radial-gradient(45% 50% at 50% 50%, hsl(var(--brand-solid) / 0.1), transparent 72%);
   pointer-events: none;
 }
 
