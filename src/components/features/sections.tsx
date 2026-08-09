@@ -99,7 +99,11 @@ export function MotionSection() {
         layout="side"
         flip
         points={[
-          { term: "Under 300ms", detail: "A 180ms menu reads as more responsive than a 400ms one" },
+          {
+            term: "Under 300ms",
+            detail:
+              "For anything answering a click or a hover - a 180ms menu reads as more responsive than a 400ms one",
+          },
           { term: "Four curves", detail: "In one file, so near-identical beziers cannot drift apart" },
           { term: "Reduced motion", detail: "Distance and scale collapse; transitions keep running" },
         ]}

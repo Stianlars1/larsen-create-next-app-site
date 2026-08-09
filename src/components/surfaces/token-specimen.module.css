@@ -55,11 +55,24 @@
   font-size: var(--text-xs);
 }
 
+/*
+ * The rung is sized by its own token and the fill is a scaleX, rather than an
+ * animated width. Width is a layout property, and eight of these on a 180ms
+ * loop put the whole ladder through layout on every step; transform runs on
+ * the compositor and draws the same picture.
+ */
 .bar {
+  width: var(--bar-width);
   height: 6px;
   border-radius: var(--radius-full);
   background: hsl(var(--brand-solid));
-  transition: width var(--duration-slow) var(--ease-out);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duration-slow) var(--ease-out);
+}
+
+.bar[data-filled="true"] {
+  transform: scaleX(1);
 }
 
 .rung code {

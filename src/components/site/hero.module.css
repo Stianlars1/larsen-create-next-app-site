@@ -112,8 +112,8 @@
 /*
  * The pill is the target, not the moving text: the copy button sits inside it,
  * so reaching for the button should settle the line rather than leave it
- * sliding under the pointer. Hovering rewinds it to the start and holds it
- * there; moving away starts a fresh pass.
+ * sliding under the pointer. Hovering pauses it where it stands, and moving
+ * away carries on from there.
  *
  * :focus-visible, deliberately not :focus-within. Clicking the copy button
  * leaves it focused, and :focus-within would then hold the line stopped long
@@ -122,9 +122,9 @@
  */
 .commandRow:hover,
 .commandRow:has(:focus-visible) {
-  --marquee-iterations: 0;
-  /* Rewound there is no tail to soften, so the leading fade would only be
-     eating the "n" of npx. */
+  --marquee-play: paused;
+  /* Stopped, the leading fade is only dimming the characters somebody has
+     paused to read. */
   --marquee-fade-start: 0px;
 }
 

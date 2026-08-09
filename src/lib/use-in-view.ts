@@ -59,8 +59,30 @@ export function useInViewLoop<T extends HTMLElement>(steps: number, interval = 1
 
   useEffect(() => {
     if (!inView || reduced) return;
-    const id = window.setInterval(advance, interval);
-    return () => window.clearInterval(id);
+
+    let id: number | undefined;
+    const start = () => {
+      window.clearInterval(id);
+      id = window.setInterval(advance, interval);
+    };
+    const stop = () => window.clearInterval(id);
+
+    /*
+     * Being on screen is not the same as being watched. A backgrounded tab does
+     * not move any element out of the viewport, so IntersectionObserver never
+     * fires and inView stays true - the loops would keep advancing and
+     * re-rendering behind whatever the visitor switched to. Browsers throttle a
+     * background interval, they do not stop it, so the page has to.
+     */
+    const onVisibility = () => (document.hidden ? stop() : start());
+
+    if (!document.hidden) start();
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, [inView, reduced, interval, advance]);
 
   // Reduced motion gets the finished state rather than a frozen first frame.

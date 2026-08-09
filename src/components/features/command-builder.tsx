@@ -3,6 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useMemo, useRef, useState } from "react";
 import { CopyCommandButton } from "@/components/ui/copy-command-button";
+import { HexField } from "@/components/ui/hex-field";
 import { PACKAGE_NAME, SKILLS } from "@/lib/content";
 import {
   FORMATS,
@@ -118,11 +119,6 @@ function isValidAppName(name: string): boolean {
  *  shell quoting, so a copied command survives the paste unchanged. */
 function isValidVersionSpec(spec: string): boolean {
   return /^[A-Za-z0-9.-]+$/.test(spec);
-}
-
-/** The input takes a bare HEX too, so the swatch needs the # put back. */
-function swatchColour(hex: string): string {
-  return `#${hex.trim().replace(/^#/, "")}`;
 }
 
 /**
@@ -312,25 +308,15 @@ export function CommandBuilder() {
               {palette.kind === "custom" && (
                 <motion.div key="palette" className={styles.nested} {...reveal}>
                   <div className={styles.field}>
-                    <label className={styles.fieldLabel} htmlFor="builder-hex">
-                      Seed HEX
-                    </label>
-                    <div className={styles.input} data-invalid={hexInvalid ? "true" : undefined}>
-                      <span
-                        className={styles.swatch}
-                        style={{
-                          background: hexInvalid ? "transparent" : swatchColour(palette.hex),
-                        }}
-                      />
-                      <input
-                        id="builder-hex"
-                        value={palette.hex}
-                        onChange={(event) => updateCustom({ hex: event.target.value })}
-                        spellCheck={false}
-                        aria-invalid={hexInvalid}
-                        aria-describedby={hexInvalid ? "builder-hex-error" : undefined}
-                      />
-                    </div>
+                    <HexField
+                      id="builder-hex"
+                      label="Seed HEX"
+                      value={palette.hex}
+                      onChange={(hex) => updateCustom({ hex })}
+                      invalid={hexInvalid}
+                      describedBy={hexInvalid ? "builder-hex-error" : undefined}
+                      surface="raised"
+                    />
                     {hexInvalid && (
                       <p className={styles.error} id="builder-hex-error">
                         Enter a valid HEX colour, with or without the #. The palette flags stay out

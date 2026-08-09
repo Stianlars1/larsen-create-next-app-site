@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { useInViewLoop } from "@/lib/use-in-view";
 import styles from "./token-specimen.module.css";
 
@@ -40,7 +41,8 @@ export function TokenSpecimen() {
             <div key={space.token} className={styles.rung}>
               <span
                 className={styles.bar}
-                style={{ width: index < filled ? `${space.px * 3.4}px` : 0 }}
+                data-filled={index < filled ? "true" : undefined}
+                style={{ "--bar-width": `${space.px * 3.4}px` } as CSSProperties}
               />
               <code>{space.token}</code>
               <span className={styles.px}>{space.px}</span>

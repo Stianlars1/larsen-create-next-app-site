@@ -7,27 +7,35 @@
  */
 
 .marquee {
-  --marquee-fade: 1.5rem;
+  /* The gap arrives from JS, which owns it because the duration is derived
+     from it - see GAP_PX. This is the fallback for the static state. */
+  --marquee-gap: var(--space-7);
+  --marquee-fade: var(--space-5);
   display: block;
   min-width: 0;
   max-width: 100%;
   overflow-x: auto;
   scrollbar-width: none;
-  /* Standing still the text is simply cut at the edge. The fade is what makes
-     that read as "there is more, scroll for it" rather than as a fault. */
-  mask-image: linear-gradient(to right, #000 calc(100% - var(--marquee-fade)), transparent);
 }
 
 .marquee::-webkit-scrollbar {
   display: none;
 }
 
+/*
+ * The fade only appears when something is genuinely cut off. Applied
+ * unconditionally it dimmed the last few characters of a command that ended
+ * well inside its box, which reads as a rendering fault rather than as "there
+ * is more" - the exact complaint this component was built to answer.
+ */
+.marquee[data-overflow="true"] {
+  mask-image: linear-gradient(to right, #000 calc(100% - var(--marquee-fade)), transparent);
+}
+
 .marquee[data-animated="true"] {
   overflow: hidden;
   /* Moving, both ends need one: the tail leaves on the left at the same moment
-     the head arrives on the right, and a hard edge on either is a stutter.
-     The leading edge is a variable because it is only earned while the line is
-     actually moving - see the rewound state below. */
+     the head arrives on the right, and a hard edge on either is a stutter. */
   mask-image: linear-gradient(
     to right,
     transparent 0,
@@ -38,21 +46,16 @@
 }
 
 /*
- * Hovering rewinds the line and holds it at the start, rather than freezing it
- * mid-pass: an animation with no iterations left paints the track's own
- * untransformed position, and letting go starts a fresh pass from the
- * beginning. Reading a command is easier from the start of it than from
- * wherever it happened to be.
+ * Hovering pauses the line where it stands, and the leading fade collapses
+ * with it so the first characters are not dimmed while somebody is reading
+ * them. A true pause rather than a rewind: ending the animation instead would
+ * paint the start position while the animation's own clock kept running, so
+ * releasing would snap forward by however long the pointer rested there.
  *
  * Keyboard focus is matched through :focus-visible, never :focus-within. A
  * mouse click on the copy button beside the line leaves that button focused,
  * so :focus-within would keep the line stopped after the pointer had already
  * moved away, with nothing on screen explaining why.
- *
- * The leading fade collapses with it. That fade exists to soften a tail
- * leaving the frame; rewound there is no tail, just the first character of the
- * command sitting against the edge, and fading it out reads as a rendering
- * fault. The trailing fade stays, because the line genuinely does continue.
  *
  * Both properties are inherited, so a surface further out - the pill that
  * holds the line and the copy button - can drive this from its own stylesheet
@@ -60,7 +63,7 @@
  */
 .marquee[data-animated="true"]:hover,
 .marquee[data-animated="true"]:has(:focus-visible) {
-  --marquee-iterations: 0;
+  --marquee-play: paused;
   --marquee-fade-start: 0px;
 }
 
@@ -70,18 +73,26 @@
   white-space: nowrap;
 }
 
+/* Inline-block so a ResizeObserver can see it. A non-replaced inline element
+   is never reported, which silently disabled re-measuring. */
+.measured {
+  display: inline-block;
+}
+
 .marquee[data-animated="true"] .track {
   /*
-   * Longhands, because the iteration count is the part that gets switched to
-   * rewind. The count is the switch and not the name: a name reached through
-   * var() is resolved long after CSS Modules has renamed these keyframes, so
-   * it would point at a `scroll` that no longer exists and nothing would move.
+   * Longhands, and the play state is the switch. The animation NAME cannot be
+   * the switch: a name reached through var() resolves after CSS Modules has
+   * renamed these keyframes, so it would point at a `scroll` that no longer
+   * exists and nothing would move at all.
    */
   animation-name: scroll;
   animation-duration: var(--marquee-duration);
   animation-timing-function: linear;
-  animation-iteration-count: var(--marquee-iterations, infinite);
-  /* This one genuinely never stops, so the layer is worth keeping */
+  animation-iteration-count: infinite;
+  animation-play-state: var(--marquee-play, running);
+  /* Scoped to the animating state, so no compositor layer is pinned for the
+     length of the page once the hero has scrolled away. */
   will-change: transform;
 }
 

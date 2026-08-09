@@ -1,10 +1,16 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useInViewLoop } from "@/lib/use-in-view";
 import { SKILLS } from "@/lib/content";
 import styles from "./misc.module.css";
 
+/**
+ * Matches --ease-out, which motion.css documents for "entrances, exits".
+ * AnimatePresence mode="wait" is exactly that - one word leaves before the
+ * next arrives, so the two are never on screen together and --ease-in-out
+ * (documented for travel between two on-screen poses) does not apply.
+ */
 const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 
 /* ------------------------------------------------------------------ *
@@ -12,9 +18,10 @@ const EASE_OUT = [0.23, 1, 0.32, 1] as const;
  * ------------------------------------------------------------------ */
 
 export function ThemeSurface() {
+  // 2600ms a side leaves ~1.8s of rest once the 740ms swap has landed, which is
+  // what makes each mode read as a state rather than a frame in a flicker.
   const { ref, step, reduced } = useInViewLoop<HTMLDivElement>(2, 2600);
   const dark = reduced ? true : step === 1;
-  const reducedMotion = useReducedMotion();
 
   return (
     <div className={styles.theme} ref={ref}>
@@ -33,15 +40,17 @@ export function ThemeSurface() {
 
       <code className={styles.themeCode}>
         &lt;html data-theme=&quot;
-        {reducedMotion ? (
+        {reduced ? (
           dark ? "dark" : "light"
         ) : (
+          /* The same text-swap treatment the copy button uses - blur masks the
+             midpoint so the two words never read as overlapping states. */
           <AnimatePresence mode="wait" initial={false}>
             <motion.span
               key={dark ? "dark" : "light"}
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
+              initial={{ opacity: 0, y: 5, filter: "blur(2px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -5, filter: "blur(2px)" }}
               transition={{ duration: 0.16, ease: EASE_OUT }}
               style={{ display: "inline-block", color: "hsl(var(--brand-blue))" }}
             >
