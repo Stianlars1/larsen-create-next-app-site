@@ -8,8 +8,8 @@
  */
 
 export const PRESETS = [
-  { value: "shadcn", label: "shadcn/ui", hint: "semantic tokens + scales" },
-  { value: "radix", label: "Radix Colors", hint: "accent + gray scales" },
+  { value: "shadcn", label: "shadcn/ui", hint: "approved semantic token names + Larsen scales" },
+  { value: "radix", label: "Radix Themes", hint: "57 custom-palette override names + 26 Larsen tokens" },
   { value: "css-variables", label: "CSS Variables", hint: "accent + gray scales" },
 ] as const;
 

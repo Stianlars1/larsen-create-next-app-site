@@ -3,8 +3,8 @@ import styles from "./prompt-flow.module.css";
 
 /**
  * Every prompt the CLI asks, with the flag that answers it. Seven questions,
- * plus three follow-ups that only appear if you ask for a custom palette -
- * shown nested rather than numbered, because that is how the flow behaves.
+ * plus the follow-ups that only appear when an answer opens them - shown
+ * nested rather than numbered, because that is how the flow behaves.
  */
 export function PromptFlow() {
   return (

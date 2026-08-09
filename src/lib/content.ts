@@ -44,7 +44,7 @@ export const PROMPT_STEPS: PromptStep[] = [
     question: "What is your app named?",
     choices: [{ label: "my-app", hint: "lowercase, digits, . _ -", isDefault: true }],
     flag: "pass the name as an argument",
-    why: "Becomes both the folder and the name in package.json, so it is checked for the characters those allow - and refuses a directory that already has files in it.",
+    why: "Becomes both the folder and the name in package.json. Checked against this package's own rule - lowercase letters, digits, '.', '_', '-', max 214 characters - and refuses a directory that already has files in it.",
   },
   {
     id: "palette",
@@ -53,7 +53,7 @@ export const PROMPT_STEPS: PromptStep[] = [
       { label: "No", hint: "ship the Larsen Utvikling theme", isDefault: true },
       { label: "Yes", hint: "generate from your brand color" },
     ],
-    flag: "--hex <color> · omit it for the default theme",
+    flag: "--hex <color> · --default-palette for the default",
     why: "Say no and you get a considered black-and-white theme with a blue accent. Say yes and three follow-up questions shape the whole palette.",
     followUps: [
       {
@@ -67,8 +67,8 @@ export const PROMPT_STEPS: PromptStep[] = [
         id: "preset",
         question: "Choose framework/style",
         choices: [
-          { label: "shadcn/ui", hint: "semantic tokens + scales", isDefault: true },
-          { label: "Radix Colors", hint: "accent + gray scales" },
+          { label: "shadcn/ui", hint: "approved semantic token names + Larsen scales", isDefault: true },
+          { label: "Radix Themes custom-palette tokens", hint: "57 override names + 26 Larsen tokens" },
           { label: "CSS Variables", hint: "accent + gray scales" },
         ],
         flag: "--preset shadcn | radix | css-variables",
@@ -102,18 +102,6 @@ export const PROMPT_STEPS: PromptStep[] = [
     why: "Passed straight through to create-next-app, so you get its official configuration for whichever you pick.",
   },
   {
-    id: "skills",
-    question: "Install Larsen Skills for AI agents?",
-    choices: [
-      { label: "Recommended", hint: "motion, interface, review, primitives", isDefault: true },
-      { label: "All", hint: "9 skills" },
-      { label: "Let me pick", hint: "multi-select" },
-      { label: "No" },
-    ],
-    flag: "--skills recommended | all | a,comma,list  ·  --no-skills",
-    why: "Installs into .agents/skills/ and symlinks each agent's own directory, so Claude Code, Codex, Cursor and Copilot all see them.",
-  },
-  {
     id: "pm",
     question: "Which package manager?",
     choices: [
@@ -124,6 +112,29 @@ export const PROMPT_STEPS: PromptStep[] = [
     ],
     flag: "--pm npm | pnpm | yarn | bun",
     why: "Runs the install and rewrites the generated README so every command shown is the one you actually type.",
+  },
+  {
+    id: "skills",
+    question: "Install Larsen Skills for AI agents (UI, motion, accessibility)?",
+    choices: [
+      { label: "Yes", isDefault: true },
+      { label: "No" },
+    ],
+    flag: "--skills recommended | all | a,comma,list  ·  --no-skills",
+    why: "Installs into .agents/skills/ through the open skills installer, then verifies each skill's SKILL.md on disk - only skills that actually landed are documented in the project.",
+    followUps: [
+      {
+        id: "skills-which",
+        question: "Which skills?",
+        choices: [
+          { label: "Recommended", hint: "motion-craft, interface-craft, interface-review, ui-primitive-picker", isDefault: true },
+          { label: "All", hint: "9 skills" },
+          { label: "Let me pick", hint: "space to toggle, enter to confirm" },
+        ],
+        flag: "--skills recommended | all | a,comma,list",
+        why: "The recommended four pair with the design system - motion, interface and review craft rather than the specialised tools.",
+      },
+    ],
   },
   {
     id: "git",
@@ -152,18 +163,19 @@ export const PROMPT_STEPS: PromptStep[] = [
  * ------------------------------------------------------------------ */
 
 export const FLAGS: { flag: string; description: string }[] = [
-  { flag: "-d, --defaults", description: "Skip every prompt and take the defaults" },
+  { flag: "-d, --defaults", description: "Skip every prompt and take the defaults - installs no skills" },
+  { flag: "--default-palette", description: "Answer No to a custom palette and ship the default theme" },
   { flag: "--hex <color>", description: "Palette seed, with or without the #. Implies a custom palette" },
   { flag: "--preset <name>", description: "shadcn | radix | css-variables" },
   { flag: "--format <name>", description: "hex | rgb | hsl | hsl-values | oklab | oklch" },
   { flag: "--scheme <name>", description: "analogous | monochromatic | complementary | triadic" },
   { flag: "--linter <name>", description: "eslint | biome | none" },
+  { flag: "--pm <name>", description: "npm | pnpm | yarn | bun" },
   { flag: "--skills <list>", description: "recommended | all | comma-separated skill names" },
   { flag: "--no-skills", description: "Skip the skills install" },
-  { flag: "--pm <name>", description: "npm | pnpm | yarn | bun" },
-  { flag: "--no-git", description: "Skip git init" },
-  { flag: "--no-install", description: "Skip the dependency install" },
-  { flag: "--cna-version <spec>", description: "Pin create-next-app instead of taking the newest" },
+  { flag: "--git / --no-git", description: "Initialize a git repository, or skip it" },
+  { flag: "--install / --no-install", description: "Install dependencies, or skip it" },
+  { flag: "--cna-version <spec>", description: "Select the create-next-app version spec instead of latest" },
   { flag: "-v, --version", description: "Print the version" },
   { flag: "-h, --help", description: "Show help" },
 ];
@@ -195,7 +207,7 @@ export const DESIGN_SYSTEM_FILES = [
     tokens: [
       { group: "Semantic", detail: "background, foreground, primary, secondary, muted, accent, border, input, ring" },
       { group: "Scales", detail: "--accent-1..12 and --gray-1..12" },
-      { group: "Status", detail: "success, danger, warning, info - each with foreground, muted and border variants" },
+      { group: "Status", detail: "success, danger, warning, info - each with foreground, muted, muted-foreground and border variants" },
       { group: "Harmony", detail: "analogous and complementary, derived from your seed" },
     ],
   },
@@ -238,7 +250,7 @@ export const DOC_FILES = [
   {
     file: "NEXTJS.md",
     role: "Next.js's own agent guide, preserved",
-    detail: "create-next-app writes an AGENTS.md of framework guidance - it is kept under a new name instead of overwritten.",
+    detail: "When create-next-app writes an AGENTS.md of framework guidance, it is kept under this name instead of overwritten - and never invented when upstream ships none.",
   },
   {
     file: "README.md",
@@ -273,8 +285,9 @@ export const PROJECT_TREE = `my-app/
 ├── DESIGN.md          token reference
 ├── NEXTJS.md          Next.js agent guide, preserved
 ├── README.md          getting started + checklist
-├── .agents/skills/    installed Larsen Skills
+├── .agents/skills/    Larsen Skills, when you opt in
 ├── public/
+│   └── larsen-utvikling/   logo SVGs, light + dark
 └── src/
     ├── app/
     │   ├── layout.tsx

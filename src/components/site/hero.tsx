@@ -51,11 +51,14 @@ export async function Hero() {
           <p className={styles.version}>
             {nextVersion ? (
               <>
-                Scaffolds Next.js <strong>{nextVersion}</strong> - resolved when you run it, never
-                pinned
+                Scaffolds Next.js <strong>{nextVersion}</strong> - resolved when you run it, or
+                pinned with <code>--cna-version</code>
               </>
             ) : (
-              <>Scaffolds the newest stable Next.js - resolved when you run it, never pinned</>
+              <>
+                Scaffolds the newest stable Next.js - resolved when you run it, or pinned with{" "}
+                <code>--cna-version</code>
+              </>
             )}
           </p>
         </div>

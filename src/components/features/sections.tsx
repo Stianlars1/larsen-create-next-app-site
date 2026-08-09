@@ -134,10 +134,10 @@ export function SkillsSection() {
         id="skills"
         label="Agent skills"
         headline="Nine skills, installed into the project"
-        lead="Optional, and off by default when unattended. One install covers Claude Code, Codex, Cursor, Copilot and Gemini CLI."
+        lead="Optional, and never installed on an unattended --defaults run. Each requested skill is verified on disk in .agents/skills/ - the project docs list only what actually landed."
         visual={<SkillsSurface />}
         points={[
-          { term: "Shared values", detail: "The motion tokens come from motion-craft, so tokens and guidance agree" },
+          { term: "Recommended four", detail: "motion, interface, review and primitives - the ones that pair with the design system" },
           { term: "Browse them", detail: "github.com/Stianlars1/larsen-skills" },
         ]}
       />
