@@ -1,0 +1,94 @@
+/*
+ * Two hues over three weights of ink. The accent carries the CLI's own
+ * vocabulary - flags, token names, folders - and a warm colour carries the
+ * parts you choose. Everything else is ink, because the brand is black and
+ * white with one accent and a coloured terminal would say otherwise.
+ *
+ * Both hues have to survive the palette demo re-theming the page, so they were
+ * measured against both code surfaces - the terminal's hsl(0 0% 5%) and the
+ * block's hsl(var(--gray-1)) - for all five seeds the demo offers:
+ *
+ *   accent-11                8.9-10.6 dark   5.1-7.2 light
+ *   warning-muted-foreground 14.1-15.3 dark  9.9-10.5 light
+ *   foreground / 0.92        15.5 dark       14.8 light
+ *   ink-muted                6.2 dark        4.4 light
+ *   ink-faint                3.4 dark        2.5 light  <- structure, never words
+ *
+ * --complementary is the obvious pick for the warm role and the wrong one: it
+ * is 9.7:1 for the shipped seed but 3.6:1 for #22C55E. The token used instead
+ * is contrast-first by construction, and the engine keeps its hue away from
+ * the accent, so the two never converge on a warm seed.
+ */
+
+/*
+ * The single wrapper every call renders. It stays a plain inline box on
+ * purpose: in a flex container that makes the whole snippet one flex item, the
+ * way a bare text node was. display: contents would hand the token spans
+ * straight back to the flex container and undo that.
+ */
+.root {
+  white-space: inherit;
+}
+
+/* Box drawing is a graphical structure, so 3.4:1 clears the 3:1 floor */
+.branch {
+  color: var(--ink-faint);
+}
+
+/*
+ * The prompt and the line continuation read as characters, not decoration -
+ * the backslash is the thing that tells you the command carries on - so they
+ * sit at ink-muted's 6.2:1 rather than ink-faint's 3.4:1.
+ */
+.prompt,
+.continuation {
+  color: var(--ink-muted);
+}
+
+/* What is being run, and what it is called */
+.binary,
+.pkg,
+.selector,
+.file {
+  color: hsl(var(--foreground) / 0.92);
+}
+
+/* The vocabulary the CLI and the design system define */
+.flag,
+.atrule,
+.prop,
+.dir {
+  color: hsl(var(--accent-11));
+}
+
+/* The parts you pick: an app name, a flag's answer, a colour value */
+.arg,
+.value,
+.number,
+.hex {
+  color: hsl(var(--warning-muted-foreground));
+}
+
+/* Commentary: prose inside code, and the plumbing around a value */
+.comment,
+.func,
+.desc {
+  color: var(--ink-muted);
+}
+
+/*
+ * A fixed box on every entry, so the description column still lines up: each
+ * row is shifted by exactly one icon. The viewBox keeps its own aspect ratio
+ * inside the box, so 2ch never stretches the glyph.
+ */
+.icon {
+  width: 2ch;
+  height: 1em;
+  margin-right: 0.35ch;
+  vertical-align: -0.15em;
+}
+
+/* Folders lead, files follow - the icon inherits the folder's accent */
+.fileIcon {
+  color: var(--ink-muted);
+}

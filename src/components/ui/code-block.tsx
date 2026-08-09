@@ -1,5 +1,6 @@
 import styles from "./code-block.module.css";
 import { CopyCommandButton } from "./copy-command-button";
+import { Highlight, type HighlightLanguage } from "./highlight";
 
 type CodeBlockProps = {
   code: string;
@@ -8,9 +9,17 @@ type CodeBlockProps = {
   copyable?: boolean;
   /** Caps the height and scrolls, for long generated output. */
   scroll?: boolean;
+  /** Adds syntax colour. Omit it and the code stays plain monospace. */
+  language?: HighlightLanguage;
 };
 
-export function CodeBlock({ code, label, copyable = false, scroll = false }: CodeBlockProps) {
+export function CodeBlock({
+  code,
+  label,
+  copyable = false,
+  scroll = false,
+  language,
+}: CodeBlockProps) {
   return (
     <div className={styles.block} data-scroll={scroll ? "true" : undefined}>
       {(label || copyable) && (
@@ -20,7 +29,9 @@ export function CodeBlock({ code, label, copyable = false, scroll = false }: Cod
         </header>
       )}
       <pre className={styles.pre}>
-        <code>{code}</code>
+        <code>
+          <Highlight code={code} language={language} />
+        </code>
       </pre>
     </div>
   );

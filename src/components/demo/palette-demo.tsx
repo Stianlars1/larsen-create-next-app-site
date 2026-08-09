@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { CodeBlock } from "@/components/ui/code-block";
 import { CopyCommandButton } from "@/components/ui/copy-command-button";
+import { useSiteTheme } from "@/components/theme/site-theme";
 import {
   FORMATS,
   PRESETS,
@@ -35,6 +36,9 @@ export function PaletteDemo({ initialTheme, initialHex }: PaletteDemoProps) {
   const [theme, setTheme] = useState<GeneratedTheme>(initialTheme);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
+
+  /** Pushes the seed up so the rest of the page adopts the same theme. */
+  const { setSeed } = useSiteTheme();
 
   const debounce = useRef<number | undefined>(undefined);
   const requestId = useRef(0);
@@ -75,6 +79,7 @@ export function PaletteDemo({ initialTheme, initialHex }: PaletteDemoProps) {
 
   const onHexChange = (value: string) => {
     setHex(value);
+    setSeed(value);
     regenerate({ hex: value, preset, format }, 200);
   };
 
@@ -175,7 +180,13 @@ export function PaletteDemo({ initialTheme, initialHex }: PaletteDemoProps) {
         <details className={styles.details}>
           <summary>Show the generated theme.css</summary>
           <div className={styles.detailsBody}>
-            <CodeBlock code={theme.css} label="src/lib/design-system/theme.css" copyable scroll />
+            <CodeBlock
+              code={theme.css}
+              label="src/lib/design-system/theme.css"
+              copyable
+              scroll
+              language="css"
+            />
           </div>
         </details>
 

@@ -1,0 +1,233 @@
+/**
+ * Two layouts, one DOM.
+ *
+ * Everything above the media query is the fallback: a plain stack of all five
+ * files, no sticky, no scroll dependency. The pinned scroll story is added
+ * inside the query and is the only thing that reads scroll position, so a
+ * narrow window, a short window or a reduced-motion preference lands on
+ * something genuinely readable rather than a degraded version of the effect.
+ */
+
+.track {
+  padding-block: var(--section-space);
+}
+
+.stage {
+  margin-top: var(--space-7);
+}
+
+/* The file list and its rail are the pinned affordance - without pinning there
+   is nothing to index into, so the cards carry the file names instead. */
+.listColumn {
+  display: none;
+}
+
+.detail {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.card {
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--surface-1);
+}
+
+.cardHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.cardFile {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: hsl(var(--brand-blue));
+}
+
+/* Only meaningful while the files arrive one at a time */
+.cardCount {
+  display: none;
+}
+
+.cardRole {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-sm);
+  color: hsl(var(--foreground) / 0.82);
+}
+
+.cardDetail {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--ink-muted);
+}
+
+/* ---------------- The pinned scroll story ---------------- */
+
+/*
+ * Width because the two columns need the room. Height because a panel pinned
+ * at 100svh has to fit its own header - below this the stack reads better than
+ * a cramped frame. Motion preference because pinning is movement, and the
+ * gentler form of a scroll sequence is simply not having one.
+ */
+@media (min-width: 56.25rem) and (min-height: 40rem) and (prefers-reduced-motion: no-preference) {
+  .track {
+    /*
+     * One viewport pays for the pinned frame itself; every file after that buys
+     * its own step of scroll. 60svh is roughly five wheel notches per file -
+     * long enough that a description can be read before it changes, short
+     * enough that five of them do not turn the page into a corridor. Total
+     * pinned travel is three viewport heights.
+     */
+    --docs-step: 60svh;
+
+    height: calc(100svh + (var(--docs-count) * var(--docs-step)));
+    /* The centred panel supplies the air that padding would, and padding here
+       would offset where the scroll progress reaches 0. */
+    padding-block: 0;
+  }
+
+  .panel {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .stage {
+    display: grid;
+    grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
+    gap: clamp(var(--space-6), 5vw, var(--space-8));
+    align-items: start;
+  }
+
+  .listColumn {
+    display: block;
+    position: relative;
+    padding-left: var(--space-5);
+  }
+
+  .rail {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    width: 2px;
+    border-radius: var(--radius-full);
+    background: var(--hairline);
+  }
+
+  .railFill {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    background: hsl(var(--brand-blue));
+    transform-origin: top;
+  }
+
+  .list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .row {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+  }
+
+  /* The one cue that does not depend on hue, so the selected row is still
+     obvious to a reader who cannot tell the blue from the grey. Motion moves
+     this between rows by layoutId rather than fading two of them. */
+  .rowMark {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+    border: 1px solid var(--hairline-strong);
+  }
+
+  /* The mark is positioned, so the text has to be too, or it paints underneath */
+  .file,
+  .role {
+    position: relative;
+  }
+
+  /* Dimmed, not disabled - an unselected row is still a file name you are
+     meant to be able to read. The selection is carried by the mark and the
+     colour shift, so these stay at the page's own legible tiers. */
+  .file {
+    font-size: var(--text-sm);
+    color: hsl(var(--foreground) / 0.5);
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .role {
+    font-size: var(--text-xs);
+    color: var(--ink-faint);
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .row[data-active="true"] .file {
+    color: hsl(var(--brand-blue));
+  }
+
+  .row[data-active="true"] .role {
+    color: var(--ink-muted);
+  }
+
+  /* Every card shares one cell, so the column is as tall as the longest of them
+     and never resizes as the reader scrolls. */
+  .detail {
+    gap: 0;
+  }
+
+  .card {
+    grid-area: 1 / 1;
+    padding: var(--space-6);
+    opacity: 0;
+    /* The token, so reduced motion collapses the travel to zero for free. */
+    transform: translateY(var(--enter-distance));
+    pointer-events: none;
+    user-select: none;
+    transition:
+      opacity var(--duration-ui) var(--ease-out),
+      transform var(--duration-enter) var(--ease-out);
+  }
+
+  .card[data-active="true"] {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+    user-select: auto;
+  }
+
+  .cardCount {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--ink-faint);
+  }
+
+  /* The list already carries the role beside the file name */
+  .cardRole {
+    display: none;
+  }
+
+  .cardDetail {
+    margin: var(--space-4) 0 0;
+    font-size: var(--text-md);
+    line-height: 1.6;
+  }
+}

@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useInViewLoop } from "@/lib/use-in-view";
-import { DOC_FILES, SKILLS } from "@/lib/content";
+import { SKILLS } from "@/lib/content";
 import styles from "./misc.module.css";
 
 const EASE_OUT = [0.23, 1, 0.32, 1] as const;
@@ -56,33 +56,6 @@ export function ThemeSurface() {
 }
 
 /* ------------------------------------------------------------------ *
- * Docs - the files that land in the repo
- * ------------------------------------------------------------------ */
-
-export function DocsSurface() {
-  const { ref, step, reduced } = useInViewLoop<HTMLDivElement>(DOC_FILES.length + 3, 1600);
-  const active = reduced ? 0 : Math.min(step, DOC_FILES.length - 1);
-
-  return (
-    <div className={styles.docs} ref={ref}>
-      <ul className={styles.docList}>
-        {DOC_FILES.map((doc, index) => (
-          <li key={doc.file} data-active={index === active ? "true" : undefined}>
-            <code>{doc.file}</code>
-            <span>{doc.role}</span>
-          </li>
-        ))}
-      </ul>
-
-      <div className={styles.docDetail}>
-        <p className={styles.docDetailName}>{DOC_FILES[active].file}</p>
-        <p className={styles.docDetailText}>{DOC_FILES[active].detail}</p>
-      </div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ *
  * Skills - chips selecting themselves
  * ------------------------------------------------------------------ */
 
@@ -131,6 +104,12 @@ export function MotionSurface() {
       {DURATIONS.map(({ token, ms, use }) => (
         <div key={token} className={styles.motionRow}>
           <code>{token}</code>
+          {/* The number and what it moves are one fact, so they travel as one
+              element - the card is too narrow to give each its own column. */}
+          <span className={styles.motionMeta}>
+            <span className={styles.motionUse}>{use}</span>
+            <span className={styles.motionMs}>{ms}ms</span>
+          </span>
           <div className={styles.motionTrack}>
             <span
               className={styles.motionDot}
@@ -140,8 +119,6 @@ export function MotionSurface() {
               }}
             />
           </div>
-          <span className={styles.motionUse}>{use}</span>
-          <span className={styles.motionMs}>{ms}ms</span>
         </div>
       ))}
     </div>

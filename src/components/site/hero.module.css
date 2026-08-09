@@ -95,6 +95,10 @@
   white-space: nowrap;
   overflow-x: auto;
   scrollbar-width: none;
+  /* The command outgrows this column at most widths. Without the fade the
+     tail is cut mid-word and reads as a rendering fault rather than as more
+     text you can scroll to. */
+  mask-image: linear-gradient(to right, #000 calc(100% - 1.5rem), transparent);
 }
 
 .command::-webkit-scrollbar {

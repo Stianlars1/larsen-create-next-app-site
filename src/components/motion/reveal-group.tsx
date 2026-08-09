@@ -6,8 +6,8 @@ interface RevealGroupProps {
     /** Delay before the first child reveals (ms). */
     baseDelay?: number;
     /** Per-child stagger offset (ms). Emil's rule: small enough to feel like
-     *  a single gesture, big enough to read as sequence — 56ms is the sweet
-     *  spot for typical 3–4 column grids. */
+     *  a single gesture, big enough to read as sequence - 56ms is the sweet
+     *  spot for typical 3-4 column grids. */
     stagger?: number;
     /** Optional cap on the cumulative delay so very long lists don't drag. */
     maxDelay?: number;
@@ -24,7 +24,7 @@ interface RevealGroupProps {
  *
  * Used everywhere we have a list / grid of cards that should cascade in on
  * scroll. The single source of truth keeps the cadence consistent across the
- * site — no per-section magic numbers like (index % 6) * 56 sprinkled around.
+ * site - no per-section magic numbers like (index % 6) * 56 sprinkled around.
  */
 export function RevealGroup({
     children,

@@ -7,13 +7,14 @@
   align-items: center;
   gap: var(--space-2);
   flex-shrink: 0;
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-1) calc(var(--space-2) + 2px);
   border: 1px solid transparent;
   border-radius: var(--radius-full);
   background: none;
   color: var(--ink-faint);
   font-family: var(--font-mono);
   font-size: var(--text-xs);
+  line-height: 1;
   cursor: pointer;
   transition:
     color var(--duration-fast) var(--ease-out),
@@ -25,6 +26,23 @@
 .button svg {
   width: 13px;
   height: 13px;
+}
+
+/* The visible word is layered over an invisible "Copied" that reserves the
+ * widest layout, so the swap never nudges the command beside it. */
+.label {
+  position: relative;
+  display: inline-grid;
+}
+
+.sizer {
+  visibility: hidden;
+  grid-area: 1 / 1;
+}
+
+.word {
+  grid-area: 1 / 1;
+  justify-self: start;
 }
 
 .button:active {

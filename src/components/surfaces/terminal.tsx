@@ -1,6 +1,7 @@
 "use client";
 
 import { useInViewLoop } from "@/lib/use-in-view";
+import { Highlight } from "@/components/ui/highlight";
 import { PROMPT_STEPS } from "@/lib/content";
 import styles from "./terminal.module.css";
 
@@ -34,7 +35,7 @@ export function Terminal() {
       <div className={styles.body}>
         <p className={styles.command}>
           <span className={styles.dollar}>$</span>
-          npx @larsen-utvikling/create-next-app
+          <Highlight code="npx @larsen-utvikling/create-next-app" language="shell" />
         </p>
 
         <ul className={styles.lines}>

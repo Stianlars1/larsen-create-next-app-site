@@ -2,12 +2,12 @@
  * Shared scroll-reveal utility.
  *
  * Emil's rules applied:
- *   • ease-out cubic-bezier(0.23, 1, 0.32, 1) — strong "punch" on enter
- *   • opacity + translateY + slight blur — blur masks the midpoint, so the
+ *   • ease-out cubic-bezier(0.23, 1, 0.32, 1) - strong "punch" on enter
+ *   • opacity + translateY + slight blur - blur masks the midpoint, so the
  *     reveal reads as a single morph rather than two visible states overlapping
- *   • never start from scale(0) — things don't appear from nothing
- *   • one-way (enter only) — users only see it the first scroll past
- *   • single canonical motion — sections never override timing; consistency
+ *   • never start from scale(0) - things don't appear from nothing
+ *   • one-way (enter only) - users only see it the first scroll past
+ *   • single canonical motion - sections never override timing; consistency
  *     reads as craft, per-section variation reads as oversight
  */
 .reveal {
@@ -32,7 +32,7 @@
     filter: blur(0);
 }
 
-/* fillCell — when the Reveal is itself a grid cell child, it must stretch so
+/* fillCell - when the Reveal is itself a grid cell child, it must stretch so
  * the actual card inside reaches the cell's full height and can shrink below
  * its intrinsic min-content width. */
 .reveal[data-fill='true'] {

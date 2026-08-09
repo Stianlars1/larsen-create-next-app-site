@@ -93,73 +93,6 @@
   color: var(--ink-muted);
 }
 
-/* ---------------- Docs ---------------- */
-
-.docs {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--space-4);
-  align-items: start;
-}
-
-@media (max-width: 44rem) {
-  .docs {
-    grid-template-columns: 1fr;
-  }
-}
-
-.docList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 1px;
-}
-
-.docList li {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-sm);
-  transition: background-color var(--duration-ui) var(--ease-out);
-}
-
-.docList li[data-active="true"] {
-  background: var(--surface-2);
-}
-
-.docList code {
-  font-size: var(--text-sm);
-  color: hsl(var(--foreground) / 0.92);
-}
-
-.docList span {
-  font-size: var(--text-xs);
-  color: var(--ink-faint);
-}
-
-.docDetail {
-  padding: var(--space-5);
-  border-radius: var(--radius-lg);
-  background: var(--surface-1);
-  min-height: 9rem;
-}
-
-.docDetailName {
-  margin: 0 0 var(--space-3);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  color: hsl(var(--brand-blue));
-}
-
-.docDetailText {
-  margin: 0;
-  font-size: var(--text-sm);
-  line-height: 1.6;
-  color: var(--ink-muted);
-}
-
 /* ---------------- Skills ---------------- */
 
 .skills {
@@ -221,36 +154,52 @@
 
 .motion {
   display: grid;
-  gap: var(--space-4);
+  /* Wider than the 12px row-gap inside a row, so each track stays visibly
+     attached to its own token instead of floating between two of them. */
+  gap: var(--space-5);
   padding: var(--space-6);
   border-radius: var(--radius-lg);
   background: var(--surface-1);
+  /* A side layout can hand this card a 21rem column on a 1440px screen, so the
+     rows have to answer to the card's width, never the viewport's. */
+  container-type: inline-size;
 }
 
+/* Narrow card: name and value share the top line, the track runs full width
+   under them. Nothing is dropped and the dot gets a runway worth watching. */
 .motionRow {
   display: grid;
-  grid-template-columns: 9.5rem minmax(0, 1fr) 6rem 3rem;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: var(--space-4);
+  column-gap: var(--space-2);
+  row-gap: var(--space-3);
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-}
-
-@media (max-width: 44rem) {
-  .motionRow {
-    grid-template-columns: 8rem minmax(0, 1fr) 3rem;
-  }
-
-  .motionUse {
-    display: none;
-  }
 }
 
 .motionRow code {
   color: var(--ink-faint);
 }
 
+/* Right-aligned, and every value is five monospace characters, so the numbers
+   line up down the card without a fixed column holding them there. */
+.motionMeta {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.motionUse {
+  color: var(--ink-faint);
+}
+
+.motionMs {
+  color: var(--ink-muted);
+}
+
 .motionTrack {
+  grid-column: 1 / -1;
   position: relative;
   height: 5px;
   border-radius: var(--radius-full);
@@ -269,11 +218,21 @@
   transition-timing-function: var(--ease-out);
 }
 
-.motionUse {
-  color: var(--ink-faint);
-}
+/* Wide card: the three parts fit one line, so the track moves in beside them.
+   Both fixed columns are sized to their longest string at --text-xs. */
+@container (min-width: 25rem) {
+  .motionRow {
+    grid-template-columns: 8rem minmax(0, 1fr) 9rem;
+    column-gap: var(--space-4);
+  }
 
-.motionMs {
-  text-align: right;
-  color: hsl(var(--foreground) / 0.5);
+  .motionTrack {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .motionMeta {
+    grid-column: 3;
+    grid-row: 1;
+  }
 }

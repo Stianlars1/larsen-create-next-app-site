@@ -9,7 +9,7 @@ interface RevealProps {
     /** Extra delay in ms before the reveal state flips (stagger). */
     delay?: number;
     className?: string;
-    /** Intersection margin — negative bottom triggers slightly before entering. */
+    /** Intersection margin - negative bottom triggers slightly before entering. */
     rootMargin?: string;
     /** If true, the wrapper skips the initial hidden state and is visible from
      *  the first paint. Use for hero content that's already in the viewport. */
@@ -24,10 +24,10 @@ interface RevealProps {
  *
  * Why not framer-motion here: CSS transitions run off the main thread, so
  * they stay smooth even while Next.js hydrates the rest of the page. That
- * matches Emil Kowalski's guidance — "CSS animations beat JS under load".
+ * matches Emil Kowalski's guidance - "CSS animations beat JS under load".
  *
  * One canonical motion: opacity + small translateY + slight blur, driven by
- * a strong ease-out. Sections should never override the timing — consistency
+ * a strong ease-out. Sections should never override the timing - consistency
  * reads as craft, variation reads as oversight.
  */
 export function Reveal({

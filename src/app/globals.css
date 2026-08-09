@@ -36,6 +36,10 @@
   --surface-2: hsl(0 0% 100% / 0.04);
   --hairline: hsl(0 0% 100% / 0.07);
   --hairline-strong: hsl(0 0% 100% / 0.13);
+  /* The edge of a card, a code block or the consent bar. Referenced by three
+     stylesheets before it was ever declared, which made every one of those
+     border shorthands invalid at computed-value time and drew no edge at all. */
+  --card-border: var(--hairline);
 
   /* Text tiers */
   --ink: hsl(var(--foreground));

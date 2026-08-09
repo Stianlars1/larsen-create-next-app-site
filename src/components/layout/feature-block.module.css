@@ -23,8 +23,16 @@
   order: 2;
 }
 
+/* Flipping mirrors the row, so the tracks have to swap with it. Ordering the
+   text last without this leaves the visual in the narrow track - the reverse
+   of every other side block, and the reason the motion card was cramped. */
+.block[data-layout="side"][data-flip="true"] {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 21rem);
+}
+
 @media (max-width: 54rem) {
-  .block[data-layout="side"] {
+  .block[data-layout="side"],
+  .block[data-layout="side"][data-flip="true"] {
     grid-template-columns: 1fr;
     gap: var(--space-6);
   }

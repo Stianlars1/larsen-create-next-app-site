@@ -2,10 +2,11 @@ import { Hero } from "@/components/site/hero";
 import { Footer } from "@/components/site/footer";
 import { Manifest } from "@/components/site/manifest";
 import { PromptFlow } from "@/components/features/prompt-flow";
+import { CommandBuilder } from "@/components/features/command-builder";
+import { DocsScroll } from "@/components/surfaces/docs-scroll";
 import {
   CliSection,
   ColourSection,
-  DocsSection,
   MotionSection,
   SkillsSection,
   ThemeSection,
@@ -27,9 +28,12 @@ export default function Page() {
         <ThemeSection />
         <TokensSection />
         <MotionSection />
-        <DocsSection />
+        {/* Renders its own <section> and pins itself, so it takes no wrapper */}
+        <DocsScroll />
         <SkillsSection />
         <CliSection />
+        {/* After the flag table, because assembling a command needs all of it */}
+        <CommandBuilder />
         <TreeSection />
       </main>
       <Footer />

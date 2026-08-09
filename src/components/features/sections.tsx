@@ -1,7 +1,7 @@
 import { FeatureBlock } from "@/components/layout/feature-block";
 import { PaletteDemo } from "@/components/demo/palette-demo";
 import { TokenSpecimen } from "@/components/surfaces/token-specimen";
-import { DocsSurface, MotionSurface, SkillsSurface, ThemeSurface } from "@/components/surfaces/misc";
+import { MotionSurface, SkillsSurface, ThemeSurface } from "@/components/surfaces/misc";
 import { CodeBlock } from "@/components/ui/code-block";
 import { generate } from "@/lib/palette";
 import { FLAGS, PROJECT_TREE, SKILLS_URL } from "@/lib/content";
@@ -110,22 +110,8 @@ export function MotionSection() {
 }
 
 /* ------------------------------------------------------------------ *
- * Docs + skills
+ * Skills
  * ------------------------------------------------------------------ */
-
-export function DocsSection() {
-  return (
-    <div className="page">
-      <FeatureBlock
-        id="docs"
-        label="Agent docs"
-        headline="The rules your agent reads before it writes"
-        lead="An agent that does not know your conventions invents them, differently every session. These ship with the project."
-        visual={<DocsSurface />}
-      />
-    </div>
-  );
-}
 
 export function SkillsSection() {
   return (
@@ -162,11 +148,13 @@ export function CliSection() {
             <CodeBlock
               label="Everything default"
               copyable
+              language="shell"
               code={"npx @larsen-utvikling/create-next-app my-app --defaults"}
             />
             <CodeBlock
               label="Your colour, your tools"
               copyable
+              language="shell"
               code={
                 "npx @larsen-utvikling/create-next-app my-app \\\n  --hex 22C55E --preset shadcn \\\n  --pm pnpm --linter biome \\\n  --skills recommended"
               }
@@ -205,7 +193,7 @@ export function TreeSection() {
         headline="What the first commit contains"
         lead="Nothing to clean up first. The demo page is replaced, the unused assets are gone, and git is initialised with the finished project."
         layout="side"
-        visual={<CodeBlock label="my-app" code={PROJECT_TREE} />}
+        visual={<CodeBlock label="my-app" code={PROJECT_TREE} language="tree" />}
         points={[
           { term: "Next.js", detail: "Resolved at scaffold time, so the version is never stale" },
           { term: "Import alias", detail: "@/* - the same default Next.js uses" },
