@@ -1,4 +1,5 @@
 import { CopyCommandButton } from "@/components/ui/copy-command-button";
+import { Marquee } from "@/components/ui/marquee";
 import { Terminal } from "@/components/surfaces/terminal";
 import { INSTALL_COMMAND, NPM_URL, REPO_URL } from "@/lib/content";
 import styles from "./hero.module.css";
@@ -37,7 +38,7 @@ export async function Hero() {
                 <span className={styles.dollar} aria-hidden="true">
                   $
                 </span>
-                {INSTALL_COMMAND}
+                <Marquee className={styles.commandText}>{INSTALL_COMMAND}</Marquee>
               </code>
               <CopyCommandButton command={INSTALL_COMMAND} />
             </div>

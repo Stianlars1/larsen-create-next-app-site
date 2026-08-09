@@ -1,0 +1,109 @@
+/*
+ * The geometry of the loop lives here rather than in JS: two identical copies
+ * in a max-content track, moved by exactly half of that track, so the last
+ * frame of a pass is the first frame of the next one. JS only decides whether
+ * to move at all and how long one pass should take, which means a stale
+ * measurement can cost a little speed but can never open a seam.
+ */
+
+.marquee {
+  --marquee-fade: 1.5rem;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* Standing still the text is simply cut at the edge. The fade is what makes
+     that read as "there is more, scroll for it" rather than as a fault. */
+  mask-image: linear-gradient(to right, #000 calc(100% - var(--marquee-fade)), transparent);
+}
+
+.marquee::-webkit-scrollbar {
+  display: none;
+}
+
+.marquee[data-animated="true"] {
+  overflow: hidden;
+  /* Moving, both ends need one: the tail leaves on the left at the same moment
+     the head arrives on the right, and a hard edge on either is a stutter.
+     The leading edge is a variable because it is only earned while the line is
+     actually moving - see the rewound state below. */
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--marquee-fade-start, var(--marquee-fade)),
+    #000 calc(100% - var(--marquee-fade)),
+    transparent
+  );
+}
+
+/*
+ * Hovering rewinds the line and holds it at the start, rather than freezing it
+ * mid-pass: an animation with no iterations left paints the track's own
+ * untransformed position, and letting go starts a fresh pass from the
+ * beginning. Reading a command is easier from the start of it than from
+ * wherever it happened to be.
+ *
+ * Keyboard focus is matched through :focus-visible, never :focus-within. A
+ * mouse click on the copy button beside the line leaves that button focused,
+ * so :focus-within would keep the line stopped after the pointer had already
+ * moved away, with nothing on screen explaining why.
+ *
+ * The leading fade collapses with it. That fade exists to soften a tail
+ * leaving the frame; rewound there is no tail, just the first character of the
+ * command sitting against the edge, and fading it out reads as a rendering
+ * fault. The trailing fade stays, because the line genuinely does continue.
+ *
+ * Both properties are inherited, so a surface further out - the pill that
+ * holds the line and the copy button - can drive this from its own stylesheet
+ * without reaching into this one.
+ */
+.marquee[data-animated="true"]:hover,
+.marquee[data-animated="true"]:has(:focus-visible) {
+  --marquee-iterations: 0;
+  --marquee-fade-start: 0px;
+}
+
+.track {
+  display: flex;
+  width: max-content;
+  white-space: nowrap;
+}
+
+.marquee[data-animated="true"] .track {
+  /*
+   * Longhands, because the iteration count is the part that gets switched to
+   * rewind. The count is the switch and not the name: a name reached through
+   * var() is resolved long after CSS Modules has renamed these keyframes, so
+   * it would point at a `scroll` that no longer exists and nothing would move.
+   */
+  animation-name: scroll;
+  animation-duration: var(--marquee-duration);
+  animation-timing-function: linear;
+  animation-iteration-count: var(--marquee-iterations, infinite);
+  /* This one genuinely never stops, so the layer is worth keeping */
+  will-change: transform;
+}
+
+.copy {
+  flex: none;
+}
+
+.marquee[data-animated="true"] .copy {
+  padding-right: var(--marquee-gap);
+}
+
+/* The duplicate is decoration. Unselectable as well as hidden from assistive
+   tech, so a drag-select over the moving line cannot produce the text twice. */
+.copy[aria-hidden="true"] {
+  user-select: none;
+}
+
+@keyframes scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}

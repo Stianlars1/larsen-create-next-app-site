@@ -33,7 +33,7 @@
 @media (max-width: 54rem) {
   .block[data-layout="side"],
   .block[data-layout="side"][data-flip="true"] {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-6);
   }
 
@@ -59,7 +59,7 @@
 
 @media (max-width: 34rem) {
   .points div {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-1);
   }
 }
