@@ -82,6 +82,9 @@
  * inside the box, so 2ch never stretches the glyph.
  */
 .icon {
+  /* base.css resets every svg to display: block. Left alone that puts each
+     icon on its own line and breaks the tree apart at every entry. */
+  display: inline-block;
   width: 2ch;
   height: 1em;
   margin-right: 0.35ch;
