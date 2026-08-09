@@ -117,6 +117,7 @@ export function CopyCommandButton({ command }: { command: string }) {
     <button
       type="button"
       className={styles.button}
+      data-copied={copied ? "true" : undefined}
       onClick={handleCopy}
       aria-label={copied ? "Command copied" : "Copy command"}
     >
