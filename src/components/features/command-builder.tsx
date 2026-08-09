@@ -357,7 +357,7 @@ export function CommandBuilder() {
                   <Segmented
                     wide
                     legend="Colour scheme"
-                    hint="No prompt asks this one - it is reachable by flag only."
+                    hint="No prompt asks this one - it is reachable by flag only. It currently tints the neutral ramp: monochromatic differs, and the other three generate the same theme."
                     value={palette.scheme}
                     options={SCHEME_OPTIONS}
                     onChange={(scheme) => updateCustom({ scheme })}
