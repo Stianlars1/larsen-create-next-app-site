@@ -6,6 +6,8 @@ import {
   buildCommand,
   changedScaleSteps,
   countChangedScaleSteps,
+  formatChangedScaleSteps,
+  normalizeHex,
   rampkitHarmonyUrl,
 } from "./palette.ts";
 
@@ -27,6 +29,21 @@ test("the command emits the strong neutral tint", () => {
   assert.equal(
     buildCommand({ ...base, neutralTint: "strong" }),
     "npx @larsen-utvikling/create-next-app my-app --hex 4DA0FF --neutral-tint strong",
+  );
+});
+
+test("HEX normalization expands shorthand and rejects invalid input", () => {
+  assert.equal(normalizeHex(" #AbC "), "#aabbcc");
+  assert.equal(normalizeHex("4DA0FF"), "#4da0ff");
+  assert.equal(normalizeHex("#abcd"), null);
+  assert.equal(normalizeHex("not-a-colour"), null);
+});
+
+test("the command is absent for invalid HEX and expands valid shorthand", () => {
+  assert.equal(buildCommand({ ...base, hex: "#abcd" }), null);
+  assert.equal(
+    buildCommand({ ...base, hex: "#AbC" }),
+    "npx @larsen-utvikling/create-next-app my-app --hex AABBCC",
   );
 });
 
@@ -84,4 +101,22 @@ test("changed scale steps are counted from actual generated token values", () =>
   assert.equal(countChangedScaleSteps(before, after, "gray"), 1);
   assert.equal(countChangedScaleSteps(before, after, "accent"), 1);
   assert.deepEqual(changedScaleSteps(before, after, "gray"), ["gray-2"]);
+});
+
+test("changed scale steps are formatted as compact ranges", () => {
+  assert.equal(
+    formatChangedScaleSteps(["gray-1", "gray-3", "gray-4", "gray-5", "gray-6", "gray-7", "gray-8", "gray-9", "gray-10", "gray-11"]),
+    "1, 3-11",
+  );
+  assert.equal(formatChangedScaleSteps([]), "");
+});
+
+test("changed-step formatting works in supported browsers without toSorted", () => {
+  const descriptor = Object.getOwnPropertyDescriptor(Array.prototype, "toSorted");
+  delete Array.prototype.toSorted;
+  try {
+    assert.equal(formatChangedScaleSteps(["gray-4", "gray-2", "gray-3"]), "2-4");
+  } finally {
+    if (descriptor) Object.defineProperty(Array.prototype, "toSorted", descriptor);
+  }
 });

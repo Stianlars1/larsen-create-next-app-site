@@ -98,10 +98,10 @@ export const PROMPT_STEPS: PromptStep[] = [
         question: "Choose neutral tint",
         choices: [
           { label: "Subtle", hint: "the standard gray ramp (recommended)", isDefault: true },
-          { label: "Strong", hint: "more seed hue in the grays; accent scale unchanged" },
+          { label: "Strong", hint: "more seed hue in the grays; chromatic accent scale unchanged" },
         ],
         flag: "--neutral-tint subtle | strong",
-        why: "How much of your colour bleeds into the neutrals. It moves the gray ramp and what is built on it, never the accent scale - and Subtle needs no flag.",
+        why: "How much of your colour bleeds into the neutrals. It moves the gray ramp and what is built on it. Chromatic accent scales stay unchanged; #000000, #010101, #FEFEFE and #FFFFFF are hueless exceptions whose accent scales also move. Subtle needs no flag.",
       },
     ],
   },

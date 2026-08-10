@@ -10,7 +10,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { generate, type NeutralTint, type TokenMap } from "@/lib/palette";
+import { generate, normalizeHex, type NeutralTint, type TokenMap } from "@/lib/palette";
 
 /**
  * Lets the palette demo re-theme the entire page from the HEX somebody typed.
@@ -98,7 +98,7 @@ export type SiteThemeSelection = {
 export type SiteTheme = {
   /** null while the page is showing the exact theme baked into theme.css. */
   selection: SiteThemeSelection | null;
-  /** Ignores anything that is not a six-digit HEX, so callers can forward raw input. */
+  /** Ignores invalid HEX, so callers can forward raw input. */
   setSelection: (selection: SiteThemeSelection | null) => void;
 };
 
@@ -157,17 +157,8 @@ export function SiteThemeProvider({
       setSelectionState(null);
       return;
     }
-    /*
-     * Six digits only, deliberately stricter than the demo's own isValidHex,
-     * which also accepts the 3-digit shorthand. The first three characters of
-     * any 6-digit HEX are themselves a valid shorthand, so accepting those
-     * would re-theme the whole page to a wrong colour mid-typing: "#22C55E"
-     * would flash "#2222CC" before settling on green.
-     */
-    if (!/^#?[0-9a-f]{6}$/i.test(next.hex.trim())) return;
-    const normalized = (
-      next.hex.trim().startsWith("#") ? next.hex.trim() : `#${next.hex.trim()}`
-    ).toLowerCase();
+    const normalized = normalizeHex(next.hex);
+    if (!normalized) return;
     setSelectionState(
       normalized === BAKED_SELECTION.hex && next.neutralTint === BAKED_SELECTION.neutralTint
         ? null

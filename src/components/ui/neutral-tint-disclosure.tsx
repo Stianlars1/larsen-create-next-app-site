@@ -37,12 +37,8 @@ export function NeutralTintDisclosure({
           ))}
         </div>
         <p>
-          Subtle is the CLI default and needs no flag. Strong adds more seed hue to the gray ramp
-          and to the tokens built on it - foreground, muted, card, popover, border and the sidebar
-          surfaces. The accent scale, background, primary and ring stay where they are, unless the
-          seed is pure black or pure white, which has no hue of its own and takes its accent scale
-          from the same tinted neutral. Expect a small shift: the largest single-channel difference
-          measured across the generator is 4 of 255, and dark mode moves least.
+          Subtle is the CLI default and needs no flag. Strong adds more seed hue to the grays.
+          Accent colours stay unchanged, except for #000000, #010101, #FEFEFE and #FFFFFF.
         </p>
       </div>
     </details>

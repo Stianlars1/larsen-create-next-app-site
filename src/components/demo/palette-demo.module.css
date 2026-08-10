@@ -245,7 +245,7 @@
   min-width: 0;
 }
 
-.output[data-status="loading"] .previews {
+.output[data-busy="true"] .previews {
   opacity: 0.6;
 }
 
@@ -336,7 +336,7 @@
 
 .scaleLabel {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-2);
   font-family: var(--font-mono);
@@ -345,15 +345,32 @@
   opacity: 0.55;
 }
 
+.changeSummary {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  text-align: right;
+}
+
 .changeCount {
   font-size: 0.62rem;
   letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
 /* A zero is evidence too - it is the claim about the accent scale, on screen. */
 .changeCount[data-none="true"] {
   opacity: 0.72;
+}
+
+.changedSteps {
+  font-size: 0.58rem;
+  line-height: 1.25;
+  letter-spacing: 0;
+  text-wrap: pretty;
 }
 
 .scale {
@@ -392,6 +409,12 @@
   white-space: nowrap;
   font-size: var(--text-sm);
   color: hsl(var(--foreground) / 0.85);
+}
+
+.commandUnavailable {
+  margin: 0;
+  color: hsl(var(--foreground) / 0.6);
+  font-size: var(--text-sm);
 }
 
 .details {

@@ -47,6 +47,11 @@ import {
 const read = (relativePath) =>
   readFileSync(fileURLToPath(new URL(relativePath, import.meta.url)), "utf8");
 
+const HUELESS_NEUTRAL_TINT_EXCEPTIONS = ["#000000", "#010101", "#FEFEFE", "#FFFFFF"];
+
+const hexClaims = (copy) =>
+  [...copy.matchAll(/#[0-9a-f]{6}/gi)].map((match) => match[0].toUpperCase());
+
 test("the documented flag list is exactly the package option contract", () => {
   // The site collapses each boolean pair into one row, and prefixes the two
   // flags that have a short form.
@@ -142,6 +147,41 @@ test("the palette walkthrough asks what the CLI asks, in the CLI's words", () =>
       (choice) => choice.value === optionDefault("neutral-tint"),
     )?.label,
   );
+});
+
+test("neutral tint copy limits accent invariance to chromatic seeds and lists every hueless exception", () => {
+  const paletteStep = PROMPT_STEPS.find((entry) => entry.id === "palette");
+  const tintStep = paletteStep?.followUps?.find((entry) => entry.id === "neutral-tint");
+  assert.ok(tintStep, "the site documents the neutral tint question");
+
+  const strong = tintStep.choices.find((choice) => choice.label === "Strong");
+  assert.match(strong?.hint ?? "", /chromatic accent scale unchanged/i);
+  assert.match(tintStep.why, /chromatic accent scales stay unchanged/i);
+  assert.deepEqual(hexClaims(tintStep.why), HUELESS_NEUTRAL_TINT_EXCEPTIONS);
+
+  const disclosure = read("../components/ui/neutral-tint-disclosure.tsx");
+  assert.match(disclosure, /Subtle is the CLI default and needs no flag\./);
+  assert.match(disclosure, /Strong adds more seed hue to the grays\./);
+  assert.match(disclosure, /Accent colours stay unchanged, except for/);
+  assert.deepEqual(hexClaims(disclosure), HUELESS_NEUTRAL_TINT_EXCEPTIONS);
+  assert.doesNotMatch(disclosure, /tokens built on it|largest single-channel difference/i);
+
+  for (const copy of [strong?.hint ?? "", tintStep.why, disclosure]) {
+    assert.doesNotMatch(
+      copy,
+      /\bnever\b[^.!?\n]{0,80}\baccent scale\b|\baccent scale\b[^.!?\n]{0,80}\bnever\b/i,
+      "neutral tint copy must not make an unconditional 'never changes accent' claim",
+    );
+  }
+});
+
+test("palette change summaries separate the count from the outlined steps", () => {
+  const demo = read("../components/demo/palette-demo.tsx");
+
+  assert.match(demo, /\$\{scale\.changed\.length\}\/12 changed/);
+  assert.match(demo, /Outlined steps:/);
+  assert.match(demo, /className=\{styles\.changedSteps\}/);
+  assert.doesNotMatch(demo, /moved by Strong|unchanged by Strong/);
 });
 
 test("the skill catalogue matches the package, source by source", () => {

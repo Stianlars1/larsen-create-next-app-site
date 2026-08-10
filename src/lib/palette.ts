@@ -82,6 +82,16 @@ export const DEFAULT_DEMO_OPTIONS = {
 /** Token name -> value, for one mode. */
 export type TokenMap = Record<string, string>;
 
+/** Normalizes CLI-valid three- or six-digit HEX input, or rejects it. */
+export function normalizeHex(hex: string): string | null {
+  const match = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(hex.trim());
+  if (!match) return null;
+
+  const digits = match[1].toLowerCase();
+  const full = digits.length === 3 ? digits.replace(/./g, (digit) => digit + digit) : digits;
+  return `#${full}`;
+}
+
 /** Returns byte-different token names in one generated twelve-step scale. */
 export function changedScaleSteps(
   before: TokenMap,
@@ -91,6 +101,29 @@ export function changedScaleSteps(
   return Array.from({ length: 12 }, (_, index) => `${scale}-${index + 1}`).filter(
     (token) => before[token] !== after[token],
   );
+}
+
+/** Formats changed scale token names as compact numeric steps, such as `1, 3-11`. */
+export function formatChangedScaleSteps(tokens: string[]): string {
+  const steps = Array.from(
+    new Set(
+      tokens
+        .map((token) => Number(token.slice(token.lastIndexOf("-") + 1)))
+        .filter((step) => Number.isInteger(step) && step > 0),
+    ),
+  ).sort((left, right) => left - right);
+
+  const ranges: string[] = [];
+  for (let index = 0; index < steps.length; ) {
+    const start = steps[index];
+    let end = start;
+    while (steps[index + 1] === end + 1) {
+      end = steps[++index];
+    }
+    ranges.push(start === end ? String(start) : `${start}-${end}`);
+    index += 1;
+  }
+  return ranges.join(", ");
 }
 
 /** Counts byte-different values in one generated twelve-step scale. */
@@ -110,8 +143,6 @@ export type GeneratedTheme = {
 
 type Engine = {
   generateThemeCss: (options: PaletteOptions) => string;
-  isValidHex: (hex: string) => boolean;
-  normalizeHex: (hex: string) => string;
 };
 
 let enginePromise: Promise<Engine> | null = null;
@@ -128,24 +159,27 @@ export function isEngineLoaded(): boolean {
 }
 
 export async function generate(options: PaletteOptions): Promise<GeneratedTheme> {
+  const hex = normalizeHex(options.hex);
+  if (!hex) throw new Error("Cannot generate a palette for invalid HEX input.");
   const engine = await loadEngine();
-  const css = engine.generateThemeCss(options);
+  const css = engine.generateThemeCss({ ...options, hex });
   return { css, light: parseBlock(css, ":root {", "@media"), dark: parseBlock(css, "@media", '[data-theme="light"]') };
-}
-
-export async function normalize(hex: string): Promise<string> {
-  const engine = await loadEngine();
-  return engine.normalizeHex(hex);
 }
 
 /** Accepts "4DA0FF" and "#4da0ff" alike - same rule as the CLI prompt. */
 export function isValidHex(hex: string): boolean {
-  return /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.test(hex.trim());
+  return normalizeHex(hex) !== null;
 }
 
 /** The exact command that reproduces the current selection. */
-export function buildCommand(options: PaletteOptions, appName = "my-app"): string {
-  const parts = [`npx @larsen-utvikling/create-next-app ${appName}`, `--hex ${options.hex.replace(/^#/, "")}`];
+export function buildCommand(options: PaletteOptions, appName = "my-app"): string | null {
+  const hex = normalizeHex(options.hex);
+  if (!hex) return null;
+
+  const parts = [
+    `npx @larsen-utvikling/create-next-app ${appName}`,
+    `--hex ${hex.slice(1).toUpperCase()}`,
+  ];
   if (options.preset !== "shadcn") parts.push(`--preset ${options.preset}`);
   if (options.format !== "hsl-values") parts.push(`--format ${options.format}`);
   if (options.neutralTint !== "subtle") parts.push(`--neutral-tint ${options.neutralTint}`);
@@ -154,9 +188,8 @@ export function buildCommand(options: PaletteOptions, appName = "my-app"): strin
 
 /** The harmony explorer keeps the visitor's current valid seed. */
 export function rampkitHarmonyUrl(hex: string): string | null {
-  if (!isValidHex(hex)) return null;
-  const clean = hex.trim().replace(/^#/, "").toUpperCase();
-  return `https://rampkit.app/?hex=${clean}&harmonized=true`;
+  const normalized = normalizeHex(hex);
+  return normalized ? `https://rampkit.app/?hex=${normalized.slice(1).toUpperCase()}&harmonized=true` : null;
 }
 
 /**

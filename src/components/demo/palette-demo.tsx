@@ -12,6 +12,7 @@ import {
   PRESETS,
   buildCommand,
   changedScaleSteps,
+  formatChangedScaleSteps,
   generate,
   isValidHex,
   rampkitHarmonyUrl,
@@ -76,10 +77,14 @@ export function PaletteDemo({ initialTheme, initialHex, initialNeutralTint }: Pa
       next: { hex: string; preset: Preset; format: Format; neutralTint: NeutralTint },
       delay: number,
     ) => {
-      if (!isValidHex(next.hex)) return;
       window.clearTimeout(debounce.current);
-      setBusy(true);
       const id = ++requestId.current;
+      setFailed(false);
+      if (!isValidHex(next.hex)) {
+        setBusy(false);
+        return;
+      }
+      setBusy(true);
       debounce.current = window.setTimeout(() => {
         /*
          * Strong is the only value with something to compare against, so the
@@ -264,8 +269,16 @@ export function PaletteDemo({ initialTheme, initialHex, initialNeutralTint }: Pa
         </div>
 
         <div className={styles.commandRow}>
-          <code>{command}</code>
-          <CopyCommandButton command={command} />
+          {command ? (
+            <>
+              <code>{command}</code>
+              <CopyCommandButton command={command} />
+            </>
+          ) : (
+            <p className={styles.commandUnavailable} role="status">
+              Enter a valid HEX colour to build a copyable command.
+            </p>
+          )}
         </div>
 
         <details className={styles.details}>
@@ -352,29 +365,49 @@ function ThemePane({
           {scales.map((scale) => (
             <div className={styles.scaleGroup} key={scale.label}>
               <span className={styles.scaleLabel}>
-                {scale.label}
+                <span>{scale.label}</span>
                 {scale.changed !== undefined && (
                   <span
-                    className={styles.changeCount}
-                    data-none={scale.changed.length === 0 ? "true" : undefined}
+                    className={styles.changeSummary}
                     aria-live="polite"
                   >
-                    {scale.changed.length === 0
-                      ? "unchanged by Strong"
-                      : `${scale.changed.length}/12 moved by Strong - outlined`}
+                    <span
+                      className={styles.changeCount}
+                      data-none={scale.changed.length === 0 ? "true" : undefined}
+                    >
+                      {`${scale.changed.length}/12 changed`}
+                    </span>
+                    {scale.changed.length > 0 && (
+                      <span className={styles.changedSteps}>
+                        Outlined steps: {formatChangedScaleSteps(scale.changed)}
+                      </span>
+                    )}
                   </span>
                 )}
               </span>
               <div className={styles.scale} aria-label={`${label} ${scale.label} scale`}>
-                {scale.tokens.map((token) => (
-                  <span
-                    key={token}
-                    className={styles.scaleStep}
-                    style={tokens[token] ? { background: wrap(tokens[token]) } : undefined}
-                    data-changed={scale.changed?.includes(token) ? "true" : undefined}
-                    title={`--${token}: ${tokens[token] ?? "not emitted"}`}
-                  />
-                ))}
+                {scale.tokens.map((token) => {
+                  const changed = scale.changed?.includes(token);
+                  const value = tokens[token] ?? "not emitted";
+                  const comparison =
+                    scale.changed === undefined
+                      ? ""
+                      : changed
+                        ? " Strong changed this swatch."
+                        : " Strong did not change this swatch.";
+
+                  return (
+                    <span
+                      key={token}
+                      className={styles.scaleStep}
+                      style={tokens[token] ? { background: wrap(tokens[token]) } : undefined}
+                      data-changed={changed ? "true" : undefined}
+                      title={`--${token}: ${value}`}
+                      role="img"
+                      aria-label={`${label} ${scale.label} swatch --${token}: ${value}.${comparison}`}
+                    />
+                  );
+                })}
               </div>
             </div>
           ))}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { isValidHex } from "@/lib/palette";
+import { normalizeHex } from "@/lib/palette";
 import styles from "./hex-field.module.css";
 
 /**
@@ -35,12 +35,9 @@ const PICKER_INTERVAL = 120;
 const DEFAULT_PICKER_VALUE = "#000000";
 
 /** The control accepts `#rrggbb` and nothing else, so the shorthand is expanded
- *  and a missing # supplied - both of which isValidHex lets through. */
+ *  and a missing # supplied - both of which normalizeHex lets through. */
 function toPickerValue(raw: string): string | null {
-  if (!isValidHex(raw)) return null;
-  const digits = raw.trim().replace(/^#/, "");
-  const full = digits.length === 3 ? digits.replace(/./g, (digit) => digit + digit) : digits;
-  return `#${full.toLowerCase()}`;
+  return normalizeHex(raw);
 }
 
 type HexFieldProps = {
