@@ -10,6 +10,11 @@ export const PACKAGE_NAME = "@larsen-utvikling/create-next-app";
 export const REPO_URL = "https://github.com/Stianlars1/larsen-create-next-app";
 export const NPM_URL = "https://www.npmjs.com/package/@larsen-utvikling/create-next-app";
 export const SKILLS_URL = "https://github.com/Stianlars1/larsen-skills";
+export const EMIL_SKILLS_URL = "https://github.com/emilkowalski/skills";
+export const KREHEL_SKILLS_URL = "https://github.com/jakubkrehel/skills";
+export const TRANSITIONS_SKILL_URL =
+  "https://github.com/Jakubantalik/transitions.dev/tree/main/skills/transitions-dev";
+export const TRANSITIONS_TERMS_URL = "https://transitions.dev/terms.html";
 export const AUTHOR_URL = "https://www.larsenutvikling.no";
 
 export const INSTALL_COMMAND = `npx ${PACKAGE_NAME} my-app`;
@@ -54,7 +59,7 @@ export const PROMPT_STEPS: PromptStep[] = [
       { label: "Yes", hint: "generate from your brand color" },
     ],
     flag: "--hex <color> · --default-palette for the default",
-    why: "Say no and you get a considered black-and-white theme with a blue accent. Say yes and three follow-up questions shape the whole palette.",
+    why: "Say no and you get a considered black-and-white theme with a blue accent. Say yes and four follow-up questions shape the palette.",
     followUps: [
       {
         id: "hex",
@@ -88,6 +93,16 @@ export const PROMPT_STEPS: PromptStep[] = [
         flag: "--format hsl-values | hex | rgb | hsl | oklab | oklch",
         why: "HSL values keep alpha composition available. Any other format and the docs switch to the color-mix idiom instead.",
       },
+      {
+        id: "neutral-tint",
+        question: "Choose neutral tint",
+        choices: [
+          { label: "Subtle", hint: "the standard gray ramp (recommended)", isDefault: true },
+          { label: "Strong", hint: "more seed hue in the grays; accent scale unchanged" },
+        ],
+        flag: "--neutral-tint subtle | strong",
+        why: "How much of your colour bleeds into the neutrals. It moves the gray ramp and what is built on it, never the accent scale - and Subtle needs no flag.",
+      },
     ],
   },
   {
@@ -115,24 +130,24 @@ export const PROMPT_STEPS: PromptStep[] = [
   },
   {
     id: "skills",
-    question: "Install Larsen Skills for AI agents (UI, motion, accessibility)?",
+    question: "Install agent skills for AI agents (UI, motion, accessibility, transitions)?",
     choices: [
       { label: "Yes", isDefault: true },
       { label: "No" },
     ],
     flag: "--skills recommended | all | a,comma,list  ·  --no-skills",
-    why: "Installs into .agents/skills/ through the open skills installer, then verifies each skill's SKILL.md on disk - only skills that actually landed are documented in the project.",
+    why: "Groups requested skills by their authors' repositories, installs each source independently, then verifies every requested SKILL.md on disk - only skills that actually landed are documented in the project.",
     followUps: [
       {
         id: "skills-which",
         question: "Which skills?",
         choices: [
           { label: "Recommended", hint: "motion-craft, interface-craft, interface-review, ui-primitive-picker", isDefault: true },
-          { label: "All", hint: "9 skills" },
+          { label: "All Larsen Skills", hint: "9 skills" },
           { label: "Let me pick", hint: "space to toggle, enter to confirm" },
         ],
         flag: "--skills recommended | all | a,comma,list",
-        why: "The recommended four pair with the design system - motion, interface and review craft rather than the specialised tools.",
+        why: "Recommended and All keep their Larsen-only meanings. Let me pick also offers Jakub Antalik's transitions-dev as a direct third-party opt-in.",
       },
     ],
   },
@@ -168,11 +183,11 @@ export const FLAGS: { flag: string; description: string }[] = [
   { flag: "--hex <color>", description: "Palette seed, with or without the #. Implies a custom palette" },
   { flag: "--preset <name>", description: "shadcn | radix | css-variables" },
   { flag: "--format <name>", description: "hex | rgb | hsl | hsl-values | oklab | oklch" },
-  { flag: "--scheme <name>", description: "analogous | monochromatic | complementary | triadic" },
+  { flag: "--neutral-tint <name>", description: "subtle | strong - affects the gray ramp, defaults to subtle" },
   { flag: "--linter <name>", description: "eslint | biome | none" },
   { flag: "--pm <name>", description: "npm | pnpm | yarn | bun" },
-  { flag: "--skills <list>", description: "recommended | all | comma-separated skill names" },
-  { flag: "--no-skills", description: "Skip the skills install" },
+  { flag: "--skills <list>", description: "recommended | all Larsen | comma-separated skill names" },
+  { flag: "--no-skills", description: "Skip agent skill installs" },
   { flag: "--git / --no-git", description: "Initialize a git repository, or skip it" },
   { flag: "--install / --no-install", description: "Install dependencies, or skip it" },
   { flag: "--cna-version <spec>", description: "Select the create-next-app version spec instead of latest" },
@@ -260,20 +275,37 @@ export const DOC_FILES = [
 ];
 
 /* ------------------------------------------------------------------ *
- * Larsen Skills
+ * Agent skills
  * ------------------------------------------------------------------ */
 
-export const SKILLS = [
-  { name: "motion-craft", blurb: "Durations, curves, reduced motion", recommended: true },
-  { name: "interface-craft", blurb: "Layout, hierarchy, spacing, type", recommended: true },
-  { name: "interface-review", blurb: "Review a screen against the rules", recommended: true },
-  { name: "ui-primitive-picker", blurb: "The right primitive for a pattern", recommended: true },
-  { name: "motion-vocabulary", blurb: "Name an effect you can describe" },
-  { name: "liquid-interface", blurb: "Glass and refraction effects" },
-  { name: "prototype-lab", blurb: "Throwaway interaction prototypes" },
-  { name: "reverse-engineer-motion", blurb: "Rebuild motion from a video" },
-  { name: "animated-logo-cycle", blurb: "Animated brand marks" },
+export type AgentSkill = {
+  name: string;
+  blurb: string;
+  source: "larsen" | "third-party";
+  recommended?: boolean;
+};
+
+export const LARSEN_SKILLS: AgentSkill[] = [
+  { name: "motion-craft", blurb: "Durations, curves, reduced motion", recommended: true, source: "larsen" },
+  { name: "interface-craft", blurb: "Layout, hierarchy, spacing, type", recommended: true, source: "larsen" },
+  { name: "interface-review", blurb: "Review a screen against the rules", recommended: true, source: "larsen" },
+  { name: "ui-primitive-picker", blurb: "The right primitive for a pattern", recommended: true, source: "larsen" },
+  { name: "motion-vocabulary", blurb: "Name an effect you can describe", source: "larsen" },
+  { name: "liquid-interface", blurb: "Glass and refraction effects", source: "larsen" },
+  { name: "prototype-lab", blurb: "Throwaway interaction prototypes", source: "larsen" },
+  { name: "reverse-engineer-motion", blurb: "Rebuild motion from a video", source: "larsen" },
+  { name: "animated-logo-cycle", blurb: "Animated brand marks", source: "larsen" },
 ];
+
+export const THIRD_PARTY_SKILLS: AgentSkill[] = [
+  {
+    name: "transitions-dev",
+    blurb: "UI transition library by Jakub Antalik",
+    source: "third-party",
+  },
+];
+
+export const SKILLS = [...LARSEN_SKILLS, ...THIRD_PARTY_SKILLS];
 
 /* ------------------------------------------------------------------ *
  * What lands on disk
@@ -285,7 +317,7 @@ export const PROJECT_TREE = `my-app/
 ├── DESIGN.md          token reference
 ├── NEXTJS.md          Next.js agent guide, preserved
 ├── README.md          getting started + checklist
-├── .agents/skills/    Larsen Skills, when you opt in
+├── .agents/skills/    agent skills, when you opt in
 ├── public/
 │   └── larsen-utvikling/   logo SVGs, light + dark
 └── src/

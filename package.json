@@ -6,10 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --test src/lib/*.test.mjs"
   },
   "dependencies": {
-    "@larsen-utvikling/create-next-app": "^0.4.0",
+    "@larsen-utvikling/create-next-app": "^0.5.0",
     "@vercel/analytics": "^2.0.1",
     "clsx": "^2.1.1",
     "flubber": "^0.4.2",

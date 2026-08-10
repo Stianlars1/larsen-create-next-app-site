@@ -5,6 +5,7 @@ import { CookieConsent } from "@/components/site/cookie-consent";
 import { SiteThemeProvider } from "@/components/theme/site-theme";
 import { fontVariables } from "@/lib/fonts";
 import { PACKAGE_NAME } from "@/lib/content";
+import { DEFAULT_DEMO_OPTIONS, generate } from "@/lib/palette";
 import "./globals.css";
 
 const SITE_URL = "https://create-next-app.larsenutvikling.no";
@@ -42,11 +43,21 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const initialTheme = await generate(DEFAULT_DEMO_OPTIONS);
+
   return (
-    <html lang="en" className={fontVariables} data-theme="dark">
+    <html lang="en" className={fontVariables} data-theme="dark" data-site-theme="custom">
       <body>
-        <SiteThemeProvider>{children}</SiteThemeProvider>
+        <SiteThemeProvider
+          initialSelection={{
+            hex: DEFAULT_DEMO_OPTIONS.hex,
+            neutralTint: DEFAULT_DEMO_OPTIONS.neutralTint,
+          }}
+          initialTokens={initialTheme.dark}
+        >
+          {children}
+        </SiteThemeProvider>
         {/* Cookie-free by design */}
         <Analytics />
         {/* Only mounts once consent is granted, and only with a measurement ID */}

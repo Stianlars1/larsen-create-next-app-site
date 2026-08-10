@@ -22,21 +22,85 @@ export const FORMATS = [
   { value: "oklch", label: "OKLCH", sample: "oklch(69% 0.16 254)" },
 ] as const;
 
-export const SCHEMES = ["analogous", "monochromatic", "complementary", "triadic"] as const;
+export const NEUTRAL_TINTS = [
+  { value: "subtle", label: "Subtle (default)" },
+  { value: "strong", label: "Strong" },
+] as const;
+
+/**
+ * Named starting points for this site's seed field.
+ *
+ * Nothing is imported from anywhere: each entry is a plain HEX handed to
+ * Larsen's own generator, exactly as if it had been typed. They are not theme
+ * presets, and picking one does not change how the palette is built. The names
+ * are the common colour vocabulary these shades are known by, which is what
+ * makes them findable.
+ *
+ * What is guaranteed is measured, not assumed: `package-contract.test.mjs`
+ * runs every one of them through the published generator under both neutral
+ * tints and asserts the package's own contrast gate returns no failures.
+ */
+export const PREDEFINED_COLOURS = [
+  { name: "Neutral", hex: "#A1A1A1" },
+  { name: "Amber", hex: "#973C00" },
+  { name: "Blue", hex: "#193CB8" },
+  { name: "Cyan", hex: "#005F78" },
+  { name: "Emerald", hex: "#006045" },
+  { name: "Fuchsia", hex: "#8A0194" },
+  { name: "Green", hex: "#016630" },
+  { name: "Indigo", hex: "#372AAC" },
+  { name: "Lime", hex: "#7CCF00" },
+  { name: "Orange", hex: "#9F2D00" },
+  { name: "Pink", hex: "#A3004C" },
+  { name: "Purple", hex: "#6E11B0" },
+  { name: "Red", hex: "#9F0712" },
+  { name: "Rose", hex: "#A50036" },
+  { name: "Sky", hex: "#00598A" },
+  { name: "Teal", hex: "#005F5A" },
+  { name: "Violet", hex: "#5D0EC0" },
+  { name: "Yellow", hex: "#EFB100" },
+] as const;
 
 export type Preset = (typeof PRESETS)[number]["value"];
 export type Format = (typeof FORMATS)[number]["value"];
-export type Scheme = (typeof SCHEMES)[number];
+export type NeutralTint = (typeof NEUTRAL_TINTS)[number]["value"];
 
 export type PaletteOptions = {
   hex: string;
   preset: Preset;
   format: Format;
-  scheme: Scheme;
+  neutralTint: NeutralTint;
 };
+
+export const DEFAULT_DEMO_OPTIONS = {
+  hex: "#4DA0FF",
+  preset: "shadcn",
+  format: "hsl-values",
+  neutralTint: "subtle",
+} as const satisfies PaletteOptions;
 
 /** Token name -> value, for one mode. */
 export type TokenMap = Record<string, string>;
+
+/** Returns byte-different token names in one generated twelve-step scale. */
+export function changedScaleSteps(
+  before: TokenMap,
+  after: TokenMap,
+  scale: "accent" | "gray",
+): string[] {
+  return Array.from({ length: 12 }, (_, index) => `${scale}-${index + 1}`).filter(
+    (token) => before[token] !== after[token],
+  );
+}
+
+/** Counts byte-different values in one generated twelve-step scale. */
+export function countChangedScaleSteps(
+  before: TokenMap,
+  after: TokenMap,
+  scale: "accent" | "gray",
+): number {
+  return changedScaleSteps(before, after, scale).length;
+}
 
 export type GeneratedTheme = {
   css: string;
@@ -84,8 +148,15 @@ export function buildCommand(options: PaletteOptions, appName = "my-app"): strin
   const parts = [`npx @larsen-utvikling/create-next-app ${appName}`, `--hex ${options.hex.replace(/^#/, "")}`];
   if (options.preset !== "shadcn") parts.push(`--preset ${options.preset}`);
   if (options.format !== "hsl-values") parts.push(`--format ${options.format}`);
-  if (options.scheme !== "analogous") parts.push(`--scheme ${options.scheme}`);
+  if (options.neutralTint !== "subtle") parts.push(`--neutral-tint ${options.neutralTint}`);
   return parts.join(" ");
+}
+
+/** The harmony explorer keeps the visitor's current valid seed. */
+export function rampkitHarmonyUrl(hex: string): string | null {
+  if (!isValidHex(hex)) return null;
+  const clean = hex.trim().replace(/^#/, "").toUpperCase();
+  return `https://rampkit.app/?hex=${clean}&harmonized=true`;
 }
 
 /**

@@ -4,15 +4,15 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useMemo, useRef, useState } from "react";
 import { CopyCommandButton } from "@/components/ui/copy-command-button";
 import { HexField } from "@/components/ui/hex-field";
+import { NeutralTintDisclosure } from "@/components/ui/neutral-tint-disclosure";
 import { PACKAGE_NAME, SKILLS } from "@/lib/content";
 import {
   FORMATS,
   PRESETS,
-  SCHEMES,
   isValidHex,
   type Format,
+  type NeutralTint,
   type Preset,
-  type Scheme,
 } from "@/lib/palette";
 import styles from "./command-builder.module.css";
 
@@ -25,7 +25,7 @@ const EASE_OUT = [0.23, 1, 0.32, 1] as const;
  */
 const DEFAULT_PRESET: Preset = "shadcn";
 const DEFAULT_FORMAT: Format = "hsl-values";
-const DEFAULT_SCHEME: Scheme = "analogous";
+const DEFAULT_NEUTRAL_TINT: NeutralTint = "subtle";
 const DEFAULT_CNA_VERSION = "latest";
 
 const PACKAGE_MANAGERS = [
@@ -47,8 +47,6 @@ type Linter = (typeof LINTERS)[number]["value"];
 const DEFAULT_PM: PackageManager = "npm";
 const DEFAULT_LINTER: Linter = "eslint";
 
-const SCHEME_OPTIONS = SCHEMES.map((scheme) => ({ value: scheme, label: scheme }));
-
 const PALETTE_CHOICES = [
   { value: "default", label: "Default theme" },
   { value: "custom", label: "From a HEX" },
@@ -57,7 +55,7 @@ const PALETTE_CHOICES = [
 const SKILL_CHOICES = [
   { value: "none", label: "None" },
   { value: "recommended", label: "Recommended" },
-  { value: "all", label: "All" },
+  { value: "all", label: "All Larsen" },
   { value: "pick", label: "Let me pick" },
 ] as const;
 
@@ -74,8 +72,8 @@ const PROMPT_MODES = [
 const RECOMMENDED_NAMES = SKILLS.filter((skill) => skill.recommended).map((skill) => skill.name);
 
 /*
- * --preset, --format and --scheme each require --hex, and --hex conflicts
- * with --default-palette. Carrying the palette as a discriminated union is
+ * --preset, --format and --neutral-tint each require --hex, and --hex
+ * conflicts with --default-palette. Carrying the palette as a discriminated union is
  * what makes that rejected combination impossible to click into rather than
  * something the UI has to warn about afterwards.
  */
@@ -84,7 +82,7 @@ type CustomPalette = {
   hex: string;
   preset: Preset;
   format: Format;
-  scheme: Scheme;
+  neutralTint: NeutralTint;
 };
 
 type PaletteChoice = { kind: "default" } | CustomPalette;
@@ -143,12 +141,12 @@ function flagsFor(answers: Answers): string[] {
   if (answers.unattended) flags.push("--defaults");
 
   if (answers.palette.kind === "custom" && isValidHex(answers.palette.hex)) {
-    const { hex, preset, format, scheme } = answers.palette;
+    const { hex, preset, format, neutralTint } = answers.palette;
     // Written without the leading #, the way the CLI's own examples write it
     flags.push(`--hex ${hex.trim().replace(/^#/, "")}`);
     if (preset !== DEFAULT_PRESET) flags.push(`--preset ${preset}`);
     if (format !== DEFAULT_FORMAT) flags.push(`--format ${format}`);
-    if (scheme !== DEFAULT_SCHEME) flags.push(`--scheme ${scheme}`);
+    if (neutralTint !== DEFAULT_NEUTRAL_TINT) flags.push(`--neutral-tint ${neutralTint}`);
   }
 
   if (answers.pm !== DEFAULT_PM) flags.push(`--pm ${answers.pm}`);
@@ -219,7 +217,7 @@ export function CommandBuilder() {
     hex: "#4DA0FF",
     preset: DEFAULT_PRESET,
     format: DEFAULT_FORMAT,
-    scheme: DEFAULT_SCHEME,
+    neutralTint: DEFAULT_NEUTRAL_TINT,
   });
   const lastPicked = useRef<string[]>(RECOMMENDED_NAMES);
 
@@ -340,13 +338,10 @@ export function CommandBuilder() {
                     onChange={(format) => updateCustom({ format })}
                   />
 
-                  <Segmented
+                  <NeutralTintDisclosure
                     wide
-                    legend="Colour scheme"
-                    hint="No prompt asks this one - it is reachable by flag only. It currently tints the neutral ramp: monochromatic differs, and the other three generate the same theme."
-                    value={palette.scheme}
-                    options={SCHEME_OPTIONS}
-                    onChange={(scheme) => updateCustom({ scheme })}
+                    value={palette.neutralTint}
+                    onChange={(neutralTint) => updateCustom({ neutralTint })}
                   />
                 </motion.div>
               )}
@@ -363,7 +358,7 @@ export function CommandBuilder() {
 
             <Segmented
               wide
-              legend="Larsen Skills"
+              legend="Agent skills"
               value={skills.kind}
               options={SKILL_CHOICES}
               onChange={(kind) =>

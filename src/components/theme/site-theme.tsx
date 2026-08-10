@@ -10,21 +10,20 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { generate, type TokenMap } from "@/lib/palette";
+import { generate, type NeutralTint, type TokenMap } from "@/lib/palette";
 
 /**
  * Lets the palette demo re-theme the entire page from the HEX somebody typed.
  *
- * The page paints the theme baked into src/styles/design-system/theme.css -
- * no script, no flash, nothing to hydrate - and this provider stays inert
- * until a real interaction pushes a seed in. Only then does the engine load
- * and a single override block land on the document root.
+ * The page keeps the package's baked strong theme.css unchanged. The server
+ * adds the demo's subtle default as one generated override before first paint,
+ * and this provider stays inert until a real interaction changes the selection.
+ * Only then does the browser load the engine and rewrite that override.
  */
 
-/** The seed theme.css was generated from (its header records it). Selecting it
- *  again drops the override rather than re-deriving it, so the page returns to
- *  the stylesheet it actually ships. */
-const DEFAULT_SEED = "#4da0ff";
+/** The exact selection baked into theme.css. Only this pair removes the
+ *  override, so #4DA0FF with subtle still renders its distinct gray ramp. */
+const BAKED_SELECTION = { hex: "#4da0ff", neutralTint: "strong" } as const;
 
 /**
  * --brand-blue and its two variants are the page's own tokens: theme.css
@@ -91,25 +90,47 @@ function shiftMs(): number {
   return ms + 160;
 }
 
+export type SiteThemeSelection = {
+  hex: string;
+  neutralTint: NeutralTint;
+};
+
 export type SiteTheme = {
-  /** null while the page is showing the theme baked into theme.css. */
-  seed: string | null;
-  /** Ignores anything that is not a HEX, so callers can forward raw input. */
-  setSeed: (hex: string | null) => void;
+  /** null while the page is showing the exact theme baked into theme.css. */
+  selection: SiteThemeSelection | null;
+  /** Ignores anything that is not a six-digit HEX, so callers can forward raw input. */
+  setSelection: (selection: SiteThemeSelection | null) => void;
 };
 
 /** A no-op default rather than a thrown error: the palette demo has to keep
  *  working on its own if the provider is ever unmounted. */
-const SiteThemeContext = createContext<SiteTheme>({ seed: null, setSeed: () => {} });
+const SiteThemeContext = createContext<SiteTheme>({ selection: null, setSelection: () => {} });
 
 export function useSiteTheme(): SiteTheme {
   return useContext(SiteThemeContext);
 }
 
-export function SiteThemeProvider({ children }: { children: ReactNode }) {
-  const [seed, setSeedState] = useState<string | null>(null);
+type SiteThemeProviderProps = {
+  children: ReactNode;
+  initialSelection: SiteThemeSelection;
+  initialTokens: TokenMap;
+};
+
+function selectionKey(selection: SiteThemeSelection | null): string {
+  return selection
+    ? `${selection.hex.trim().toLowerCase()}|${selection.neutralTint}`
+    : "baked";
+}
+
+export function SiteThemeProvider({
+  children,
+  initialSelection,
+  initialTokens,
+}: SiteThemeProviderProps) {
+  const [selection, setSelectionState] = useState<SiteThemeSelection | null>(initialSelection);
   const sheet = useRef<HTMLStyleElement | null>(null);
   const settle = useRef<number | undefined>(undefined);
+  const appliedSelection = useRef(selectionKey(initialSelection));
 
   /**
    * One stylesheet, rewritten whole. Specificity is why it beats theme.css -
@@ -131,9 +152,9 @@ export function SiteThemeProvider({ children }: { children: ReactNode }) {
     }, shiftMs());
   }, []);
 
-  const setSeed = useCallback((hex: string | null) => {
-    if (hex === null) {
-      setSeedState(null);
+  const setSelection = useCallback((next: SiteThemeSelection | null) => {
+    if (next === null) {
+      setSelectionState(null);
       return;
     }
     /*
@@ -143,14 +164,23 @@ export function SiteThemeProvider({ children }: { children: ReactNode }) {
      * would re-theme the whole page to a wrong colour mid-typing: "#22C55E"
      * would flash "#2222CC" before settling on green.
      */
-    if (!/^#?[0-9a-f]{6}$/i.test(hex.trim())) return;
-    const normalized = (hex.trim().startsWith("#") ? hex.trim() : `#${hex.trim()}`).toLowerCase();
-    setSeedState(normalized === DEFAULT_SEED ? null : normalized);
+    if (!/^#?[0-9a-f]{6}$/i.test(next.hex.trim())) return;
+    const normalized = (
+      next.hex.trim().startsWith("#") ? next.hex.trim() : `#${next.hex.trim()}`
+    ).toLowerCase();
+    setSelectionState(
+      normalized === BAKED_SELECTION.hex && next.neutralTint === BAKED_SELECTION.neutralTint
+        ? null
+        : { hex: normalized, neutralTint: next.neutralTint },
+    );
   }, []);
 
   useEffect(() => {
-    if (seed === null) {
-      // Nothing to undo before the first interaction, so first paint is untouched.
+    const nextKey = selectionKey(selection);
+    if (nextKey === appliedSelection.current) return;
+    appliedSelection.current = nextKey;
+
+    if (selection === null) {
       if (sheet.current) apply(null);
       return;
     }
@@ -164,7 +194,12 @@ export function SiteThemeProvider({ children }: { children: ReactNode }) {
      * and the other presets emit different token names. The site runs
      * data-theme="dark", so only the dark block is used.
      */
-    generate({ hex: seed, preset: "shadcn", format: "hsl-values", scheme: "analogous" })
+    generate({
+      hex: selection.hex,
+      preset: "shadcn",
+      format: "hsl-values",
+      neutralTint: selection.neutralTint,
+    })
       .then((theme) => {
         if (!cancelled) apply(theme.dark);
       })
@@ -176,22 +211,26 @@ export function SiteThemeProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [seed, apply]);
+  }, [selection, apply]);
 
   useEffect(
     () => () => {
       window.clearTimeout(settle.current);
-      sheet.current?.remove();
-      // Cleared so a StrictMode remount does not reuse a detached element.
-      sheet.current = null;
-      document.documentElement.removeAttribute("data-site-theme");
     },
     [],
   );
 
-  const value = useMemo(() => ({ seed, setSeed }), [seed, setSeed]);
+  const value = useMemo(
+    () => ({ selection, setSelection }),
+    [selection, setSelection],
+  );
 
-  return <SiteThemeContext.Provider value={value}>{children}</SiteThemeContext.Provider>;
+  return (
+    <>
+      <style ref={sheet}>{rootBlock(initialTokens)}</style>
+      <SiteThemeContext.Provider value={value}>{children}</SiteThemeContext.Provider>
+    </>
+  );
 }
 
 /** The generated dark tokens plus the three the page defines itself. */

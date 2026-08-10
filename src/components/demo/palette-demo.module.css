@@ -33,6 +33,33 @@
   color: hsl(var(--foreground) / 0.45);
 }
 
+.fieldHint {
+  margin: 0;
+  color: hsl(var(--foreground) / 0.5);
+  font-size: var(--text-xs);
+  line-height: var(--leading-body);
+}
+
+.harmonyLink {
+  width: fit-content;
+  color: hsl(var(--brand-blue));
+  font-size: var(--text-xs);
+  text-decoration: none;
+}
+
+.harmonyLink:focus-visible {
+  outline: 2px solid hsl(var(--brand-blue));
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .harmonyLink:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+}
+
 .hexInput {
   display: flex;
   align-items: center;
@@ -72,34 +99,106 @@
   outline: none;
 }
 
-.seeds {
+.colourPicker {
+  border: var(--border-width) solid var(--card-border);
+  border-radius: var(--radius-md);
+  background: hsl(var(--gray-1));
+  overflow: clip;
+}
+
+.colourPicker summary {
+  min-height: 44px;
   display: flex;
-  gap: var(--space-2);
-}
-
-.seed {
-  width: 26px;
-  height: 26px;
-  border-radius: var(--radius-full);
-  border: 2px solid transparent;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  color: hsl(var(--foreground) / 0.5);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
   cursor: pointer;
-  padding: 0;
+  list-style: none;
+}
+
+.colourPicker summary::-webkit-details-marker {
+  display: none;
+}
+
+.colourPicker summary:focus-visible {
+  outline: 2px solid hsl(var(--brand-blue));
+  outline-offset: -3px;
+}
+
+.colourPickerValue {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: hsl(var(--foreground) / 0.82);
+}
+
+.colourPickerDot {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  border: var(--border-width) solid hsl(var(--foreground) / 0.18);
+  border-radius: var(--radius-full);
+}
+
+.colourGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px;
+  padding: 0 var(--space-2) var(--space-2);
+}
+
+.colourGrid button {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: hsl(var(--foreground) / 0.65);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-align: left;
+  cursor: pointer;
   transition:
-    transform var(--duration-press) var(--ease-out),
-    border-color var(--duration-fast) var(--ease-out);
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-press) var(--ease-out);
 }
 
-.seed[data-active="true"] {
-  border-color: hsl(var(--foreground) / 0.8);
-}
-
-.seed:active {
+.colourGrid button:active {
   transform: scale(var(--press-scale));
 }
 
+.colourGrid button[data-active="true"] {
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--brand-solid) / 0.45);
+  background: hsl(var(--brand-solid) / 0.1);
+}
+
+.colourGrid button:focus-visible {
+  outline: 2px solid hsl(var(--brand-blue));
+  outline-offset: -2px;
+}
+
+.colourSource {
+  margin: 0;
+  padding: var(--space-1) var(--space-3) var(--space-3);
+  color: hsl(var(--foreground) / 0.45);
+  font-size: var(--text-xs);
+  line-height: var(--leading-body);
+}
+
 @media (hover: hover) and (pointer: fine) {
-  .seed:hover {
-    border-color: hsl(var(--foreground) / 0.4);
+  .colourGrid button:hover:not([data-active="true"]) {
+    color: hsl(var(--foreground) / 0.85);
+    background: hsl(var(--gray-2));
   }
 }
 
@@ -222,17 +321,57 @@
   transition: background-color var(--duration-slow) var(--ease-out);
 }
 
+.scales {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: auto;
+}
+
+.scaleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.scaleLabel {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: currentColor;
+  opacity: 0.55;
+}
+
+.changeCount {
+  font-size: 0.62rem;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+/* A zero is evidence too - it is the claim about the accent scale, on screen. */
+.changeCount[data-none="true"] {
+  opacity: 0.72;
+}
+
 .scale {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   gap: 2px;
-  margin-top: auto;
 }
 
 .scaleStep {
   height: 26px;
   border-radius: 2px;
-  transition: background-color var(--duration-slow) var(--ease-out);
+  transition:
+    background-color var(--duration-slow) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.scaleStep[data-changed="true"] {
+  box-shadow: inset 0 0 0 2px currentColor;
 }
 
 .commandRow {

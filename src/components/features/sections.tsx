@@ -3,11 +3,17 @@ import { PaletteDemo } from "@/components/demo/palette-demo";
 import { TokenSpecimen } from "@/components/surfaces/token-specimen";
 import { MotionSurface, SkillsSurface, ThemeSurface } from "@/components/surfaces/misc";
 import { CodeBlock } from "@/components/ui/code-block";
-import { generate } from "@/lib/palette";
-import { FLAGS, PROJECT_TREE, SKILLS_URL } from "@/lib/content";
+import { DEFAULT_DEMO_OPTIONS, generate } from "@/lib/palette";
+import {
+  EMIL_SKILLS_URL,
+  FLAGS,
+  KREHEL_SKILLS_URL,
+  PROJECT_TREE,
+  SKILLS_URL,
+  TRANSITIONS_SKILL_URL,
+  TRANSITIONS_TERMS_URL,
+} from "@/lib/content";
 import styles from "./sections.module.css";
-
-const DEFAULT_SEED = "#4DA0FF";
 
 /* ------------------------------------------------------------------ *
  * Colour - the palette demo, as one block among several
@@ -16,12 +22,7 @@ const DEFAULT_SEED = "#4DA0FF";
 export async function ColourSection() {
   // Generated on the server at build, so the page paints a real palette
   // before the engine has been fetched at all.
-  const initialTheme = await generate({
-    hex: DEFAULT_SEED,
-    preset: "shadcn",
-    format: "hsl-values",
-    scheme: "analogous",
-  });
+  const initialTheme = await generate(DEFAULT_DEMO_OPTIONS);
 
   return (
     <div className="page">
@@ -30,7 +31,13 @@ export async function ColourSection() {
         label="Colour"
         headline="One HEX in. A whole theme out."
         lead="The generator that runs during install runs here too, imported from the published package - so what you make is byte-for-byte what npx writes."
-        visual={<PaletteDemo initialTheme={initialTheme} initialHex={DEFAULT_SEED} />}
+        visual={
+          <PaletteDemo
+            initialTheme={initialTheme}
+            initialHex={DEFAULT_DEMO_OPTIONS.hex}
+            initialNeutralTint={DEFAULT_DEMO_OPTIONS.neutralTint}
+          />
+        }
       />
     </div>
   );
@@ -123,14 +130,22 @@ export function SkillsSection() {
       <FeatureBlock
         id="skills"
         label="Agent skills"
-        headline="Nine skills, installed into the project"
-        lead="Optional, and never installed on an unattended --defaults run. Each requested skill is verified on disk in .agents/skills/ - the project docs list only what actually landed."
+        headline="Nine Larsen skills. One direct third-party opt-in."
+        lead="Optional, and never installed on an unattended --defaults run. Each requested source installs independently, and the project docs list only SKILL.md files verified on disk."
         visual={<SkillsSurface />}
         points={[
           { term: "Recommended four", detail: "motion, interface, review and primitives - the ones that pair with the design system" },
-          { term: "Browse them", detail: "github.com/Stianlars1/larsen-skills" },
+          { term: "All nine", detail: "still means the Larsen collection only" },
+          { term: "transitions-dev", detail: "explicit opt-in from Jakub Antalik's repository" },
         ]}
       />
+      <p className={styles.footnote}>
+        Larsen Skills were informed by public work from{" "}
+        <a href={EMIL_SKILLS_URL}>Emil Kowalski</a> and{" "}
+        <a href={KREHEL_SKILLS_URL}>Jakub Krehel</a>.{" "}
+        <a href={TRANSITIONS_SKILL_URL}>Jakub Antalik&apos;s transitions-dev</a> installs
+        directly under the <a href={TRANSITIONS_TERMS_URL}>Transitions.dev terms</a>.
+      </p>
     </div>
   );
 }
@@ -206,8 +221,9 @@ export function TreeSection() {
         ]}
       />
       <p className={styles.footnote}>
-        Skills live in <code>.agents/skills/</code> - see{" "}
-        <a href={SKILLS_URL}>the collection</a>.
+        Skills live in <code>.agents/skills/</code> - browse{" "}
+        <a href={SKILLS_URL}>Larsen Skills</a> or{" "}
+        <a href={TRANSITIONS_SKILL_URL}>transitions-dev</a> at their sources.
       </p>
     </div>
   );

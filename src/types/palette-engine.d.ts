@@ -8,7 +8,7 @@ declare module "@larsen-utvikling/create-next-app/palette/index.js" {
     darkHex?: string;
     preset?: string;
     format?: string;
-    scheme?: string;
+    neutralTint?: string;
     overrides?: Record<string, string>;
     darkOverrides?: Record<string, string>;
     append?: string;
@@ -24,12 +24,12 @@ declare module "@larsen-utvikling/create-next-app/palette/index.js" {
 
   export const PRESETS: Record<string, string>;
   export const FORMATS: Record<string, string>;
-  export const SCHEMES: string[];
+  export const NEUTRAL_TINTS: string[];
   export const DEFAULT_THEME: {
     hex: string;
     darkHex: string;
     preset: string;
     format: string;
-    scheme: string;
+    neutralTint: string;
   };
 }

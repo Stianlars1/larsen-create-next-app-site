@@ -43,6 +43,14 @@ npm's naming rules" (it is the package's own regex) and "seven questions"
 beside a list of ten (seven top-level, three follow-ups). **Check factual
 statements against the CLI source, do not infer them.**
 
+`src/lib/package-contract.test.mjs` enforces that mechanically. It imports the
+installed package's `OPTION_CONTRACT`, `SKILLS_PROMPT_CONTRACT`, skill lists
+and palette constants, and fails when this site's flags, choices, defaults,
+skill catalogue, prompt wording or skill counts drift from them. It reads the
+*installed* package, so it also fails while `package.json` still pins a
+version older than the behaviour the site describes. That is the intended
+gate, not a nuisance: bump the dependency, reinstall, then make the claim.
+
 ## Design direction
 
 Restraint over decoration. The reference points are Linear, Vercel, Raycast and
@@ -90,6 +98,7 @@ Emil Kowalski's site.
 npm run dev
 npm run build
 npm run lint
+npm test          # pure logic plus the package-contract drift guard
 npx tsc --noEmit
 ```
 
