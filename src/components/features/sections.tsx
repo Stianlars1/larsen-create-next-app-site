@@ -8,6 +8,7 @@ import {
   EMIL_SKILLS_URL,
   FLAGS,
   KREHEL_SKILLS_URL,
+  PACKAGE_EXEC,
   PROJECT_TREE,
   SKILLS_URL,
   TRANSITIONS_SKILL_URL,
@@ -168,14 +169,14 @@ export function CliSection() {
               label="Everything default"
               copyable
               language="shell"
-              code={"npx @larsen-utvikling/create-next-app my-app --defaults"}
+              code={`${PACKAGE_EXEC} my-app --defaults`}
             />
             <CodeBlock
               label="Your colour, your tools"
               copyable
               language="shell"
               code={
-                "npx @larsen-utvikling/create-next-app my-app \\\n  --hex 22C55E --preset shadcn \\\n  --pm pnpm --linter biome \\\n  --skills recommended"
+                `${PACKAGE_EXEC} my-app \\\n  --defaults --hex 22C55E --preset shadcn \\\n  --pm pnpm --linter biome \\\n  --skills recommended`
               }
             />
           </div>
