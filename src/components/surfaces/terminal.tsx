@@ -2,7 +2,7 @@
 
 import { useInViewLoop } from "@/lib/use-in-view";
 import { Highlight } from "@/components/ui/highlight";
-import { PROMPT_STEPS } from "@/lib/content";
+import { PACKAGE_EXEC, PROMPT_STEPS } from "@/lib/content";
 import styles from "./terminal.module.css";
 
 const LINES = PROMPT_STEPS.map((step) => ({
@@ -35,7 +35,7 @@ export function Terminal() {
       <div className={styles.body}>
         <p className={styles.command}>
           <span className={styles.dollar}>$</span>
-          <Highlight code="npx @larsen-utvikling/create-next-app" language="shell" />
+          <Highlight code={PACKAGE_EXEC} language="shell" />
         </p>
 
         <ul className={styles.lines}>

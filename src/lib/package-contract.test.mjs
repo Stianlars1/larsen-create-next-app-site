@@ -17,6 +17,7 @@ import {
   optionChoices,
   optionDefault,
 } from "@larsen-utvikling/create-next-app/src/options.js";
+import packageMetadata from "@larsen-utvikling/create-next-app/package.json" with { type: "json" };
 import {
   ALL_SKILLS,
   RECOMMENDED_SKILLS,
@@ -35,7 +36,15 @@ import {
 import { checkThemeContrast } from "@larsen-utvikling/create-next-app/src/theme-contrast.mjs";
 import { generateThemeCss } from "@larsen-utvikling/create-next-app/palette/index.js";
 
-import { FLAGS, LARSEN_SKILLS, PROMPT_STEPS, THIRD_PARTY_SKILLS } from "./content.ts";
+import {
+  FLAGS,
+  LARSEN_SKILLS,
+  PACKAGE_EXEC,
+  PACKAGE_VERSION,
+  PROMPT_STEPS,
+  THIRD_PARTY_SKILLS,
+} from "./content.ts";
+import { DEFAULT_NEUTRAL_TINT } from "./command-builder.ts";
 import {
   FORMATS,
   NEUTRAL_TINTS,
@@ -88,11 +97,22 @@ test("the demo and the builder start from the CLI's own defaults", () => {
   assert.equal(DEFAULT_DEMO_OPTIONS.format, optionDefault("format"));
   assert.equal(DEFAULT_DEMO_OPTIONS.neutralTint, optionDefault("neutral-tint"));
 
+  assert.equal(DEFAULT_NEUTRAL_TINT, optionDefault("neutral-tint"));
+});
+
+test("copied commands target the installed package version and never offer partial prompt answers", () => {
+  assert.equal(PACKAGE_VERSION, packageMetadata.version);
+  assert.equal(PACKAGE_EXEC, `npx --yes @larsen-utvikling/create-next-app@${packageMetadata.version}`);
+
   const builder = read("../components/features/command-builder.tsx");
-  assert.match(
+  assert.doesNotMatch(builder, /PROMPT_MODES|legend="Prompts"|Ask me/);
+  for (const source of [
     builder,
-    new RegExp(`DEFAULT_NEUTRAL_TINT: NeutralTint = "${optionDefault("neutral-tint")}"`),
-  );
+    read("../components/features/sections.tsx"),
+    read("../components/surfaces/terminal.tsx"),
+  ]) {
+    assert.doesNotMatch(source, /npx @larsen-utvikling\/create-next-app/);
+  }
 });
 
 test("the labelled tint is the one the CLI falls back to", () => {

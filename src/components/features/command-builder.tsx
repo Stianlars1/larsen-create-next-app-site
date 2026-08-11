@@ -5,28 +5,31 @@ import { useMemo, useRef, useState } from "react";
 import { CopyCommandButton } from "@/components/ui/copy-command-button";
 import { HexField } from "@/components/ui/hex-field";
 import { NeutralTintDisclosure } from "@/components/ui/neutral-tint-disclosure";
-import { PACKAGE_NAME, SKILLS } from "@/lib/content";
+import { SKILLS } from "@/lib/content";
+import {
+  DEFAULT_CNA_VERSION,
+  DEFAULT_FORMAT,
+  DEFAULT_LINTER,
+  DEFAULT_NEUTRAL_TINT,
+  DEFAULT_PM,
+  DEFAULT_PRESET,
+  buildScaffoldCommand,
+  isValidAppName,
+  isValidVersionSpec,
+  type CustomPalette,
+  type Linter,
+  type PackageManager,
+  type PaletteChoice,
+  type SkillsChoice,
+} from "@/lib/command-builder";
 import {
   FORMATS,
   PRESETS,
   isValidHex,
-  type Format,
-  type NeutralTint,
-  type Preset,
 } from "@/lib/palette";
 import styles from "./command-builder.module.css";
 
 const EASE_OUT = [0.23, 1, 0.32, 1] as const;
-
-/*
- * Every default below is the one OPTION_CONTRACT declares in the published
- * package. A flag is emitted only where the answer differs from it, so the
- * command never repeats back what the CLI would have chosen anyway.
- */
-const DEFAULT_PRESET: Preset = "shadcn";
-const DEFAULT_FORMAT: Format = "hsl-values";
-const DEFAULT_NEUTRAL_TINT: NeutralTint = "subtle";
-const DEFAULT_CNA_VERSION = "latest";
 
 const PACKAGE_MANAGERS = [
   { value: "npm", label: "npm" },
@@ -40,12 +43,6 @@ const LINTERS = [
   { value: "biome", label: "Biome" },
   { value: "none", label: "None" },
 ] as const;
-
-type PackageManager = (typeof PACKAGE_MANAGERS)[number]["value"];
-type Linter = (typeof LINTERS)[number]["value"];
-
-const DEFAULT_PM: PackageManager = "npm";
-const DEFAULT_LINTER: Linter = "eslint";
 
 const PALETTE_CHOICES = [
   { value: "default", label: "Default theme" },
@@ -64,133 +61,7 @@ const YES_NO = [
   { value: "no", label: "No" },
 ] as const;
 
-const PROMPT_MODES = [
-  { value: "ask", label: "Ask me" },
-  { value: "skip", label: "Skip them" },
-] as const;
-
 const RECOMMENDED_NAMES = SKILLS.filter((skill) => skill.recommended).map((skill) => skill.name);
-
-/*
- * --preset, --format and --neutral-tint each require --hex, and --hex
- * conflicts with --default-palette. Carrying the palette as a discriminated union is
- * what makes that rejected combination impossible to click into rather than
- * something the UI has to warn about afterwards.
- */
-type CustomPalette = {
-  kind: "custom";
-  hex: string;
-  preset: Preset;
-  format: Format;
-  neutralTint: NeutralTint;
-};
-
-type PaletteChoice = { kind: "default" } | CustomPalette;
-
-/* --skills and --no-skills conflict, so one value answers both. */
-type SkillsChoice =
-  | { kind: "none" }
-  | { kind: "recommended" }
-  | { kind: "all" }
-  | { kind: "pick"; names: string[] };
-
-type Answers = {
-  appName: string;
-  palette: PaletteChoice;
-  pm: PackageManager;
-  linter: Linter;
-  skills: SkillsChoice;
-  git: boolean;
-  install: boolean;
-  /** --defaults, which answers every prompt the other flags leave open. */
-  unattended: boolean;
-  cnaVersion: string;
-};
-
-/** The CLI's own name rule. The empty-directory check it also runs cannot be
- *  reproduced in a browser, so it is not claimed here. */
-function isValidAppName(name: string): boolean {
-  return name.length <= 214 && /^[a-z0-9][a-z0-9._-]*$/.test(name);
-}
-
-/** Narrower than npm's spec grammar on purpose: these characters need no
- *  shell quoting, so a copied command survives the paste unchanged. */
-function isValidVersionSpec(spec: string): boolean {
-  return /^[A-Za-z0-9.-]+$/.test(spec);
-}
-
-/**
- * Pressing enter through the prompts installs the recommended four, while
- * --defaults installs nothing. The flag is needed only where the answer
- * differs from whichever of those two the command is running under.
- */
-function skillsFlag(skills: SkillsChoice, unattended: boolean): string | undefined {
-  // An empty selection installs nothing, which is what --no-skills says - and
-  // it keeps `--skills` from ever being written with an empty value.
-  const picked = skills.kind === "pick" ? skills.names : [];
-  const kind = skills.kind === "pick" && picked.length === 0 ? "none" : skills.kind;
-
-  if (kind === "none") return unattended ? undefined : "--no-skills";
-  if (kind === "recommended") return unattended ? "--skills recommended" : undefined;
-  if (kind === "all") return "--skills all";
-  return `--skills ${picked.join(",")}`;
-}
-
-function flagsFor(answers: Answers): string[] {
-  const flags: string[] = [];
-  if (answers.unattended) flags.push("--defaults");
-
-  if (answers.palette.kind === "custom" && isValidHex(answers.palette.hex)) {
-    const { hex, preset, format, neutralTint } = answers.palette;
-    // Written without the leading #, the way the CLI's own examples write it
-    flags.push(`--hex ${hex.trim().replace(/^#/, "")}`);
-    if (preset !== DEFAULT_PRESET) flags.push(`--preset ${preset}`);
-    if (format !== DEFAULT_FORMAT) flags.push(`--format ${format}`);
-    if (neutralTint !== DEFAULT_NEUTRAL_TINT) flags.push(`--neutral-tint ${neutralTint}`);
-  }
-
-  if (answers.pm !== DEFAULT_PM) flags.push(`--pm ${answers.pm}`);
-  if (answers.linter !== DEFAULT_LINTER) flags.push(`--linter ${answers.linter}`);
-
-  const skills = skillsFlag(answers.skills, answers.unattended);
-  if (skills) flags.push(skills);
-
-  if (!answers.git) flags.push("--no-git");
-  if (!answers.install) flags.push("--no-install");
-
-  const spec = answers.cnaVersion.trim();
-  if (spec && spec !== DEFAULT_CNA_VERSION && isValidVersionSpec(spec)) {
-    flags.push(`--cna-version ${spec}`);
-  }
-
-  return flags;
-}
-
-const MAX_LINE = 64;
-
-/**
- * Wraps into shell line continuations. A flag and its value stay on one line,
- * and the join leaves no whitespace after the backslash, so the copied string
- * runs as written rather than only reading well.
- */
-function wrap(head: string, flags: string[]): string {
-  const lines = [head];
-  for (const flag of flags) {
-    const last = lines.length - 1;
-    const joined = `${lines[last]} ${flag}`;
-    if (joined.length <= MAX_LINE) lines[last] = joined;
-    else lines.push(`  ${flag}`);
-  }
-  return lines.join(" \\\n");
-}
-
-function buildCommand(answers: Answers): string {
-  const name = answers.appName.trim();
-  // An invalid name is left out rather than pasted into a command that would
-  // be rejected. Without it the CLI asks, or uses my-app under --defaults.
-  const head = isValidAppName(name) ? `npx ${PACKAGE_NAME} ${name}` : `npx ${PACKAGE_NAME}`;
-  return wrap(head, flagsFor(answers));
-}
 
 /**
  * Every option the published CLI accepts, as controls, with the exact command
@@ -207,7 +78,6 @@ export function CommandBuilder() {
   const [skills, setSkills] = useState<SkillsChoice>({ kind: "recommended" });
   const [git, setGit] = useState(true);
   const [install, setInstall] = useState(true);
-  const [unattended, setUnattended] = useState(false);
   const [cnaVersion, setCnaVersion] = useState("");
 
   // Kept so switching away from a branch and back does not silently discard
@@ -241,8 +111,8 @@ export function CommandBuilder() {
 
   const command = useMemo(
     () =>
-      buildCommand({ appName, palette, pm, linter, skills, git, install, unattended, cnaVersion }),
-    [appName, palette, pm, linter, skills, git, install, unattended, cnaVersion],
+      buildScaffoldCommand({ appName, palette, pm, linter, skills, git, install, cnaVersion }),
+    [appName, palette, pm, linter, skills, git, install, cnaVersion],
   );
 
   const trimmedName = appName.trim();
@@ -264,8 +134,8 @@ export function CommandBuilder() {
         <p className="label">The command</p>
         <h2 className="headline">Click the answers. Copy the command.</h2>
         <p className="lead">
-          Every option the scaffold takes, as a control - and a flag appears only where your answer
-          differs from the CLI&apos;s own default.
+          Every option the scaffold takes, as a control. The copied command answers all of them and
+          runs without follow-up prompts.
         </p>
 
         <div className={styles.builder}>
@@ -410,13 +280,6 @@ export function CommandBuilder() {
               onChange={(value) => setInstall(value === "yes")}
             />
 
-            <Segmented
-              legend="Prompts"
-              value={unattended ? "skip" : "ask"}
-              options={PROMPT_MODES}
-              onChange={(value) => setUnattended(value === "skip")}
-            />
-
             <div className={styles.field}>
               <label className={styles.fieldLabel} htmlFor="builder-cna">
                 create-next-app version
@@ -465,9 +328,8 @@ export function CommandBuilder() {
           </div>
 
           <p className={styles.note}>
-            {unattended
-              ? "--defaults answers the rest. It installs no skills unless --skills asks for some."
-              : "Only the answers that differ from a default become flags - the CLI asks for the rest."}
+            The command answers every control. <code>--defaults</code> closes the prompt flow, and
+            selected overrides are added explicitly.
           </p>
         </div>
       </div>

@@ -7,6 +7,8 @@
  * lazily on first interaction instead of on page load.
  */
 
+import { PACKAGE_NAME, PACKAGE_VERSION } from "./content.ts";
+
 export const PRESETS = [
   { value: "shadcn", label: "shadcn/ui", hint: "approved semantic token names + Larsen scales" },
   { value: "radix", label: "Radix Themes", hint: "57 custom-palette override names + 26 Larsen tokens" },
@@ -177,7 +179,8 @@ export function buildCommand(options: PaletteOptions, appName = "my-app"): strin
   if (!hex) return null;
 
   const parts = [
-    `npx @larsen-utvikling/create-next-app ${appName}`,
+    `npx --yes ${PACKAGE_NAME}@${PACKAGE_VERSION} ${appName}`,
+    "--defaults",
     `--hex ${hex.slice(1).toUpperCase()}`,
   ];
   if (options.preset !== "shadcn") parts.push(`--preset ${options.preset}`);

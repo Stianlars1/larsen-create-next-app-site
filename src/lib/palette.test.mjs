@@ -21,14 +21,14 @@ const base = {
 test("the command omits the default subtle neutral tint", () => {
   assert.equal(
     buildCommand(base),
-    "npx @larsen-utvikling/create-next-app my-app --hex 4DA0FF",
+    "npx --yes @larsen-utvikling/create-next-app@0.5.1 my-app --defaults --hex 4DA0FF",
   );
 });
 
 test("the command emits the strong neutral tint", () => {
   assert.equal(
     buildCommand({ ...base, neutralTint: "strong" }),
-    "npx @larsen-utvikling/create-next-app my-app --hex 4DA0FF --neutral-tint strong",
+    "npx --yes @larsen-utvikling/create-next-app@0.5.1 my-app --defaults --hex 4DA0FF --neutral-tint strong",
   );
 });
 
@@ -43,7 +43,7 @@ test("the command is absent for invalid HEX and expands valid shorthand", () => 
   assert.equal(buildCommand({ ...base, hex: "#abcd" }), null);
   assert.equal(
     buildCommand({ ...base, hex: "#AbC" }),
-    "npx @larsen-utvikling/create-next-app my-app --hex AABBCC",
+    "npx --yes @larsen-utvikling/create-next-app@0.5.1 my-app --defaults --hex AABBCC",
   );
 });
 

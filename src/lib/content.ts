@@ -7,6 +7,8 @@
  */
 
 export const PACKAGE_NAME = "@larsen-utvikling/create-next-app";
+export const PACKAGE_VERSION = "0.5.1";
+export const PACKAGE_EXEC = `npx --yes ${PACKAGE_NAME}@${PACKAGE_VERSION}`;
 export const REPO_URL = "https://github.com/Stianlars1/larsen-create-next-app";
 export const NPM_URL = "https://www.npmjs.com/package/@larsen-utvikling/create-next-app";
 export const SKILLS_URL = "https://github.com/Stianlars1/larsen-skills";
@@ -17,7 +19,7 @@ export const TRANSITIONS_SKILL_URL =
 export const TRANSITIONS_TERMS_URL = "https://transitions.dev/terms.html";
 export const AUTHOR_URL = "https://www.larsenutvikling.no";
 
-export const INSTALL_COMMAND = `npx ${PACKAGE_NAME} my-app`;
+export const INSTALL_COMMAND = `${PACKAGE_EXEC} my-app`;
 
 /* ------------------------------------------------------------------ *
  * The interactive flow - every prompt, in the order the CLI asks them
