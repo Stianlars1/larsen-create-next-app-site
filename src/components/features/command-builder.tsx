@@ -1,22 +1,19 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, type CSSProperties } from "react";
+import { usePaletteSession } from "@/components/theme/palette-session";
 import { CopyCommandButton } from "@/components/ui/copy-command-button";
 import { HexField } from "@/components/ui/hex-field";
 import { NeutralTintDisclosure } from "@/components/ui/neutral-tint-disclosure";
 import { SKILLS } from "@/lib/content";
 import {
   DEFAULT_CNA_VERSION,
-  DEFAULT_FORMAT,
   DEFAULT_LINTER,
-  DEFAULT_NEUTRAL_TINT,
   DEFAULT_PM,
-  DEFAULT_PRESET,
   buildScaffoldCommand,
   isValidAppName,
   isValidVersionSpec,
-  type CustomPalette,
   type Linter,
   type PackageManager,
   type PaletteChoice,
@@ -26,6 +23,7 @@ import {
   FORMATS,
   PRESETS,
   isValidHex,
+  paletteBorderGradient,
 } from "@/lib/palette";
 import styles from "./command-builder.module.css";
 
@@ -70,9 +68,15 @@ const RECOMMENDED_NAMES = SKILLS.filter((skill) => skill.recommended).map((skill
  */
 export function CommandBuilder() {
   const reduced = useReducedMotion() ?? false;
+  const {
+    options: paletteOptions,
+    theme: paletteTheme,
+    customPaletteActive,
+    setCustomPaletteActive,
+    updatePalette,
+  } = usePaletteSession();
 
   const [appName, setAppName] = useState("my-app");
-  const [palette, setPalette] = useState<PaletteChoice>({ kind: "default" });
   const [pm, setPm] = useState<PackageManager>(DEFAULT_PM);
   const [linter, setLinter] = useState<Linter>(DEFAULT_LINTER);
   const [skills, setSkills] = useState<SkillsChoice>({ kind: "recommended" });
@@ -80,20 +84,22 @@ export function CommandBuilder() {
   const [install, setInstall] = useState(true);
   const [cnaVersion, setCnaVersion] = useState("");
 
-  // Kept so switching away from a branch and back does not silently discard
-  // the answers that branch already had.
-  const lastCustom = useRef<CustomPalette>({
-    kind: "custom",
-    hex: "#4DA0FF",
-    preset: DEFAULT_PRESET,
-    format: DEFAULT_FORMAT,
-    neutralTint: DEFAULT_NEUTRAL_TINT,
-  });
   const lastPicked = useRef<string[]>(RECOMMENDED_NAMES);
 
-  const updateCustom = (patch: Partial<Omit<CustomPalette, "kind">>) => {
-    lastCustom.current = { ...lastCustom.current, ...patch };
-    setPalette(lastCustom.current);
+  const palette = useMemo<PaletteChoice>(
+    () =>
+      customPaletteActive
+        ? { kind: "custom", ...paletteOptions }
+        : { kind: "default" },
+    [customPaletteActive, paletteOptions],
+  );
+
+  const paletteBorder = useMemo(
+    () => paletteBorderGradient(paletteTheme, paletteOptions.format),
+    [paletteTheme, paletteOptions.format],
+  );
+  const palettePanelStyle: CSSProperties & { "--palette-border": string } = {
+    "--palette-border": paletteBorder,
   };
 
   const toggleSkill = (name: string) => {
@@ -167,20 +173,23 @@ export function CommandBuilder() {
               legend="Palette"
               value={palette.kind}
               options={PALETTE_CHOICES}
-              onChange={(kind) =>
-                setPalette(kind === "custom" ? lastCustom.current : { kind: "default" })
-              }
+              onChange={(kind) => setCustomPaletteActive(kind === "custom")}
             />
 
             <AnimatePresence initial={false}>
               {palette.kind === "custom" && (
-                <motion.div key="palette" className={styles.nested} {...reveal}>
+                <motion.div
+                  key="palette"
+                  className={`${styles.nested} ${styles.palettePanel}`}
+                  style={palettePanelStyle}
+                  {...reveal}
+                >
                   <div className={styles.field}>
                     <HexField
                       id="builder-hex"
                       label="Seed HEX"
                       value={palette.hex}
-                      onChange={(hex) => updateCustom({ hex })}
+                      onChange={(hex) => updatePalette({ hex }, { delay: 200 })}
                       invalid={hexInvalid}
                       describedBy={hexInvalid ? "builder-hex-error" : undefined}
                       surface="raised"
@@ -197,7 +206,7 @@ export function CommandBuilder() {
                     legend="Framework / style"
                     value={palette.preset}
                     options={PRESETS}
-                    onChange={(preset) => updateCustom({ preset })}
+                    onChange={(preset) => updatePalette({ preset })}
                   />
 
                   <Segmented
@@ -205,13 +214,13 @@ export function CommandBuilder() {
                     legend="Colour format"
                     value={palette.format}
                     options={FORMATS}
-                    onChange={(format) => updateCustom({ format })}
+                    onChange={(format) => updatePalette({ format })}
                   />
 
                   <NeutralTintDisclosure
                     wide
                     value={palette.neutralTint}
-                    onChange={(neutralTint) => updateCustom({ neutralTint })}
+                    onChange={(neutralTint) => updatePalette({ neutralTint })}
                   />
                 </motion.div>
               )}

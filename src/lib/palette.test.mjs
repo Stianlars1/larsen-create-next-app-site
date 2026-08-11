@@ -8,6 +8,7 @@ import {
   countChangedScaleSteps,
   formatChangedScaleSteps,
   normalizeHex,
+  paletteBorderGradient,
   rampkitHarmonyUrl,
 } from "./palette.ts";
 
@@ -119,4 +120,52 @@ test("changed-step formatting works in supported browsers without toSorted", () 
   } finally {
     if (descriptor) Object.defineProperty(Array.prototype, "toSorted", descriptor);
   }
+});
+
+test("the command palette border follows all four generated scales in order", () => {
+  const tokens = (mode) =>
+    Object.fromEntries(
+      ["accent", "gray"].flatMap((scale) =>
+        Array.from({ length: 12 }, (_, index) => [
+          `${scale}-${index + 1}`,
+          `${mode}-${scale}-${index + 1}`,
+        ]),
+      ),
+    );
+
+  const gradient = paletteBorderGradient(
+    { css: "", dark: tokens("dark"), light: tokens("light") },
+    "hex",
+  );
+  const ordered = [
+    "dark-accent-1",
+    "dark-accent-12",
+    "dark-gray-1",
+    "dark-gray-12",
+    "light-accent-1",
+    "light-accent-12",
+    "light-gray-1",
+    "light-gray-12",
+  ];
+
+  for (let index = 1; index < ordered.length; index += 1) {
+    assert.ok(
+      gradient.indexOf(ordered[index - 1]) < gradient.indexOf(ordered[index]),
+      `${ordered[index - 1]} must precede ${ordered[index]}`,
+    );
+  }
+  assert.equal(gradient.endsWith("dark-accent-1)"), true);
+});
+
+test("the palette border wraps bare HSL values as CSS colours", () => {
+  const tokens = Object.fromEntries(
+    ["accent", "gray"].flatMap((scale) =>
+      Array.from({ length: 12 }, (_, index) => [`${scale}-${index + 1}`, "212 100% 65%"]),
+    ),
+  );
+
+  assert.match(
+    paletteBorderGradient({ css: "", dark: tokens, light: tokens }, "hsl-values"),
+    /hsl\(212 100% 65%\)/,
+  );
 });

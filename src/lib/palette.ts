@@ -143,6 +143,32 @@ export type GeneratedTheme = {
   dark: TokenMap;
 };
 
+/**
+ * All four generated scales, in the same order the page explains them.
+ * A conic gradient lets that sequence travel around a panel perimeter instead
+ * of turning the palette into another row of swatches.
+ */
+export function paletteBorderGradient(theme: GeneratedTheme, format: Format): string {
+  const scale = (mode: "light" | "dark", name: "accent" | "gray") =>
+    Array.from({ length: 12 }, (_, index) => theme[mode][`${name}-${index + 1}`])
+      .filter((value): value is string => Boolean(value))
+      .map((value) => (format === "hsl-values" ? `hsl(${value})` : value));
+
+  const colours = [
+    ...scale("dark", "accent"),
+    ...scale("dark", "gray"),
+    ...scale("light", "accent"),
+    ...scale("light", "gray"),
+  ];
+
+  if (colours.length < 2) {
+    return "conic-gradient(from 225deg, var(--hairline), var(--hairline))";
+  }
+
+  // Repeat the first colour only to close the loop without a hard seam.
+  return `conic-gradient(from 225deg, ${colours.join(", ")}, ${colours[0]})`;
+}
+
 type Engine = {
   generateThemeCss: (options: PaletteOptions) => string;
 };

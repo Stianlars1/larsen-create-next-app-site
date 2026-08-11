@@ -3,7 +3,6 @@ import { PaletteDemo } from "@/components/demo/palette-demo";
 import { TokenSpecimen } from "@/components/surfaces/token-specimen";
 import { MotionSurface, SkillsSurface, ThemeSurface } from "@/components/surfaces/misc";
 import { CodeBlock } from "@/components/ui/code-block";
-import { DEFAULT_DEMO_OPTIONS, generate } from "@/lib/palette";
 import {
   EMIL_SKILLS_URL,
   FLAGS,
@@ -20,11 +19,7 @@ import styles from "./sections.module.css";
  * Colour - the palette demo, as one block among several
  * ------------------------------------------------------------------ */
 
-export async function ColourSection() {
-  // Generated on the server at build, so the page paints a real palette
-  // before the engine has been fetched at all.
-  const initialTheme = await generate(DEFAULT_DEMO_OPTIONS);
-
+export function ColourSection() {
   return (
     <div className="page">
       <FeatureBlock
@@ -32,13 +27,7 @@ export async function ColourSection() {
         label="Colour"
         headline="One HEX in. A whole theme out."
         lead="The generator that runs during install runs here too, imported from the published package - so what you make is byte-for-byte what npx writes."
-        visual={
-          <PaletteDemo
-            initialTheme={initialTheme}
-            initialHex={DEFAULT_DEMO_OPTIONS.hex}
-            initialNeutralTint={DEFAULT_DEMO_OPTIONS.neutralTint}
-          />
-        }
+        visual={<PaletteDemo />}
       />
     </div>
   );

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import GoogleAnalyticsProvider from "@/lib/analytics/GoogleAnalyticsProvider";
 import { CookieConsent } from "@/components/site/cookie-consent";
+import { PaletteSessionProvider } from "@/components/theme/palette-session";
 import { SiteThemeProvider } from "@/components/theme/site-theme";
 import { fontVariables } from "@/lib/fonts";
 import { PACKAGE_NAME } from "@/lib/content";
@@ -56,7 +57,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           }}
           initialTokens={initialTheme.dark}
         >
-          {children}
+          <PaletteSessionProvider
+            initialOptions={DEFAULT_DEMO_OPTIONS}
+            initialTheme={initialTheme}
+          >
+            {children}
+          </PaletteSessionProvider>
         </SiteThemeProvider>
         {/* Cookie-free by design */}
         <Analytics />

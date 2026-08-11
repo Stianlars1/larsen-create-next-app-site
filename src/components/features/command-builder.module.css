@@ -75,6 +75,33 @@
   background: var(--surface-1);
 }
 
+/* The four generated 12-step scales travel around one quiet perimeter:
+   dark accent, dark gray, light accent, then light gray. A mask keeps the
+   gradient in the border only, so the controls retain their existing surface
+   and never turn into another swatch display. */
+.palettePanel {
+  position: relative;
+}
+
+.palettePanel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--palette-border);
+  opacity: 0.78;
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
 @media (max-width: 44rem) {
   .nested {
     grid-template-columns: minmax(0, 1fr);

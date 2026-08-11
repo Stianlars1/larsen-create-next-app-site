@@ -1,3 +1,4 @@
+import { ArrowDown } from "lucide-react";
 import { CopyCommandButton } from "@/components/ui/copy-command-button";
 import { Marquee } from "@/components/ui/marquee";
 import { Terminal } from "@/components/surfaces/terminal";
@@ -66,6 +67,10 @@ export async function Hero() {
 
         <div className={styles.visual}>
           <Terminal />
+          <a className={styles.builderLink} href="#builder">
+            Build your command
+            <ArrowDown aria-hidden="true" size={15} strokeWidth={1.75} />
+          </a>
         </div>
       </div>
     </header>
