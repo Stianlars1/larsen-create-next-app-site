@@ -23,8 +23,10 @@ import {
   FORMATS,
   PRESETS,
   isValidHex,
+  paletteAuraColours,
   paletteBorderGradient,
 } from "@/lib/palette";
+import { useInView } from "@/lib/use-in-view";
 import styles from "./command-builder.module.css";
 
 const EASE_OUT = [0.23, 1, 0.32, 1] as const;
@@ -98,8 +100,21 @@ export function CommandBuilder() {
     () => paletteBorderGradient(paletteTheme, paletteOptions.format),
     [paletteTheme, paletteOptions.format],
   );
-  const palettePanelStyle: CSSProperties & { "--palette-border": string } = {
+  const aura = useMemo(
+    () => paletteAuraColours(paletteTheme, paletteOptions.format),
+    [paletteTheme, paletteOptions.format],
+  );
+
+  /* The ring and the aura are both continuous, so they idle whenever the panel
+     is off screen rather than repainting for nobody. */
+  const { ref: auraRef, inView: auraInView } = useInView<HTMLDivElement>();
+
+  const palettePanelStyle: CSSProperties & Record<`--${string}`, string> = {
     "--palette-border": paletteBorder,
+    "--aura-1": aura[0],
+    "--aura-2": aura[1],
+    "--aura-3": aura[2],
+    "--aura-4": aura[3],
   };
 
   const toggleSkill = (name: string) => {
@@ -135,7 +150,7 @@ export function CommandBuilder() {
   };
 
   return (
-    <section className="section" id="builder">
+    <section className={`section ${styles.bleedGuard}`} id="builder">
       <div className="page">
         <p className="label">The command</p>
         <h2 className="headline">Click the answers. Copy the command.</h2>
@@ -180,48 +195,70 @@ export function CommandBuilder() {
               {palette.kind === "custom" && (
                 <motion.div
                   key="palette"
-                  className={`${styles.nested} ${styles.palettePanel}`}
+                  className={styles.paletteShell}
                   style={palettePanelStyle}
                   {...reveal}
                 >
-                  <div className={styles.field}>
-                    <HexField
-                      id="builder-hex"
-                      label="Seed HEX"
-                      value={palette.hex}
-                      onChange={(hex) => updatePalette({ hex }, { delay: 200 })}
-                      invalid={hexInvalid}
-                      describedBy={hexInvalid ? "builder-hex-error" : undefined}
-                      surface="raised"
-                    />
-                    {hexInvalid && (
-                      <p className={styles.error} id="builder-hex-error">
-                        Enter a valid HEX colour, with or without the #. The palette flags stay out
-                        of the command until it is valid.
-                      </p>
-                    )}
+                  {/* Purely ambient, and announced to nobody. Each lobe carries
+                      the decorative marker so motion.css can stop it outright
+                      under a reduced-motion preference - a drifting glow has no
+                      gentler form. */}
+                  <div
+                    ref={auraRef}
+                    className={styles.aura}
+                    data-visible={auraInView ? "true" : undefined}
+                    aria-hidden="true"
+                  >
+                    <span className={styles.blob} data-layer="1" data-motion="decorative" />
+                    <span className={styles.blob} data-layer="2" data-motion="decorative" />
+                    <span className={styles.blob} data-layer="3" data-motion="decorative" />
+                    <span className={styles.blob} data-layer="4" data-motion="decorative" />
                   </div>
 
-                  <Segmented
-                    legend="Framework / style"
-                    value={palette.preset}
-                    options={PRESETS}
-                    onChange={(preset) => updatePalette({ preset })}
-                  />
+                  <div
+                    className={`${styles.nested} ${styles.palettePanel}`}
+                    data-visible={auraInView ? "true" : undefined}
+                    data-motion="decorative"
+                  >
+                    <div className={styles.field}>
+                      <HexField
+                        id="builder-hex"
+                        label="Seed HEX"
+                        value={palette.hex}
+                        onChange={(hex) => updatePalette({ hex }, { delay: 200 })}
+                        invalid={hexInvalid}
+                        describedBy={hexInvalid ? "builder-hex-error" : undefined}
+                        surface="raised"
+                      />
+                      {hexInvalid && (
+                        <p className={styles.error} id="builder-hex-error">
+                          Enter a valid HEX colour, with or without the #. The palette flags stay
+                          out of the command until it is valid.
+                        </p>
+                      )}
+                    </div>
 
-                  <Segmented
-                    wide
-                    legend="Colour format"
-                    value={palette.format}
-                    options={FORMATS}
-                    onChange={(format) => updatePalette({ format })}
-                  />
+                    <Segmented
+                      legend="Framework / style"
+                      value={palette.preset}
+                      options={PRESETS}
+                      onChange={(preset) => updatePalette({ preset })}
+                    />
 
-                  <NeutralTintDisclosure
-                    wide
-                    value={palette.neutralTint}
-                    onChange={(neutralTint) => updatePalette({ neutralTint })}
-                  />
+                    <Segmented
+                      wide
+                      legend="Colour format"
+                      value={palette.format}
+                      options={FORMATS}
+                      onChange={(format) => updatePalette({ format })}
+                    />
+
+                    <NeutralTintDisclosure
+                      wide
+                      value={palette.neutralTint}
+                      onChange={(neutralTint) => updatePalette({ neutralTint })}
+                    />
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>

@@ -1,14 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 
-/** True while the element is on screen. Used to pause work nobody is looking at. */
+/**
+ * True while the element is on screen. Used to pause work nobody is looking at.
+ *
+ * The target is tracked with a callback ref rather than read out of a ref
+ * object inside the effect. An object ref only reports the node that happened
+ * to be mounted on the effect's first run, so an element that appears later -
+ * anything behind a branch or an AnimatePresence - was never observed at all
+ * and stayed permanently offscreen as far as this hook was concerned.
+ */
 export function useInView<T extends HTMLElement>(rootMargin = "0px 0px -10% 0px") {
-  const ref = useRef<T | null>(null);
+  const [node, setNode] = useState<T | null>(null);
   const [inView, setInView] = useState(false);
+  const ref = useCallback((next: T | null) => setNode(next), []);
 
   useEffect(() => {
-    const node = ref.current;
     if (!node) return;
     const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), {
       threshold: 0.25,
@@ -16,7 +24,7 @@ export function useInView<T extends HTMLElement>(rootMargin = "0px 0px -10% 0px"
     });
     observer.observe(node);
     return () => observer.disconnect();
-  }, [rootMargin]);
+  }, [node, rootMargin]);
 
   return { ref, inView };
 }

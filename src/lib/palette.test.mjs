@@ -8,6 +8,7 @@ import {
   countChangedScaleSteps,
   formatChangedScaleSteps,
   normalizeHex,
+  paletteAuraColours,
   paletteBorderGradient,
   rampkitHarmonyUrl,
 } from "./palette.ts";
@@ -167,5 +168,68 @@ test("the palette border wraps bare HSL values as CSS colours", () => {
   assert.match(
     paletteBorderGradient({ css: "", dark: tokens, light: tokens }, "hsl-values"),
     /hsl\(212 100% 65%\)/,
+  );
+});
+
+test("the palette border reads its start angle from the sweep property", () => {
+  const tokens = Object.fromEntries(
+    ["accent", "gray"].flatMap((scale) =>
+      Array.from({ length: 12 }, (_, index) => [`${scale}-${index + 1}`, "#4da0ff"]),
+    ),
+  );
+
+  assert.match(
+    paletteBorderGradient({ css: "", dark: tokens, light: tokens }, "hex"),
+    /^conic-gradient\(from var\(--palette-angle, 225deg\),/,
+  );
+  // The fallback has to stay a valid gradient too, or an empty theme paints
+  // nothing at all rather than a hairline.
+  assert.match(
+    paletteBorderGradient({ css: "", dark: {}, light: {} }, "hex"),
+    /^conic-gradient\(from var\(--palette-angle, 225deg\),/,
+  );
+});
+
+test("the aura takes vivid accent steps from both modes and no gray", () => {
+  const tokens = (mode) =>
+    Object.fromEntries(
+      ["accent", "gray"].flatMap((scale) =>
+        Array.from({ length: 12 }, (_, index) => [
+          `${scale}-${index + 1}`,
+          `${mode}-${scale}-${index + 1}`,
+        ]),
+      ),
+    );
+
+  const colours = paletteAuraColours(
+    { css: "", dark: tokens("dark"), light: tokens("light") },
+    "hex",
+  );
+
+  assert.deepEqual(colours, [
+    "dark-accent-9",
+    "light-accent-10",
+    "dark-accent-11",
+    "light-accent-8",
+  ]);
+  assert.equal(
+    colours.some((colour) => colour.includes("gray")),
+    false,
+    "gray would desaturate the glow, so it stays on the ring",
+  );
+});
+
+test("the aura wraps bare HSL values and survives a theme with no accent scale", () => {
+  const tokens = Object.fromEntries(
+    Array.from({ length: 12 }, (_, index) => [`accent-${index + 1}`, "212 100% 65%"]),
+  );
+
+  assert.deepEqual(
+    paletteAuraColours({ css: "", dark: tokens, light: tokens }, "hsl-values"),
+    Array.from({ length: 4 }, () => "hsl(212 100% 65%)"),
+  );
+  assert.deepEqual(
+    paletteAuraColours({ css: "", dark: {}, light: {} }, "hex"),
+    Array.from({ length: 4 }, () => "var(--hairline-strong)"),
   );
 });

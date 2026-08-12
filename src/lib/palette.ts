@@ -144,15 +144,27 @@ export type GeneratedTheme = {
 };
 
 /**
+ * The engine emits `hsl-values` as bare triplets, because that is the shape
+ * shadcn tokens take. Every other format is already a complete CSS colour.
+ */
+function asCssColour(value: string, format: Format): string {
+  return format === "hsl-values" ? `hsl(${value})` : value;
+}
+
+/**
  * All four generated scales, in the same order the page explains them.
  * A conic gradient lets that sequence travel around a panel perimeter instead
  * of turning the palette into another row of swatches.
+ *
+ * The start angle is read from `--palette-angle` rather than written here, so
+ * the stylesheet can sweep the sequence around the perimeter. The literal
+ * fallback keeps the gradient valid wherever that property is not registered.
  */
 export function paletteBorderGradient(theme: GeneratedTheme, format: Format): string {
   const scale = (mode: "light" | "dark", name: "accent" | "gray") =>
     Array.from({ length: 12 }, (_, index) => theme[mode][`${name}-${index + 1}`])
       .filter((value): value is string => Boolean(value))
-      .map((value) => (format === "hsl-values" ? `hsl(${value})` : value));
+      .map((value) => asCssColour(value, format));
 
   const colours = [
     ...scale("dark", "accent"),
@@ -162,11 +174,38 @@ export function paletteBorderGradient(theme: GeneratedTheme, format: Format): st
   ];
 
   if (colours.length < 2) {
-    return "conic-gradient(from 225deg, var(--hairline), var(--hairline))";
+    return "conic-gradient(from var(--palette-angle, 225deg), var(--hairline), var(--hairline))";
   }
 
   // Repeat the first colour only to close the loop without a hard seam.
-  return `conic-gradient(from 225deg, ${colours.join(", ")}, ${colours[0]})`;
+  return `conic-gradient(from var(--palette-angle, 225deg), ${colours.join(", ")}, ${colours[0]})`;
+}
+
+/**
+ * The four stops the ambient glow behind the panel is built from.
+ *
+ * Steps 8 to 11 are where a generated scale carries its chroma - 1 to 7 are
+ * surfaces and 12 is text, and either of those turns a heavily softened glow
+ * into a grey wash. The modes alternate so the aura holds a light and a dark
+ * reading of the same seed rather than one flat tone.
+ *
+ * Gray is deliberately absent. It is near-neutral by construction, so blurring
+ * it into the accent would desaturate exactly the thing the glow exists to
+ * show. It stays on the perimeter ring, where it reads as data rather than
+ * decoration.
+ */
+export function paletteAuraColours(theme: GeneratedTheme, format: Format): string[] {
+  const stops = [
+    ["dark", "accent-9"],
+    ["light", "accent-10"],
+    ["dark", "accent-11"],
+    ["light", "accent-8"],
+  ] as const;
+
+  return stops.map(([mode, token]) => {
+    const value = theme[mode][token];
+    return value ? asCssColour(value, format) : "var(--hairline-strong)";
+  });
 }
 
 type Engine = {

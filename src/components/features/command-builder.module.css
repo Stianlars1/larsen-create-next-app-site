@@ -75,12 +75,63 @@
   background: var(--surface-1);
 }
 
+@media (max-width: 44rem) {
+  .nested {
+    grid-template-columns: minmax(0, 1fr);
+    padding: var(--space-4);
+  }
+}
+
+/* ---------------- The palette panel: ring and aura ---------------- */
+
+/*
+ * An unregistered custom property is an uninterpolatable token stream, so a
+ * conic gradient built on one can only snap between values. Registering the
+ * angle is what lets the perimeter sweep.
+ */
+@property --palette-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 225deg;
+}
+
+/* The shell exists only to give the aura something to be positioned against
+   that is not the panel itself - the glow has to sit behind an opaque surface
+   to read as a halo rather than a wash across the controls. */
+.paletteShell {
+  position: relative;
+  grid-column: 1 / -1;
+}
+
+/* A blurred halo enlarges the section's scrollable overflow, which on a narrow
+   viewport is enough to gain a sideways scroll. Clipping only the inline axis
+   caps that at the viewport edge, where the halo has long since faded, and
+   `clip` - unlike `hidden` - leaves the block axis genuinely visible instead of
+   silently turning the section into a scroll container. */
+.bleedGuard {
+  overflow-x: clip;
+}
+
 /* The four generated 12-step scales travel around one quiet perimeter:
    dark accent, dark gray, light accent, then light gray. A mask keeps the
    gradient in the border only, so the controls retain their existing surface
    and never turn into another swatch display. */
 .palettePanel {
   position: relative;
+  z-index: 1;
+  /* --surface-1 is a 2.4% white lift, which is not opaque enough to hide the
+     aura behind it. Compositing the same lift over the page background keeps
+     the rendered colour identical and gives the panel something to occlude
+     with. */
+  background:
+    linear-gradient(var(--surface-1), var(--surface-1)),
+    var(--page-bg);
+  animation: paletteSweep 26s linear infinite;
+  animation-play-state: paused;
+}
+
+.palettePanel[data-visible="true"] {
+  animation-play-state: running;
 }
 
 .palettePanel::before {
@@ -90,7 +141,18 @@
   padding: 1px;
   border-radius: inherit;
   background: var(--palette-border);
-  opacity: 0.78;
+  /*
+   * Dimmer than the halo behind it, on purpose. A 1px stroke at full chroma on
+   * a near-black page is maximum local contrast, so it out-shines its own glow
+   * and reads as drawn ink rather than as light. Sitting under the halo's peak
+   * puts it back inside the glow.
+   *
+   * The sub-pixel blur spreads the stroke over two device pixels. Nothing about
+   * the geometry changes; it just stops being mechanically crisp, which is the
+   * other half of why a uniform hairline reads as hard.
+   */
+  opacity: 0.42;
+  filter: blur(0.5px);
   pointer-events: none;
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
@@ -102,10 +164,180 @@
   mask-composite: exclude;
 }
 
-@media (max-width: 44rem) {
-  .nested {
-    grid-template-columns: minmax(0, 1fr);
-    padding: var(--space-4);
+@keyframes paletteSweep {
+  to {
+    --palette-angle: 585deg;
+  }
+}
+
+/*
+ * The aura.
+ *
+ * It shares the panel's box exactly and clips to it, so the only thing that
+ * ever escapes is what the blur carries past the edge: a halo the width of the
+ * blur radius, not a wash over the controls underneath. Clipping before
+ * blurring is what removes the hard edge - the cut lands beneath an opaque
+ * panel, and the blur is what turns it into the falloff.
+ *
+ * Four accent lobes drift inside on coprime periods, so no two ever return to
+ * the same relative pose. That non-repetition is what reads as alive rather
+ * than as a loop, and it is why the halo's colour shifts around the perimeter
+ * on its own. Position and brightness run on separate animations with separate
+ * durations for the same reason.
+ */
+.aura {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: var(--radius-lg);
+  overflow: clip;
+  filter: blur(34px);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Only what sits near an edge can be seen at all, so the lobes are large and
+   deliberately straddle the boundary rather than sitting inside it. */
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  /* Interpolating to `transparent` in sRGB fades through transparent black and
+     greys the falloff; oklab keeps the hue to the last pixel. */
+  background: radial-gradient(in oklab closest-side, var(--tint), transparent);
+  will-change: transform, opacity;
+}
+
+.blob[data-layer="1"] {
+  --tint: var(--aura-1);
+  inset-block: -45% auto;
+  inset-inline: -18% auto;
+  inline-size: 72%;
+  block-size: 190%;
+  animation:
+    auraDriftA 19s ease-in-out infinite,
+    auraPulse 13s ease-in-out infinite;
+}
+
+.blob[data-layer="2"] {
+  --tint: var(--aura-2);
+  inset-block: -55% auto;
+  inset-inline: auto -20%;
+  inline-size: 64%;
+  block-size: 210%;
+  animation:
+    auraDriftB 23s ease-in-out infinite,
+    auraPulse 17s ease-in-out infinite -6s;
+}
+
+/* Pulled back off the lower edge: sitting proud of it pooled the glow under
+   the panel and carried it down into the linter row. */
+.blob[data-layer="3"] {
+  --tint: var(--aura-3);
+  inset-block: auto -25%;
+  inset-inline: 14% auto;
+  inline-size: 76%;
+  block-size: 150%;
+  animation:
+    auraDriftC 29s ease-in-out infinite,
+    auraPulse 11s ease-in-out infinite -3s;
+}
+
+.blob[data-layer="4"] {
+  --tint: var(--aura-4);
+  inset-block: -35% auto;
+  inset-inline: 42% auto;
+  inline-size: 52%;
+  block-size: 170%;
+  animation:
+    auraDriftD 31s ease-in-out infinite,
+    auraPulse 19s ease-in-out infinite -9s;
+}
+
+/*
+ * Idle unless the panel is on screen.
+ *
+ * This has to come after the rules above: `animation` is a shorthand, so each
+ * lobe rule resets play-state back to `running`, and a paused default declared
+ * any earlier would be silently overwritten.
+ */
+.aura .blob {
+  animation-play-state: paused;
+}
+
+.aura[data-visible="true"] .blob {
+  animation-play-state: running;
+}
+
+/* Translate percentages resolve against each lobe's own box, so the paths stay
+   proportional at every width. Only transform and opacity move: both composite
+   without repainting the blurred raster. */
+@keyframes auraDriftA {
+  0% {
+    transform: translate3d(-6%, -3%, 0) scale(1);
+  }
+  34% {
+    transform: translate3d(9%, 7%, 0) scale(1.16);
+  }
+  67% {
+    transform: translate3d(-3%, 11%, 0) scale(0.92);
+  }
+  100% {
+    transform: translate3d(-6%, -3%, 0) scale(1);
+  }
+}
+
+@keyframes auraDriftB {
+  0% {
+    transform: translate3d(5%, 6%, 0) scale(1.08);
+  }
+  30% {
+    transform: translate3d(-8%, -5%, 0) scale(0.9);
+  }
+  71% {
+    transform: translate3d(-2%, 9%, 0) scale(1.2);
+  }
+  100% {
+    transform: translate3d(5%, 6%, 0) scale(1.08);
+  }
+}
+
+@keyframes auraDriftC {
+  0% {
+    transform: translate3d(-4%, 8%, 0) scale(0.96);
+  }
+  41% {
+    transform: translate3d(7%, -6%, 0) scale(1.22);
+  }
+  73% {
+    transform: translate3d(-9%, -2%, 0) scale(1.02);
+  }
+  100% {
+    transform: translate3d(-4%, 8%, 0) scale(0.96);
+  }
+}
+
+@keyframes auraDriftD {
+  0% {
+    transform: translate3d(8%, -7%, 0) scale(1.12);
+  }
+  38% {
+    transform: translate3d(-6%, 4%, 0) scale(0.94);
+  }
+  64% {
+    transform: translate3d(3%, 10%, 0) scale(1.18);
+  }
+  100% {
+    transform: translate3d(8%, -7%, 0) scale(1.12);
+  }
+}
+
+@keyframes auraPulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.56;
   }
 }
 
