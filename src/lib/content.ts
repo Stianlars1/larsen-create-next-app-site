@@ -7,7 +7,7 @@
  */
 
 export const PACKAGE_NAME = "@larsen-utvikling/create-next-app";
-export const PACKAGE_VERSION = "0.5.1";
+export const PACKAGE_VERSION = "0.6.0";
 export const PACKAGE_EXEC = `npx --yes ${PACKAGE_NAME}@${PACKAGE_VERSION}`;
 export const REPO_URL = "https://github.com/Stianlars1/larsen-create-next-app";
 export const NPM_URL = "https://www.npmjs.com/package/@larsen-utvikling/create-next-app";

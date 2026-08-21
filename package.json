@@ -11,7 +11,7 @@
     "test": "node --test src/lib/*.test.mjs"
   },
   "dependencies": {
-    "@larsen-utvikling/create-next-app": "^0.5.1",
+    "@larsen-utvikling/create-next-app": "^0.6.0",
     "@vercel/analytics": "^2.0.1",
     "clsx": "^2.1.1",
     "flubber": "^0.4.2",
