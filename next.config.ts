@@ -5,6 +5,10 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
+        source: "/stats/api/:path*",
+        destination: "https://gateway.umami.is/api/:path*",
+      },
+      {
         source: "/stats/:path*",
         destination: "https://cloud.umami.is/:path*",
       },

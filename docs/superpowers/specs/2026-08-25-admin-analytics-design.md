@@ -72,6 +72,8 @@ Public tracking uses:
 
 - `NEXT_PUBLIC_UMAMI_SRC` set to `/stats/script.js`, which the app rewrites to
   `https://cloud.umami.is/:path*`
+- `data-host-url` set to `/stats`, which routes collector requests to
+  `https://gateway.umami.is/api/:path*`
 - `NEXT_PUBLIC_UMAMI_WEBSITE_ID`
 
 Server-side dashboard queries use:
