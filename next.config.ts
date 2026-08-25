@@ -2,6 +2,14 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  async rewrites() {
+    return [
+      {
+        source: "/stats/:path*",
+        destination: "https://cloud.umami.is/:path*",
+      },
+    ];
+  },
   async headers() {
     return [
       {

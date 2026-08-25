@@ -77,12 +77,13 @@ project creations.
 ## Deployment
 
 Vercel deploys from `main`. Production configuration is managed in the Vercel
-dashboard or CLI. Set `NEXT_PUBLIC_UMAMI_SRC` to
-`https://cloud.umami.is/script.js`, use this app's own Website ID for the public
-and server Website ID variables, and set the shared Cloud API key as the
-server-only `UMAMI_API_KEY`. The Cloud API endpoint is `https://api.umami.is/v1`.
-Also set the admin password and session secret, and optionally the GA measurement
-ID.
+dashboard or CLI. Set `NEXT_PUBLIC_UMAMI_SRC` to `/stats/script.js`.
+`next.config.ts` proxies that first-party path to Umami Cloud, which reduces
+ad-blocker loss while keeping Umami's Cloud service as the data collector. Use
+this app's own Website ID for the public and server Website ID variables, and
+set the shared Cloud API key as the server-only `UMAMI_API_KEY`. The Cloud API
+endpoint is `https://api.umami.is/v1`. Also set the admin password and session
+secret, and optionally the GA measurement ID.
 
 Treat local tests, preview behavior, the production deployment, and visible
 provider ingestion as separate verification boundaries. A green local test does

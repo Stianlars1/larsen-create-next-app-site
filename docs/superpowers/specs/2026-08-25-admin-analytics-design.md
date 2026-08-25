@@ -70,7 +70,8 @@ Umami follows the approved cookie-free policy: its tracker writes no browser sto
 
 Public tracking uses:
 
-- `NEXT_PUBLIC_UMAMI_SRC` set to `https://cloud.umami.is/script.js`
+- `NEXT_PUBLIC_UMAMI_SRC` set to `/stats/script.js`, which the app rewrites to
+  `https://cloud.umami.is/:path*`
 - `NEXT_PUBLIC_UMAMI_WEBSITE_ID`
 
 Server-side dashboard queries use:
