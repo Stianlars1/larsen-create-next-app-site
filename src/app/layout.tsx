@@ -3,11 +3,9 @@ import { SiteAnalytics } from "@/lib/analytics/SiteAnalytics";
 import { PaletteSessionProvider } from "@/components/theme/palette-session";
 import { SiteThemeProvider } from "@/components/theme/site-theme";
 import { fontVariables } from "@/lib/fonts";
-import { PACKAGE_NAME } from "@/lib/content";
+import { PACKAGE_NAME, SITE_URL } from "@/lib/content";
 import { DEFAULT_DEMO_OPTIONS, generate } from "@/lib/palette";
 import "./globals.css";
-
-const SITE_URL = "https://create-next-app.larsenutvikling.no";
 
 const description =
   "Scaffold the newest Next.js with a vanilla CSS design system: color tokens generated from one HEX, motion tokens, agent docs, and no Tailwind.";
