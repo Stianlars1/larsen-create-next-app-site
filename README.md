@@ -85,6 +85,10 @@ set the shared Cloud API key as the server-only `UMAMI_API_KEY`. The Cloud API
 endpoint is `https://api.umami.is/v1`. Also set the admin password and session
 secret, and optionally the GA measurement ID.
 
+The tracker sets `data-host-url="/stats"`. `next.config.ts` therefore routes
+the tracker script to `cloud.umami.is` and the current collect endpoint to
+`gateway.umami.is`, without exposing either endpoint to the public page.
+
 Treat local tests, preview behavior, the production deployment, and visible
 provider ingestion as separate verification boundaries. A green local test does
 not prove a Vercel environment variable, an Umami website record, or production

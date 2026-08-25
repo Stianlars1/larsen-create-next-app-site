@@ -15,6 +15,7 @@ export function UmamiAnalytics() {
 
   return (
     <Script
+      data-host-url="/stats"
       data-website-id={websiteId}
       onLoad={flushPendingUmamiEvents}
       src={src}

@@ -6,7 +6,11 @@ const { usePathnameMock } = vi.hoisted(() => ({ usePathnameMock: vi.fn() }));
 vi.mock("next/navigation", () => ({ usePathname: usePathnameMock }));
 vi.mock("next/script", () => ({
   default: (props: Record<string, unknown>) => (
-    <div data-src={String(props.src)} data-testid="umami-script" />
+    <div
+      data-host-url={String(props["data-host-url"])}
+      data-src={String(props.src)}
+      data-testid="umami-script"
+    />
   ),
 }));
 
@@ -26,6 +30,7 @@ describe("UmamiAnalytics", () => {
     expect(screen.getByTestId("umami-script").getAttribute("data-src")).toBe(
       "/stats/script.js",
     );
+    expect(screen.getByTestId("umami-script").getAttribute("data-host-url")).toBe("/stats");
   });
 
   it.each(["/admin", "/admin/unlock", "/admin/anything"])(

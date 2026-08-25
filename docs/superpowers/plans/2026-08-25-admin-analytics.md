@@ -1421,6 +1421,7 @@ Use these Cloud endpoints:
 
 ```text
 Public tracker: /stats/script.js, rewritten to https://cloud.umami.is/:path*
+Collector: /stats/api/:path*, rewritten to https://gateway.umami.is/api/:path*
 Server API: https://api.umami.is/v1
 Authentication: Authorization: Bearer <UMAMI_API_KEY>
 ```
