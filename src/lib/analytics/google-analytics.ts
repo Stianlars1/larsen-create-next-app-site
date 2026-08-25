@@ -1,6 +1,8 @@
 import type { ConsentState } from './consent';
 
-export const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+export function getGoogleAnalyticsMeasurementId(): string | undefined {
+    return process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+}
 
 type Gtag = (...args: unknown[]) => void;
 
@@ -20,7 +22,10 @@ export function pageview(url: string): void {
     });
 }
 
-export function event(action: string, params?: Record<string, string | number | undefined>): void {
+export function event(
+    action: string,
+    params?: Record<string, string | number | boolean | null | undefined>,
+): void {
     const gtag = getGtag();
     if (!gtag) return;
 

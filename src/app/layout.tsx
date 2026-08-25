@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/next";
-import GoogleAnalyticsProvider from "@/lib/analytics/GoogleAnalyticsProvider";
-import { CookieConsent } from "@/components/site/cookie-consent";
+import { SiteAnalytics } from "@/lib/analytics/SiteAnalytics";
 import { PaletteSessionProvider } from "@/components/theme/palette-session";
 import { SiteThemeProvider } from "@/components/theme/site-theme";
 import { fontVariables } from "@/lib/fonts";
@@ -64,11 +62,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {children}
           </PaletteSessionProvider>
         </SiteThemeProvider>
-        {/* Cookie-free by design */}
-        <Analytics />
-        {/* Only mounts once consent is granted, and only with a measurement ID */}
-        <GoogleAnalyticsProvider />
-        <CookieConsent />
+        <SiteAnalytics />
       </body>
     </html>
   );

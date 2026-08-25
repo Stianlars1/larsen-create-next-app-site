@@ -9,7 +9,7 @@ import {
   writeConsent,
   type ConsentState,
 } from "@/lib/analytics/consent";
-import { GA_MEASUREMENT_ID } from "@/lib/analytics/google-analytics";
+import { getGoogleAnalyticsMeasurementId } from "@/lib/analytics/google-analytics";
 import styles from "./cookie-consent.module.css";
 
 function subscribeToConsent(onChange: () => void) {
@@ -18,9 +18,9 @@ function subscribeToConsent(onChange: () => void) {
 }
 
 /**
- * Asks once, remembers the answer, and stays out of the way. Nothing is
- * measured before the visitor says yes - Vercel Analytics runs cookie-free
- * either way, so declining still leaves the page working exactly as before.
+ * Asks once, remembers the answer, and stays out of the way. Cookie-free Umami
+ * and Vercel Analytics run without browser storage. Accepting enables optional
+ * Google Analytics cookies.
  */
 export function CookieConsent() {
   // Read as an external store so the answer is never assumed during render on
@@ -39,7 +39,7 @@ export function CookieConsent() {
     return () => window.removeEventListener(OPEN_CONSENT_BANNER_EVENT, open);
   }, []);
 
-  const visible = Boolean(GA_MEASUREMENT_ID) && !dismissed && (!answered || reopened);
+  const visible = Boolean(getGoogleAnalyticsMeasurementId()) && !dismissed && (!answered || reopened);
   if (!visible) return null;
 
   const answer = (state: ConsentState) => {
@@ -52,8 +52,7 @@ export function CookieConsent() {
   return (
     <aside className={styles.banner} role="dialog" aria-label="Analytics consent">
       <p className={styles.text}>
-        Analytics cookies help me see whether this page is useful. Nothing is stored until
-        you accept.
+        Cookie-free traffic analytics is always on. Accept to also enable Google Analytics cookies.
       </p>
       <div className={styles.actions}>
         <button type="button" className={styles.decline} onClick={() => answer("denied")}>
