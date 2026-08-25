@@ -1,0 +1,259 @@
+.dashboard {
+  display: grid;
+  gap: var(--space-5);
+  max-inline-size: 76rem;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.eyebrow,
+.subtitle,
+.window,
+.panelSubtitle,
+.footnote,
+.unavailable,
+.statHint,
+.chartCaption,
+.empty {
+  margin: 0;
+  color: hsl(var(--foreground-subtle));
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.eyebrow {
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: var(--space-1) 0;
+  font-size: var(--text-2xl);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+
+.lock {
+  min-block-size: 2.75rem;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+
+.lock:focus-visible,
+.periods a:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.periods {
+  display: inline-flex;
+  inline-size: fit-content;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+}
+
+.periods a {
+  padding: var(--space-2) var(--space-3);
+  color: hsl(var(--foreground-subtle));
+  font-size: var(--text-sm);
+  text-decoration: none;
+}
+
+.periods a[aria-current="page"] {
+  background: var(--surface-2);
+  color: hsl(var(--foreground));
+}
+
+.statGrid,
+.metricGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.panel,
+.statCard {
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  background: var(--surface-1);
+}
+
+.panel {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.panelHeader {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.panelTitle,
+.statValue {
+  margin: 0;
+  font-weight: 500;
+}
+
+.panelTitle {
+  font-size: var(--text-md);
+}
+
+.statCard {
+  display: grid;
+  gap: var(--space-1);
+  min-block-size: 7rem;
+  padding: var(--space-4);
+}
+
+.statLabel {
+  color: hsl(var(--foreground-subtle));
+  font-size: var(--text-xs);
+}
+
+.statValue {
+  font-size: var(--text-xl);
+  letter-spacing: -0.03em;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 1.5rem;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--surface-2);
+  color: hsl(var(--foreground-subtle));
+  font-size: var(--text-xs);
+}
+
+.status[data-status="up"] {
+  background: hsl(var(--success-muted));
+  color: hsl(var(--success-muted-foreground));
+}
+
+.status[data-status="down"] {
+  background: hsl(var(--danger-muted));
+  color: hsl(var(--danger-muted-foreground));
+}
+
+.chart {
+  margin: 0;
+}
+
+.chart svg {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  overflow: visible;
+}
+
+.chartLine {
+  stroke: hsl(var(--accent-9));
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 4;
+}
+
+.chartLine[data-series="1"] {
+  stroke: hsl(var(--accent-11));
+}
+
+.chartLine[data-series="2"] {
+  stroke: hsl(var(--success));
+}
+
+.chartCaption {
+  margin-top: var(--space-2);
+}
+
+.barList,
+.healthList {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+}
+
+.barList {
+  list-style: none;
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: minmax(5rem, auto) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.barTrack {
+  block-size: 0.45rem;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--surface-2);
+}
+
+.barFill {
+  display: block;
+  block-size: 100%;
+  border-radius: inherit;
+  background: hsl(var(--accent-9));
+}
+
+.healthList > div {
+  display: grid;
+  grid-template-columns: minmax(8rem, 1fr) minmax(0, 2fr);
+  gap: var(--space-3);
+  align-items: center;
+  font-size: var(--text-sm);
+}
+
+.healthList dt,
+.healthList dd {
+  margin: 0;
+}
+
+.healthList dt {
+  color: hsl(var(--foreground-subtle));
+}
+
+@media (max-width: 60rem) {
+  .statGrid,
+  .metricGrid,
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 38rem) {
+  .header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .statGrid,
+  .metricGrid,
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

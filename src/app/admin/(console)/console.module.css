@@ -3,44 +3,41 @@
   padding: var(--space-7) var(--page-gutter);
 }
 
-.card {
+.skeleton {
   display: grid;
-  gap: var(--space-4);
-  max-inline-size: 44rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+  max-inline-size: 76rem;
   margin: 0 auto;
-  padding: var(--space-6);
-  border: 1px solid var(--hairline);
+}
+
+.skeleton > span {
+  min-block-size: 7rem;
   border-radius: var(--radius-lg);
-  background: var(--surface-1);
+  background: var(--surface-2);
+  animation: pulse 1.4s ease-in-out infinite;
 }
 
-.title,
-.copy {
-  margin: 0;
+@keyframes pulse {
+  50% {
+    opacity: 0.55;
+  }
 }
 
-.title {
-  font-size: var(--text-xl);
-  font-weight: 500;
-  letter-spacing: -0.03em;
+@media (prefers-reduced-motion: reduce) {
+  .skeleton > span {
+    animation: none;
+  }
 }
 
-.copy {
-  color: hsl(var(--foreground-subtle));
+@media (max-width: 60rem) {
+  .skeleton {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-.lock {
-  min-block-size: 2.75rem;
-  padding: 0 var(--space-4);
-  border: 1px solid var(--hairline-strong);
-  border-radius: var(--radius-md);
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
-}
-
-.lock:focus-visible {
-  outline: 2px solid hsl(var(--ring));
-  outline-offset: 2px;
+@media (max-width: 38rem) {
+  .skeleton {
+    grid-template-columns: 1fr;
+  }
 }
