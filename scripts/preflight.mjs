@@ -30,20 +30,16 @@ const serverUmamiKeys = [
   "UMAMI_API_URL",
   "UMAMI_WEBSITE_ID",
   "UMAMI_API_KEY",
-  "UMAMI_USERNAME",
-  "UMAMI_PASSWORD",
 ];
 if (serverUmamiKeys.some(has)) {
   const base = value("UMAMI_API_URL");
   const websiteId = value("UMAMI_WEBSITE_ID");
   const apiKey = value("UMAMI_API_KEY");
-  const username = value("UMAMI_USERNAME");
-  const password = value("UMAMI_PASSWORD");
 
   if (!base || !websiteId) {
     errors.push("UMAMI_API_URL and UMAMI_WEBSITE_ID must both be set.");
-  } else if (!apiKey && !(username && password)) {
-    errors.push("UMAMI_API_KEY or UMAMI_USERNAME and UMAMI_PASSWORD must be set.");
+  } else if (!apiKey) {
+    errors.push("UMAMI_API_KEY must be set.");
   }
 }
 

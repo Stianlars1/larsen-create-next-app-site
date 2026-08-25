@@ -14,7 +14,7 @@ import { UmamiAnalytics } from "./UmamiAnalytics";
 
 describe("UmamiAnalytics", () => {
   beforeEach(() => {
-    vi.stubEnv("NEXT_PUBLIC_UMAMI_SRC", "https://analytics.tinify.dev/script.js");
+    vi.stubEnv("NEXT_PUBLIC_UMAMI_SRC", "https://cloud.umami.is/script.js");
     vi.stubEnv("NEXT_PUBLIC_UMAMI_WEBSITE_ID", "site-id");
   });
 
@@ -24,7 +24,7 @@ describe("UmamiAnalytics", () => {
     render(<UmamiAnalytics />);
 
     expect(screen.getByTestId("umami-script").getAttribute("data-src")).toBe(
-      "https://analytics.tinify.dev/script.js",
+      "https://cloud.umami.is/script.js",
     );
   });
 

@@ -49,10 +49,10 @@ test("preflight rejects partial public and server Umami configuration", () => {
   assert.equal(publicPartial.status, 1);
   assert.match(publicPartial.stderr, /NEXT_PUBLIC_UMAMI_SRC and NEXT_PUBLIC_UMAMI_WEBSITE_ID/);
   assert.equal(serverPartial.status, 1);
-  assert.match(serverPartial.stderr, /UMAMI_API_KEY or UMAMI_USERNAME and UMAMI_PASSWORD/);
+  assert.match(serverPartial.stderr, /UMAMI_API_KEY must be set/);
 });
 
-test("preflight accepts either full Umami authentication mechanism", () => {
+test("preflight accepts complete Umami Cloud configuration", () => {
   const apiKey = run({
     NEXT_PUBLIC_UMAMI_SRC: "https://analytics.example/script.js",
     NEXT_PUBLIC_UMAMI_WEBSITE_ID: "website-id",
@@ -60,13 +60,6 @@ test("preflight accepts either full Umami authentication mechanism", () => {
     UMAMI_WEBSITE_ID: "website-id",
     UMAMI_API_KEY: "api-key",
   });
-  const password = run({
-    UMAMI_API_URL: "https://analytics.example/api",
-    UMAMI_WEBSITE_ID: "website-id",
-    UMAMI_USERNAME: "admin",
-    UMAMI_PASSWORD: "password",
-  });
 
   assert.equal(apiKey.status, 0, apiKey.stderr);
-  assert.equal(password.status, 0, password.stderr);
 });

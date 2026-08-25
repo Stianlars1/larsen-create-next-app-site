@@ -5,14 +5,11 @@ import type { AdminFailureReason, AdminResult } from "./result";
 import type { AnalyticsWindow } from "./time-window";
 
 const TIMEOUT_MS = 4_000;
-const TOKEN_CACHE_MS = 55 * 60 * 1_000;
 
 export type UmamiEnvironment = Record<string, string | undefined> & {
   UMAMI_API_URL?: string;
   UMAMI_WEBSITE_ID?: string;
   UMAMI_API_KEY?: string;
-  UMAMI_USERNAME?: string;
-  UMAMI_PASSWORD?: string;
 };
 
 export type UmamiStats = {
@@ -50,40 +47,21 @@ export type UmamiEventValue = {
 type UmamiConfig = {
   base: string;
   websiteId: string;
-  apiKey?: string;
-  username?: string;
-  password?: string;
+  apiKey: string;
 };
-
-type CachedToken = {
-  base: string;
-  username: string;
-  token: string;
-  expiresAt: number;
-};
-
-type HeaderResult =
-  | { ok: true; headers: Record<string, string>; retryable: boolean }
-  | { ok: false; reason: AdminFailureReason };
-
-let cachedToken: CachedToken | null = null;
 
 function readConfig(environment: UmamiEnvironment): UmamiConfig | null {
   const base = environment.UMAMI_API_URL?.trim().replace(/\/$/, "");
   const websiteId = environment.UMAMI_WEBSITE_ID?.trim();
-  const apiKey = environment.UMAMI_API_KEY;
-  const username = environment.UMAMI_USERNAME;
-  const password = environment.UMAMI_PASSWORD;
+  const apiKey = environment.UMAMI_API_KEY?.trim();
 
-  if (!base || !websiteId) return null;
+  if (!base || !websiteId || !apiKey) return null;
   try {
     new URL(base);
   } catch {
     return null;
   }
-  if (apiKey) return { base, websiteId, apiKey };
-  if (username && password) return { base, websiteId, username, password };
-  return null;
+  return { base, websiteId, apiKey };
 }
 
 function failure<T>(reason: AdminFailureReason): AdminResult<T> {
@@ -133,65 +111,11 @@ function isProductEventName(value: string): value is ProductEventName {
   return (PRODUCT_EVENT_NAMES as readonly string[]).includes(value);
 }
 
-export function resetUmamiTokenCacheForTests(): void {
-  cachedToken = null;
-}
-
 export function createUmamiClient(
   environment: UmamiEnvironment = process.env,
   fetcher: typeof fetch = fetch,
 ) {
   const config = readConfig(environment);
-
-  async function login(activeConfig: UmamiConfig): Promise<string | AdminFailureReason> {
-    if (!activeConfig.username || !activeConfig.password) return "unconfigured";
-    try {
-      const response = await fetcher(`${activeConfig.base}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: activeConfig.username, password: activeConfig.password }),
-        cache: "no-store",
-        signal: AbortSignal.timeout(TIMEOUT_MS),
-      });
-      if (!response.ok) return "unreachable";
-      const body: unknown = await response.json();
-      if (!isRecord(body) || typeof body.token !== "string" || body.token.length === 0) {
-        return "invalid_response";
-      }
-      cachedToken = {
-        base: activeConfig.base,
-        username: activeConfig.username,
-        token: body.token,
-        expiresAt: Date.now() + TOKEN_CACHE_MS,
-      };
-      return body.token;
-    } catch (error) {
-      return classify(error);
-    }
-  }
-
-  async function headers(activeConfig: UmamiConfig, fresh = false): Promise<HeaderResult> {
-    if (activeConfig.apiKey) {
-      return { ok: true as const, headers: { Authorization: `Bearer ${activeConfig.apiKey}` }, retryable: false };
-    }
-    if (
-      !fresh &&
-      cachedToken &&
-      cachedToken.base === activeConfig.base &&
-      cachedToken.username === activeConfig.username &&
-      cachedToken.expiresAt > Date.now()
-    ) {
-      return {
-        ok: true as const,
-        headers: { Authorization: `Bearer ${cachedToken.token}` },
-        retryable: true,
-      };
-    }
-
-    const token = await login(activeConfig);
-    if (typeof token !== "string") return { ok: false as const, reason: token };
-    return { ok: true as const, headers: { Authorization: `Bearer ${token}` }, retryable: true };
-  }
 
   async function get(path: string, params: Record<string, string> = {}): Promise<AdminResult<unknown>> {
     if (!config) return failure("unconfigured");
@@ -199,25 +123,12 @@ export function createUmamiClient(
     const url = new URL(`${config.base}${path}`);
     for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
 
-    const firstHeaders = await headers(config);
-    if (!firstHeaders.ok) return failure(firstHeaders.reason);
-
-    async function send(requestHeaders: Record<string, string>) {
-      return fetcher(url.toString(), {
-        headers: requestHeaders,
+    try {
+      const response = await fetcher(url.toString(), {
+        headers: { Authorization: `Bearer ${config.apiKey}` },
         cache: "no-store",
         signal: AbortSignal.timeout(TIMEOUT_MS),
       });
-    }
-
-    try {
-      let response = await send(firstHeaders.headers);
-      if (response.status === 401 && firstHeaders.retryable) {
-        cachedToken = null;
-        const retryHeaders = await headers(config, true);
-        if (!retryHeaders.ok) return failure(retryHeaders.reason);
-        response = await send(retryHeaders.headers);
-      }
       if (!response.ok) return failure("unreachable");
       try {
         return success(await response.json());

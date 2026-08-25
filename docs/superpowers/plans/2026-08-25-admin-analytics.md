@@ -831,14 +831,13 @@ export type AnalyticsWindow = {
 };
 ```
 
-- [ ] **Step 2: Write failing Umami configuration, auth, retry, and response tests**
+- [ ] **Step 2: Write failing Umami Cloud configuration and response tests**
 
-Mock `server-only` and inject a controlled `fetch` implementation. Cover both auth mechanisms:
+Mock `server-only` and inject a controlled `fetch` implementation. Cover the
+Cloud API-key contract:
 
-- `x-umami-api-key` when `UMAMI_API_KEY` exists.
-- `POST /auth/login` and cached bearer token when username/password exist.
-- no network request and `unconfigured` when base URL, website ID, or both auth mechanisms are incomplete.
-- one fresh login and one retry after a 401, never a loop.
+- `Authorization: Bearer <UMAMI_API_KEY>` on every request.
+- no network request and `unconfigured` when base URL, Website ID, or API key is incomplete.
 - a four-second timeout classified as `timeout`.
 - non-OK response classified as `unreachable`.
 - malformed JSON shape classified as `invalid_response`.
@@ -873,12 +872,11 @@ type UmamiEnvironment = {
   UMAMI_API_URL?: string;
   UMAMI_WEBSITE_ID?: string;
   UMAMI_API_KEY?: string;
-  UMAMI_USERNAME?: string;
-  UMAMI_PASSWORD?: string;
 };
 ```
 
-Normalize `UMAMI_API_URL` by removing one trailing slash. Treat API key as preferred and username/password as fallback. Cache a bearer token for 55 minutes, clear it on a 401, and retry once.
+Normalize `UMAMI_API_URL` by removing one trailing slash. Require a non-empty
+Cloud API key and use it as the bearer token for each request.
 
 Every request uses:
 
@@ -898,7 +896,8 @@ Build URLs with `URL` and `searchParams`, never string-concatenate values. The e
 - `/websites/:id/events/series` for the product-activity series.
 - `/websites/:id/event-data/values` with exact `event` and `propertyName=surface` for copy-source counts.
 
-Accept plain numeric fields and the older `{ value: number }` wrapper where Tinify already proved both can occur. Do not coerce missing, negative, NaN, or string values to zero.
+Accept plain numeric fields and the older `{ value: number }` wrapper. Do not
+coerce missing, negative, NaN, or string values to zero.
 
 Map raw provider names at the boundary: `totaltime` becomes `totalTime`; the `/pageviews` response's `sessions` array becomes the exported `visitors` series after validation; and event-series `x`, `t`, and `y` become `event`, `at`, and `count`. Reject event names outside `PRODUCT_EVENT_NAMES` instead of casting them.
 
@@ -911,7 +910,7 @@ npm run test:vitest -- src/lib/admin/time-window.vitest.ts src/lib/admin/umami.v
 npx tsc --noEmit
 ```
 
-Expected: all window, auth, retry, timeout, and validation cases pass.
+Expected: all window, API-key, timeout, and validation cases pass.
 
 - [ ] **Step 6: Commit the Umami client**
 
@@ -1281,8 +1280,6 @@ NEXT_PUBLIC_UMAMI_WEBSITE_ID=
 UMAMI_API_URL=
 UMAMI_WEBSITE_ID=
 UMAMI_API_KEY=
-UMAMI_USERNAME=
-UMAMI_PASSWORD=
 NEXT_PUBLIC_GA_MEASUREMENT_ID=
 ```
 
@@ -1412,69 +1409,26 @@ test -n "$TEAM_ID"
 
 Do not print the JSON because it contains account and deployment metadata.
 
-- [ ] **Step 3: Read the existing Tinify Umami credentials without printing them**
+- [x] **Step 3: Provision the dedicated Umami Cloud website and API key**
 
-Define a shell helper that resolves a production environment-variable ID from `tinify-dev` and then reads its decrypted value from the authenticated API:
+Use the signed-in shared Umami Cloud account. Create or reuse exactly one Website
+record for `create-next-app.larsenutvikling.no`; its data must remain separate
+from every other application Website record. Create an account API key for
+server-side dashboard reads, copy it directly to encrypted Vercel storage, and
+never print it.
 
-```bash
-read_vercel_env() {
-  local project_name="$1"
-  local env_key="$2"
-  local env_id
-  env_id=$(vercel api "/v10/projects/${project_name}/env?teamId=${TEAM_ID}" --raw | jq -er --arg key "$env_key" '.envs[] | select(.key == $key and (.target | index("production"))) | .id' | head -n 1)
-  vercel api "/v1/projects/${project_name}/env/${env_id}?teamId=${TEAM_ID}" --raw | jq -er '.value'
-}
+Use these Cloud endpoints:
 
-UMAMI_API_URL_VALUE=$(read_vercel_env tinify-dev UMAMI_API_URL)
-UMAMI_USERNAME_VALUE=$(read_vercel_env tinify-dev UMAMI_USERNAME)
-UMAMI_PASSWORD_VALUE=$(read_vercel_env tinify-dev UMAMI_PASSWORD)
-UMAMI_SRC_VALUE=$(read_vercel_env tinify-dev NEXT_PUBLIC_UMAMI_SRC)
-
-test -n "$UMAMI_API_URL_VALUE"
-test -n "$UMAMI_USERNAME_VALUE"
-test -n "$UMAMI_PASSWORD_VALUE"
-test -n "$UMAMI_SRC_VALUE"
+```text
+Public tracker: https://cloud.umami.is/script.js
+Server API: https://api.umami.is/v1
+Authentication: Authorization: Bearer <UMAMI_API_KEY>
 ```
 
-Never echo, log, or write these variables to the repository or a temporary file.
+Tinify is a reference only. Do not read, reuse, modify, or query Tinify
+credentials, Website records, API endpoints, or Vercel project state.
 
-- [ ] **Step 4: Create or reuse the dedicated Umami website**
-
-Authenticate, list websites, and create only when the exact domain is absent:
-
-```bash
-UMAMI_LOGIN_JSON=$(curl -fsS "${UMAMI_API_URL_VALUE}/auth/login" -H 'Content-Type: application/json' --data "$(jq -cn --arg username "$UMAMI_USERNAME_VALUE" --arg password "$UMAMI_PASSWORD_VALUE" '{username:$username,password:$password}')")
-UMAMI_TOKEN_VALUE=$(printf '%s' "$UMAMI_LOGIN_JSON" | jq -er '.token')
-UMAMI_WEBSITES_JSON=$(curl -fsS "${UMAMI_API_URL_VALUE}/websites" -H "Authorization: Bearer ${UMAMI_TOKEN_VALUE}")
-UMAMI_WEBSITE_ID_VALUE=$(printf '%s' "$UMAMI_WEBSITES_JSON" | jq -r '(.data // .)[] | select(.domain == "create-next-app.larsenutvikling.no") | .id' | head -n 1)
-
-if [ -z "$UMAMI_WEBSITE_ID_VALUE" ]; then
-  curl -fsS "${UMAMI_API_URL_VALUE}/websites" \
-    -X POST \
-    -H "Authorization: Bearer ${UMAMI_TOKEN_VALUE}" \
-    -H 'Content-Type: application/json' \
-    --data '{"name":"Larsen create-next-app","domain":"create-next-app.larsenutvikling.no"}' \
-    >/dev/null
-fi
-
-UMAMI_WEBSITES_JSON=$(curl -fsS "${UMAMI_API_URL_VALUE}/websites" -H "Authorization: Bearer ${UMAMI_TOKEN_VALUE}")
-UMAMI_MATCH_COUNT=$(printf '%s' "$UMAMI_WEBSITES_JSON" | jq -r '(.data // .)[] | select(.domain == "create-next-app.larsenutvikling.no") | .id' | wc -l | tr -d ' ')
-test "$UMAMI_MATCH_COUNT" -eq 1
-UMAMI_WEBSITE_ID_VALUE=$(printf '%s' "$UMAMI_WEBSITES_JSON" | jq -er '(.data // .)[] | select(.domain == "create-next-app.larsenutvikling.no") | .id')
-```
-
-The creation body is exactly:
-
-```json
-{
-  "name": "Larsen create-next-app",
-  "domain": "create-next-app.larsenutvikling.no"
-}
-```
-
-Re-list and assert there is exactly one exact-domain match. Store its ID in `UMAMI_WEBSITE_ID_VALUE`. Never reuse Tinify's website ID.
-
-- [ ] **Step 5: Generate and store the admin credentials**
+- [x] **Step 4: Generate and store the admin credentials**
 
 Generate:
 
@@ -1483,41 +1437,48 @@ ADMIN_PASSWORD_VALUE=$(openssl rand -base64 24 | tr -d '\n')
 ADMIN_SESSION_SECRET_VALUE=$(openssl rand -base64 48 | tr -d '\n')
 ```
 
-Validate both with the same bounds as preflight. Store the human password in macOS Keychain under service `create-next-app.larsenutvikling.no admin` and account `stian` using `security add-generic-password -U`. Do not store the session secret outside Vercel.
+Validate both with the same bounds as preflight. Store the human password and
+independent session secret in login Keychain under the separate services
+`create-next-app.larsenutvikling.no admin password` and
+`create-next-app.larsenutvikling.no admin session secret`, account `stian`.
+Vercel remains the runtime source for both values.
 
 ```bash
 test "${#ADMIN_PASSWORD_VALUE}" -ge 24
 test "$(printf '%s' "$ADMIN_PASSWORD_VALUE" | wc -c | tr -d ' ')" -le 256
 test "$(printf '%s' "$ADMIN_SESSION_SECRET_VALUE" | wc -c | tr -d ' ')" -ge 32
 test "$(printf '%s' "$ADMIN_SESSION_SECRET_VALUE" | wc -c | tr -d ' ')" -le 512
-security add-generic-password -U -a stian -s 'create-next-app.larsenutvikling.no admin' -w "$ADMIN_PASSWORD_VALUE"
+security add-generic-password -U -a stian -s 'create-next-app.larsenutvikling.no admin password' -w "$ADMIN_PASSWORD_VALUE"
+security add-generic-password -U -a stian -s 'create-next-app.larsenutvikling.no admin session secret' -w "$ADMIN_SESSION_SECRET_VALUE"
 ```
 
-- [ ] **Step 6: Set production Vercel environment variables without printing values**
+- [x] **Step 5: Set Vercel environment variables without printing values**
 
-Use stdin so no secret appears as a command argument:
+Use stdin so no secret appears as a command argument. Public configuration is
+available to Production, Preview, and Development. Vercel only allows sensitive
+variables in Production and Preview, so keep API and admin secrets out of
+Development:
 
 ```bash
-add_sensitive_env() {
+add_secret_env() {
   local env_key="$1"
   local env_value="$2"
-  printf '%s' "$env_value" | vercel env add "$env_key" production --project larsen-create-next-app-site --scope stians-applications --force --sensitive --yes
+  printf '%s' "$env_value" | vercel env add "$env_key" production,preview --project larsen-create-next-app-site --scope stians-applications --force --sensitive --yes
 }
 
-add_public_env() {
+add_config_env() {
   local env_key="$1"
   local env_value="$2"
-  printf '%s' "$env_value" | vercel env add "$env_key" production --project larsen-create-next-app-site --scope stians-applications --force --no-sensitive --yes
+  printf '%s' "$env_value" | vercel env add "$env_key" production,preview,development --project larsen-create-next-app-site --scope stians-applications --force --no-sensitive --yes
 }
 
-add_sensitive_env ADMIN_PASSWORD "$ADMIN_PASSWORD_VALUE"
-add_sensitive_env ADMIN_SESSION_SECRET "$ADMIN_SESSION_SECRET_VALUE"
-add_public_env NEXT_PUBLIC_UMAMI_SRC "$UMAMI_SRC_VALUE"
-add_public_env NEXT_PUBLIC_UMAMI_WEBSITE_ID "$UMAMI_WEBSITE_ID_VALUE"
-add_sensitive_env UMAMI_API_URL "$UMAMI_API_URL_VALUE"
-add_sensitive_env UMAMI_WEBSITE_ID "$UMAMI_WEBSITE_ID_VALUE"
-add_sensitive_env UMAMI_USERNAME "$UMAMI_USERNAME_VALUE"
-add_sensitive_env UMAMI_PASSWORD "$UMAMI_PASSWORD_VALUE"
+add_secret_env ADMIN_PASSWORD "$ADMIN_PASSWORD_VALUE"
+add_secret_env ADMIN_SESSION_SECRET "$ADMIN_SESSION_SECRET_VALUE"
+add_config_env NEXT_PUBLIC_UMAMI_SRC 'https://cloud.umami.is/script.js'
+add_config_env NEXT_PUBLIC_UMAMI_WEBSITE_ID "$UMAMI_WEBSITE_ID_VALUE"
+add_config_env UMAMI_API_URL 'https://api.umami.is/v1'
+add_config_env UMAMI_WEBSITE_ID "$UMAMI_WEBSITE_ID_VALUE"
+add_secret_env UMAMI_API_KEY "$UMAMI_API_KEY_VALUE"
 ```
 
 These are the configured variables:
@@ -1528,14 +1489,16 @@ These are the configured variables:
 - `NEXT_PUBLIC_UMAMI_WEBSITE_ID`
 - `UMAMI_API_URL`
 - `UMAMI_WEBSITE_ID`
-- `UMAMI_USERNAME`
-- `UMAMI_PASSWORD`
+- `UMAMI_API_KEY`
 
-Do not add `UMAMI_API_KEY` when the self-hosted instance uses username/password. Do not add `NEXT_PUBLIC_GA_MEASUREMENT_ID` unless an existing intended GA4 property is independently confirmed; keeping the optional code path does not authorize inventing a measurement ID.
+Do not add `NEXT_PUBLIC_GA_MEASUREMENT_ID` unless an existing intended GA4
+property is independently confirmed; keeping the optional code path does not
+authorize inventing a measurement ID.
 
-List only variable names, targets, and sensitive/plain type afterward. Confirm every secret is sensitive and production-scoped.
+List only variable names, targets, and sensitive/plain type afterward. Confirm
+every secret is sensitive and scoped to Production and Preview.
 
-- [ ] **Step 7: Enable and verify Vercel Web Analytics**
+- [x] **Step 6: Enable and verify Vercel Web Analytics**
 
 The query API currently reports that Web Analytics is disabled even though the component and project metadata exist. Enable it and prove the public query endpoint accepts the project:
 
@@ -1546,7 +1509,7 @@ vercel api "/v1/query/web-analytics/visits/count?teamId=${TEAM_ID}&projectId=${T
 
 Expected: the second command no longer returns `Web Analytics is not enabled for this project`. Do not use Vercel data inside `/admin`.
 
-- [ ] **Step 8: Push verified commits and wait for the Git-triggered production deployment**
+- [ ] **Step 7: Push verified commits and wait for the Git-triggered production deployment**
 
 Run:
 
@@ -1556,7 +1519,7 @@ git push origin main
 
 Use Vercel project/deployment reads to wait for the commit deployment to become `READY` and promoted to production. A pushed commit is not deployment proof; record deployment ID, commit SHA, ready timestamp, and aliases only after Vercel reports them.
 
-- [ ] **Step 9: Verify public and admin behavior in production**
+- [ ] **Step 8: Verify public and admin behavior in production**
 
 With browser network inspection:
 
@@ -1570,11 +1533,11 @@ With browser network inspection:
 
 Capture desktop and mobile screenshots and console/network evidence. Do not include the password, cookie, Umami token, or provider credentials in screenshots or logs.
 
-- [ ] **Step 10: Verify provider ingestion after its real delay**
+- [ ] **Step 9: Verify provider ingestion after its real delay**
 
 Poll Umami's authenticated stats/events endpoints using the exact controlled time window every 15 seconds for at most 10 minutes. Verify the same Umami-derived counts in `/admin`. Check Vercel Analytics independently over the same bounded window. If a provider still lacks the controlled event, report that evidence as failed and investigate instead of extending an unbounded wait. Do not call the feature complete while only local dispatch mocks pass.
 
-- [ ] **Step 11: Report completion with evidence boundaries**
+- [ ] **Step 10: Report completion with evidence boundaries**
 
 Report separately:
 

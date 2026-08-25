@@ -1,11 +1,11 @@
 // @vitest-environment node
 
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
 import { analyticsWindow } from "./time-window";
-import { createUmamiClient, resetUmamiTokenCacheForTests } from "./umami";
+import { createUmamiClient } from "./umami";
 
 const WINDOW = analyticsWindow("30d", new Date("2026-08-25T12:00:00.000Z"));
 
@@ -26,8 +26,6 @@ function fetchMock(...responses: Array<Response | Error>) {
 }
 
 describe("Umami admin client", () => {
-  beforeEach(() => resetUmamiTokenCacheForTests());
-
   it("fails honestly without complete configuration", async () => {
     const request = vi.fn() as unknown as typeof fetch;
     const client = createUmamiClient({}, request);
@@ -40,7 +38,7 @@ describe("Umami admin client", () => {
     const request = fetchMock(json({ visitors: 5 }));
     const client = createUmamiClient(
       {
-        UMAMI_API_URL: "https://analytics.tinify.dev/api/",
+        UMAMI_API_URL: "https://api.umami.is/v1/",
         UMAMI_WEBSITE_ID: "website-id",
         UMAMI_API_KEY: "api-key",
       },
@@ -51,50 +49,18 @@ describe("Umami admin client", () => {
 
     expect(result).toMatchObject({ ok: true, data: { visitors: 5 } });
     const [url, init] = vi.mocked(request).mock.calls[0] ?? [];
-    expect(String(url)).toBe("https://analytics.tinify.dev/api/websites/website-id/active");
+    expect(String(url)).toBe("https://api.umami.is/v1/websites/website-id/active");
     expect(new Headers(init?.headers).get("authorization")).toBe("Bearer api-key");
-  });
-
-  it("logs in once and retries one unauthorized request with a fresh token", async () => {
-    const request = fetchMock(
-      json({ token: "first-token" }),
-      new Response(null, { status: 401 }),
-      json({ token: "second-token" }),
-      json({ pageviews: 120, visitors: 40, visits: 55, bounces: 12, totaltime: 4200 }),
-    );
-    const client = createUmamiClient(
-      {
-        UMAMI_API_URL: "https://analytics.tinify.dev/api",
-        UMAMI_WEBSITE_ID: "website-id",
-        UMAMI_USERNAME: "admin",
-        UMAMI_PASSWORD: "password",
-      },
-      request,
-    );
-
-    const result = await client.getStats(WINDOW);
-
-    expect(result).toMatchObject({
-      ok: true,
-      data: { pageviews: 120, visitors: 40, visits: 55, bounces: 12, totalTime: 4200 },
-    });
-    expect(request).toHaveBeenCalledTimes(4);
-    expect(new Headers(vi.mocked(request).mock.calls[1]?.[1]?.headers).get("authorization")).toBe(
-      "Bearer first-token",
-    );
-    expect(new Headers(vi.mocked(request).mock.calls[3]?.[1]?.headers).get("authorization")).toBe(
-      "Bearer second-token",
-    );
   });
 
   it("returns timeout and invalid-response results rather than zero", async () => {
     const timeout = Object.assign(new Error("timed out"), { name: "TimeoutError" });
     const timeoutClient = createUmamiClient(
-      { UMAMI_API_URL: "https://analytics.tinify.dev/api", UMAMI_WEBSITE_ID: "website-id", UMAMI_API_KEY: "key" },
+      { UMAMI_API_URL: "https://api.umami.is/v1", UMAMI_WEBSITE_ID: "website-id", UMAMI_API_KEY: "key" },
       fetchMock(timeout),
     );
     const invalidClient = createUmamiClient(
-      { UMAMI_API_URL: "https://analytics.tinify.dev/api", UMAMI_WEBSITE_ID: "website-id", UMAMI_API_KEY: "key" },
+      { UMAMI_API_URL: "https://api.umami.is/v1", UMAMI_WEBSITE_ID: "website-id", UMAMI_API_KEY: "key" },
       fetchMock(json({ visitors: "five" })),
     );
 
@@ -119,7 +85,7 @@ describe("Umami admin client", () => {
       json([{ value: "hero", total: 3 }]),
     );
     const client = createUmamiClient(
-      { UMAMI_API_URL: "https://analytics.tinify.dev/api", UMAMI_WEBSITE_ID: "website-id", UMAMI_API_KEY: "key" },
+      { UMAMI_API_URL: "https://api.umami.is/v1", UMAMI_WEBSITE_ID: "website-id", UMAMI_API_KEY: "key" },
       request,
     );
 
