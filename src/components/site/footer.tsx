@@ -1,5 +1,6 @@
+import { TrackedNpmLink } from "@/components/analytics/tracked-npm-link";
 import { CopyCommandButton } from "@/components/ui/copy-command-button";
-import { AUTHOR_URL, INSTALL_COMMAND, NPM_URL, REPO_URL, SKILLS_URL } from "@/lib/content";
+import { AUTHOR_URL, INSTALL_COMMAND, REPO_URL, SKILLS_URL } from "@/lib/content";
 import styles from "./footer.module.css";
 
 export function Footer() {
@@ -12,14 +13,17 @@ export function Footer() {
             <code>
               <span aria-hidden="true">$</span> {INSTALL_COMMAND}
             </code>
-            <CopyCommandButton command={INSTALL_COMMAND} />
+            <CopyCommandButton
+              command={INSTALL_COMMAND}
+              tracking={{ event: "command_copied", surface: "footer" }}
+            />
           </div>
         </div>
 
         <div className={styles.meta}>
           <nav aria-label="Footer">
             <a href={REPO_URL}>GitHub</a>
-            <a href={NPM_URL}>npm</a>
+            <TrackedNpmLink surface="footer">npm</TrackedNpmLink>
             <a href={SKILLS_URL}>Larsen Skills</a>
             <a href="https://rampkit.app">rampkit</a>
           </nav>

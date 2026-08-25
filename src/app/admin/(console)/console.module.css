@@ -1,0 +1,43 @@
+.page {
+  min-block-size: 100dvh;
+  padding: var(--space-7) var(--page-gutter);
+}
+
+.skeleton {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+  max-inline-size: 76rem;
+  margin: 0 auto;
+}
+
+.skeleton > span {
+  min-block-size: 7rem;
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton > span {
+    animation: none;
+  }
+}
+
+@media (max-width: 60rem) {
+  .skeleton {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 38rem) {
+  .skeleton {
+    grid-template-columns: 1fr;
+  }
+}
