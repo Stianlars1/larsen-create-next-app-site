@@ -1420,7 +1420,7 @@ never print it.
 Use these Cloud endpoints:
 
 ```text
-Public tracker: https://cloud.umami.is/script.js
+Public tracker: /stats/script.js, rewritten to https://cloud.umami.is/:path*
 Server API: https://api.umami.is/v1
 Authentication: Authorization: Bearer <UMAMI_API_KEY>
 ```
@@ -1474,7 +1474,7 @@ add_config_env() {
 
 add_secret_env ADMIN_PASSWORD "$ADMIN_PASSWORD_VALUE"
 add_secret_env ADMIN_SESSION_SECRET "$ADMIN_SESSION_SECRET_VALUE"
-add_config_env NEXT_PUBLIC_UMAMI_SRC 'https://cloud.umami.is/script.js'
+add_config_env NEXT_PUBLIC_UMAMI_SRC '/stats/script.js'
 add_config_env NEXT_PUBLIC_UMAMI_WEBSITE_ID "$UMAMI_WEBSITE_ID_VALUE"
 add_config_env UMAMI_API_URL 'https://api.umami.is/v1'
 add_config_env UMAMI_WEBSITE_ID "$UMAMI_WEBSITE_ID_VALUE"
