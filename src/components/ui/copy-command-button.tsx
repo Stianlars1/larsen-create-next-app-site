@@ -11,6 +11,8 @@ import {
   useTransform,
 } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { CommandCopySurface } from "@/lib/analytics/events";
+import { trackProductEvent } from "@/lib/analytics/events";
 import styles from "./copy-command-button.module.css";
 
 /*
@@ -85,7 +87,19 @@ function MorphIcon({ copied, reduced }: { copied: boolean; reduced: boolean }) {
   );
 }
 
-export function CopyCommandButton({ command }: { command: string }) {
+export type CopyTracking =
+  | { event: "command_copied"; surface: CommandCopySurface }
+  | { event: "theme_css_copied"; surface: "palette_demo" };
+
+function trackCopy(tracking: CopyTracking) {
+  if (tracking.event === "command_copied") {
+    trackProductEvent({ name: "command_copied", data: { surface: tracking.surface } });
+    return;
+  }
+  trackProductEvent({ name: "theme_css_copied", data: { surface: tracking.surface } });
+}
+
+export function CopyCommandButton({ command, tracking }: { command: string; tracking: CopyTracking }) {
   const [copied, setCopied] = useState(false);
   const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const reduced = useReducedMotion() ?? false;
@@ -102,6 +116,7 @@ export function CopyCommandButton({ command }: { command: string }) {
     try {
       await navigator.clipboard.writeText(command);
       setCopied(true);
+      trackCopy(tracking);
 
       if (resetTimer.current) {
         clearTimeout(resetTimer.current);
@@ -119,7 +134,15 @@ export function CopyCommandButton({ command }: { command: string }) {
       className={styles.button}
       data-copied={copied ? "true" : undefined}
       onClick={handleCopy}
-      aria-label={copied ? "Command copied" : "Copy command"}
+      aria-label={
+        tracking.event === "theme_css_copied"
+          ? copied
+            ? "Stylesheet copied"
+            : "Copy stylesheet"
+          : copied
+            ? "Command copied"
+            : "Copy command"
+      }
     >
       <MorphIcon copied={copied} reduced={reduced} />
       <span className={styles.label} aria-live="polite">
