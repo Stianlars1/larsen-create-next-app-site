@@ -6,7 +6,7 @@
 
 **Architecture:** Keep authentication, provider clients, and aggregation in focused server-only modules. Public components emit one validated product-event union to Umami, Vercel, and mounted GA4, while one path-aware provider component prevents every analytics script from mounting under `/admin`. The admin page streams one server-rendered dashboard whose data sources fail independently and never expose provider credentials.
 
-**Tech Stack:** Next.js 16.3 App Router, React 19.2, TypeScript, CSS Modules, Node crypto, Vitest, React Testing Library, self-hosted Umami v3 API, Vercel Web Analytics, GA4, and the public npm registry APIs.
+**Tech Stack:** Next.js 16.3 App Router, React 19.2, TypeScript, CSS Modules, Node crypto, Vitest, React Testing Library, Umami Cloud API, Vercel Web Analytics, GA4, and the public npm registry APIs.
 
 **Spec:** `docs/superpowers/specs/2026-08-25-admin-analytics-design.md`
 
@@ -87,7 +87,7 @@
 - Create `.env.example` with names and empty values only.
 - Modify `README.md` with admin, analytics, environment, and verification contracts.
 - Modify only the analytics-consent rule in `AGENTS.md`; preserve its existing unrelated dirty block.
-- Use the existing Tinify Umami credentials without printing them, create a separate website record, configure Vercel, enable Vercel Web Analytics, deploy, and verify production.
+- Use the shared Umami Cloud account with a separate Website record for this domain, configure Vercel, enable Vercel Web Analytics, deploy, and verify production. Never use Tinify credentials or infrastructure.
 
 ---
 

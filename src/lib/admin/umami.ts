@@ -172,7 +172,7 @@ export function createUmamiClient(
 
   async function headers(activeConfig: UmamiConfig, fresh = false): Promise<HeaderResult> {
     if (activeConfig.apiKey) {
-      return { ok: true as const, headers: { "x-umami-api-key": activeConfig.apiKey }, retryable: false };
+      return { ok: true as const, headers: { Authorization: `Bearer ${activeConfig.apiKey}` }, retryable: false };
     }
     if (
       !fresh &&

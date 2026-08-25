@@ -52,7 +52,7 @@ describe("Umami admin client", () => {
     expect(result).toMatchObject({ ok: true, data: { visitors: 5 } });
     const [url, init] = vi.mocked(request).mock.calls[0] ?? [];
     expect(String(url)).toBe("https://analytics.tinify.dev/api/websites/website-id/active");
-    expect(new Headers(init?.headers).get("x-umami-api-key")).toBe("api-key");
+    expect(new Headers(init?.headers).get("authorization")).toBe("Bearer api-key");
   });
 
   it("logs in once and retries one unauthorized request with a fresh token", async () => {
