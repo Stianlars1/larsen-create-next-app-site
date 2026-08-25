@@ -31,14 +31,59 @@ the CLI and quietly go missing from the site.
 ```bash
 npm install
 npm run dev
+npm run preflight
+npm test
 npm run build
 npm run lint
+npx tsc --noEmit
 ```
+
+## Analytics and admin
+
+The public site keeps two cookie-free analytics providers:
+
+- Umami is the source of truth for `/admin` traffic and product-use reporting.
+- Vercel Web Analytics remains an independent public measurement system.
+
+Google Analytics is optional and mounts only after analytics consent when
+`NEXT_PUBLIC_GA_MEASUREMENT_ID` is configured. No analytics provider or consent
+banner mounts under `/admin`.
+
+The public event contract is deliberately small and does not send commands,
+app names, entered HEX values, URLs, or other free-form data:
+
+- `palette_generator_used`
+- `command_builder_used`
+- `command_copied`
+- `theme_css_copied`
+- `npm_link_clicked`
+
+`/admin` is a one-operator password gate. It requires both `ADMIN_PASSWORD`
+and an independent `ADMIN_SESSION_SECRET`. The password must contain at least
+20 Unicode code points and no more than 256 UTF-8 bytes. The session secret
+must contain at least 32 random bytes. The session is HMAC-signed, HTTP-only,
+Secure on HTTPS, SameSite Strict, scoped to `/admin`, and expires after 12
+hours.
+
+Use [.env.example](.env.example) for variable names only. Never commit values.
+The preflight script permits an entirely unconfigured local admin, but rejects
+partial or invalid admin and Umami configuration before a build.
+
+The admin dashboard displays an on-demand snapshot of the public site, Umami,
+npm registry, and npm downloads API. It is not independent uptime monitoring.
+npm figures are package downloads, not unique visitors, installs, or confirmed
+project creations.
 
 ## Deployment
 
-Vercel, from `main`. The domain is attached in the Vercel dashboard;
-`NEXT_PUBLIC_GA_MEASUREMENT_ID` is set there too.
+Vercel deploys from `main`. Production configuration is managed in the Vercel
+dashboard or CLI. Set Umami public identifiers and server credentials, the admin
+password and session secret, and optionally the GA measurement ID there.
+
+Treat local tests, preview behavior, the production deployment, and visible
+provider ingestion as separate verification boundaries. A green local test does
+not prove a Vercel environment variable, an Umami website record, or production
+analytics ingestion.
 
 ## License
 

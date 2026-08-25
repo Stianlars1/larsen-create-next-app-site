@@ -5,11 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
+    "preflight": "node scripts/preflight.mjs",
+    "prebuild": "npm run preflight",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "test": "npm run test:node && npm run test:vitest",
-    "test:node": "node --test src/lib/*.test.mjs",
+    "test:node": "node --test src/lib/*.test.mjs scripts/*.test.mjs",
     "test:vitest": "vitest run"
   },
   "dependencies": {
