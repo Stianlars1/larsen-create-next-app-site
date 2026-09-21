@@ -55,3 +55,15 @@ publication. Registry confirmed 0.7.0 absent afterward. Publication and website
 deployment await renewed owner authentication; no production change is claimed.
 The lockfile records the candidate integrity at its intended future registry URL;
 local checks used the exact tarball. Run npm ci and the registry gate after publish.
+
+## Published dependency verification
+
+CLI 0.7.0 was published and independently verified on 2026-09-22 Europe/Oslo.
+Registry version/latest, integrity, gitHead and downloaded tarball bytes match
+the corrected release candidate above. The CLI release is at
+https://github.com/Stianlars1/larsen-create-next-app/releases/tag/v0.7.0.
+
+The site installed 0.7.0 from npm and completed npm ci. The required publication
+gate passed against the public registry. The combined suite passes 39 Node tests
+and 84 Vitest tests; ESLint, TypeScript and production build pass. This supersedes
+the earlier authentication blocker. Live deployment is verified separately.
