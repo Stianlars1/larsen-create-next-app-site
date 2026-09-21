@@ -18,14 +18,14 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-2) var(--space-3);
-  border: var(--border-width) solid var(--card-border);
+  border: var(--border-width) solid hsl(var(--input));
   border-radius: var(--radius-md);
   transition: border-color var(--duration-fast) var(--ease-out);
 }
 
 /* Matched to the block the field sits in - see the surface prop. */
 .field[data-surface="card"] {
-  background: hsl(var(--gray-1));
+  background: hsl(var(--background));
 }
 
 .field[data-surface="raised"] {
@@ -33,7 +33,7 @@
 }
 
 .field:focus-within {
-  border-color: hsl(var(--brand-solid) / 0.6);
+  border-color: hsl(var(--ring));
 }
 
 .field[data-invalid="true"] {

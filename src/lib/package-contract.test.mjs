@@ -8,7 +8,7 @@
  * before it can reach a visitor.
  */
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 
@@ -56,11 +56,6 @@ import {
 const read = (relativePath) =>
   readFileSync(fileURLToPath(new URL(relativePath, import.meta.url)), "utf8");
 
-const HUELESS_NEUTRAL_TINT_EXCEPTIONS = ["#000000", "#010101", "#FEFEFE", "#FFFFFF"];
-
-const hexClaims = (copy) =>
-  [...copy.matchAll(/#[0-9a-f]{6}/gi)].map((match) => match[0].toUpperCase());
-
 test("the documented flag list is exactly the package option contract", () => {
   // The site collapses each boolean pair into one row, and prefixes the two
   // flags that have a short form.
@@ -68,7 +63,13 @@ test("the documented flag list is exactly the package option contract", () => {
     FLAGS.flatMap(({ flag }) =>
       flag
         .split(" / ")
-        .map((part) => part.trim().replace(/^-\w,\s*/, "").split(" ")[0])
+        .map(
+          (part) =>
+            part
+              .trim()
+              .replace(/^-\w,\s*/, "")
+              .split(" ")[0],
+        )
         .filter((part) => part.startsWith("--")),
     ),
   );
@@ -102,7 +103,10 @@ test("the demo and the builder start from the CLI's own defaults", () => {
 
 test("copied commands target the installed package version and never offer partial prompt answers", () => {
   assert.equal(PACKAGE_VERSION, packageMetadata.version);
-  assert.equal(PACKAGE_EXEC, `npx --yes @larsen-utvikling/create-next-app@${packageMetadata.version}`);
+  assert.equal(
+    PACKAGE_EXEC,
+    `npx --yes @larsen-utvikling/create-next-app@${packageMetadata.version}`,
+  );
 
   const builder = read("../components/features/command-builder.tsx");
   assert.doesNotMatch(builder, /PROMPT_MODES|legend="Prompts"|Ask me/);
@@ -117,7 +121,9 @@ test("copied commands target the installed package version and never offer parti
 
 test("the labelled tint is the one the CLI falls back to", () => {
   const fallback = optionDefault("neutral-tint");
-  const labelled = NEUTRAL_TINTS.filter((tint) => tint.label.includes("(default)"));
+  const labelled = NEUTRAL_TINTS.filter((tint) =>
+    tint.label.includes("(default)"),
+  );
   assert.deepEqual(
     labelled.map((tint) => tint.value),
     [fallback],
@@ -133,7 +139,9 @@ test("the palette walkthrough asks what the CLI asks, in the CLI's words", () =>
 
   // The walkthrough mirrors the CLI's own prompt contract, question for
   // question and in order, rather than a hand-kept copy of it.
-  const expected = PALETTE_PROMPT_CONTRACT.followUps.map((entry) => entry.option);
+  const expected = PALETTE_PROMPT_CONTRACT.followUps.map(
+    (entry) => entry.option,
+  );
   assert.deepEqual(
     step.followUps?.map((entry) => entry.id),
     expected,
@@ -153,8 +161,14 @@ test("the palette walkthrough asks what the CLI asks, in the CLI's words", () =>
   const tintStep = step.followUps?.find((entry) => entry.id === "neutral-tint");
   assert.ok(tintStep, "the site documents the neutral tint question");
   assert.deepEqual(
-    tintStep.choices.map((choice) => ({ label: choice.label, hint: choice.hint })),
-    optionChoices("neutral-tint").map((choice) => ({ label: choice.label, hint: choice.hint })),
+    tintStep.choices.map((choice) => ({
+      label: choice.label,
+      hint: choice.hint,
+    })),
+    optionChoices("neutral-tint").map((choice) => ({
+      label: choice.label,
+      hint: choice.hint,
+    })),
   );
   assert.equal(
     tintStep.choices.filter((choice) => choice.isDefault).length,
@@ -169,30 +183,11 @@ test("the palette walkthrough asks what the CLI asks, in the CLI's words", () =>
   );
 });
 
-test("neutral tint copy limits accent invariance to chromatic seeds and lists every hueless exception", () => {
-  const paletteStep = PROMPT_STEPS.find((entry) => entry.id === "palette");
-  const tintStep = paletteStep?.followUps?.find((entry) => entry.id === "neutral-tint");
-  assert.ok(tintStep, "the site documents the neutral tint question");
-
-  const strong = tintStep.choices.find((choice) => choice.label === "Strong");
-  assert.match(strong?.hint ?? "", /chromatic accent scale unchanged/i);
-  assert.match(tintStep.why, /chromatic accent scales stay unchanged/i);
-  assert.deepEqual(hexClaims(tintStep.why), HUELESS_NEUTRAL_TINT_EXCEPTIONS);
-
+test("neutral copy describes the native engine choices without legacy promises", () => {
   const disclosure = read("../components/ui/neutral-tint-disclosure.tsx");
-  assert.match(disclosure, /Subtle is the CLI default and needs no flag\./);
-  assert.match(disclosure, /Strong adds more seed hue to the grays\./);
-  assert.match(disclosure, /Accent colours stay unchanged, except for/);
-  assert.deepEqual(hexClaims(disclosure), HUELESS_NEUTRAL_TINT_EXCEPTIONS);
-  assert.doesNotMatch(disclosure, /tokens built on it|largest single-channel difference/i);
-
-  for (const copy of [strong?.hint ?? "", tintStep.why, disclosure]) {
-    assert.doesNotMatch(
-      copy,
-      /\bnever\b[^.!?\n]{0,80}\baccent scale\b|\baccent scale\b[^.!?\n]{0,80}\bnever\b/i,
-      "neutral tint copy must not make an unconditional 'never changes accent' claim",
-    );
-  }
+  assert.match(disclosure, /Weak is the CLI default/);
+  assert.match(disclosure, /None uses achromatic neutrals/);
+  assert.doesNotMatch(disclosure, /Accent colours stay unchanged|Subtle/);
 });
 
 test("palette change summaries separate the count from the outlined steps", () => {
@@ -210,7 +205,9 @@ test("the skill catalogue matches the package, source by source", () => {
     [...ALL_SKILLS],
   );
   assert.deepEqual(
-    LARSEN_SKILLS.filter((skill) => skill.recommended).map((skill) => skill.name),
+    LARSEN_SKILLS.filter((skill) => skill.recommended).map(
+      (skill) => skill.name,
+    ),
     [...RECOMMENDED_SKILLS],
   );
   assert.deepEqual(
@@ -240,12 +237,25 @@ test("the skills prompt is quoted verbatim from the package contract", () => {
     SKILLS_PROMPT_CONTRACT.selection.options.map((option) => option.label),
   );
 
-  const recommended = which.choices.find((choice) => choice.label === "Recommended");
+  const recommended = which.choices.find(
+    (choice) => choice.label === "Recommended",
+  );
   assert.equal(recommended?.hint, RECOMMENDED_SKILLS.join(", "));
 });
 
 test("the skills headline counts what the package actually ships", () => {
-  const NUMERALS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
+  const NUMERALS = [
+    "zero",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+  ];
   const larsenWord = NUMERALS[ALL_SKILLS.length] ?? String(ALL_SKILLS.length);
   const thirdPartyWord = NUMERALS[SELECTABLE_SKILLS.length - ALL_SKILLS.length];
 
@@ -263,11 +273,16 @@ test("the skills headline counts what the package actually ships", () => {
   assert.match(sections, new RegExp(`All ${larsenWord}`, "i"));
 });
 
-test("every named seed clears the package's own contrast gate, both tints", () => {
+test("every named seed clears the package's own contrast gate, all three neutrals", () => {
   const failures = [];
   for (const { name, hex } of PREDEFINED_COLOURS) {
     for (const neutralTint of NEUTRAL_TINTS.map((tint) => tint.value)) {
-      const css = generateThemeCss({ hex, preset: "shadcn", format: "hsl-values", neutralTint });
+      const css = generateThemeCss({
+        hex,
+        preset: "shadcn",
+        format: "hsl-values",
+        neutralTint,
+      });
       for (const failure of checkThemeContrast(css)) {
         failures.push(`${name} ${hex} ${neutralTint}: ${failure}`);
       }
@@ -284,6 +299,54 @@ test("no page still offers the removed scheme flag", () => {
     "../components/features/command-builder.tsx",
     "../components/ui/neutral-tint-disclosure.tsx",
   ]) {
-    assert.doesNotMatch(read(file), /--scheme|\bSCHEMES\b/, `${file} still mentions --scheme`);
+    assert.doesNotMatch(
+      read(file),
+      /--scheme|\bSCHEMES\b/,
+      `${file} still mentions --scheme`,
+    );
+  }
+});
+
+test("UI format choices equal engine capabilities and preview bytes equal CLI exports", async () => {
+  const { supportedFormats, generateThemeArtifacts } =
+    await import("@larsen-utvikling/create-next-app/palette/index.js");
+  const { formatsFor, generate } = await import("./palette.ts");
+  for (const preset of PRESETS)
+    assert.deepEqual(
+      formatsFor(preset.value)
+        .map((f) => f.value)
+        .sort(),
+      supportedFormats(preset.value).sort(),
+    );
+  const options = {
+    hex: "#005F78",
+    preset: "canonical",
+    format: "oklch",
+    neutralTint: "strong",
+  };
+  const preview = await generate(options);
+  const cli = generateThemeArtifacts(options);
+  assert.equal(preview.css, cli.css);
+  assert.deepEqual(preview.artifacts, cli.artifacts);
+  assert.deepEqual(preview.manifest, cli.manifest);
+});
+
+test("consumer CSS has no removed ramp references or translucent preview text", () => {
+  const root = fileURLToPath(new URL("../", import.meta.url));
+  for (const file of readdirSync(root, { recursive: true })) {
+    if (!file.endsWith(".css") || file.includes("design-system")) continue;
+    assert.doesNotMatch(
+      readFileSync(`${root}/${file}`, "utf8"),
+      /var\(--(?:gray|accent)-\d+\)/,
+      file,
+    );
+  }
+  const css = read("../components/demo/palette-demo.module.css");
+  for (const selector of ["role code", "scaleLabel", "changeCount"]) {
+    const block = css.match(
+      new RegExp(`\\.${selector.replace(" ", "\\s+")}[^{}]*\\{([^}]*)\\}`),
+    );
+    assert.ok(block);
+    assert.doesNotMatch(block[1], /opacity:/);
   }
 });

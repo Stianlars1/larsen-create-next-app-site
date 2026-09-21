@@ -7,7 +7,7 @@
  */
 
 export const PACKAGE_NAME = "@larsen-utvikling/create-next-app";
-export const PACKAGE_VERSION = "0.6.0";
+export const PACKAGE_VERSION = "0.7.0";
 export const PACKAGE_EXEC = `npx --yes ${PACKAGE_NAME}@${PACKAGE_VERSION}`;
 export const REPO_URL = "https://github.com/Stianlars1/larsen-create-next-app";
 export const NPM_URL = "https://www.npmjs.com/package/@larsen-utvikling/create-next-app";
@@ -61,7 +61,7 @@ export const PROMPT_STEPS: PromptStep[] = [
       { label: "Yes", hint: "generate from your brand color" },
     ],
     flag: "--hex <color> · --default-palette for the default",
-    why: "Say no and you get a considered black-and-white theme with a blue accent. Say yes and four follow-up questions shape the palette.",
+    why: "Say no and you get a considered Tintful theme generated from Larsen blue. Say yes and four follow-up questions shape the palette.",
     followUps: [
       {
         id: "hex",
@@ -74,11 +74,11 @@ export const PROMPT_STEPS: PromptStep[] = [
         id: "preset",
         question: "Choose framework/style",
         choices: [
-          { label: "shadcn/ui", hint: "approved semantic token names + Larsen scales", isDefault: true },
-          { label: "Radix Themes custom-palette tokens", hint: "57 override names + 26 Larsen tokens" },
-          { label: "CSS Variables", hint: "accent + gray scales" },
+          { label: "shadcn/ui", hint: "native Tintful shadcn tokens", isDefault: true },
+          { label: "Radix Themes custom-palette tokens", hint: "native Radix Themes custom-palette tokens" },
+          { label: "Canonical", hint: "native Tintful ramps and semantic roles" },
         ],
-        flag: "--preset shadcn | radix | css-variables",
+        flag: "--preset shadcn | radix | canonical",
         why: "Decides which token names exist - and the generated docs and starter CSS are rewritten to match.",
       },
       {
@@ -99,11 +99,12 @@ export const PROMPT_STEPS: PromptStep[] = [
         id: "neutral-tint",
         question: "Choose neutral tint",
         choices: [
-          { label: "Subtle", hint: "the standard gray ramp (recommended)", isDefault: true },
-          { label: "Strong", hint: "more seed hue in the grays; chromatic accent scale unchanged" },
+          { label: "None", hint: "achromatic neutrals" },
+          { label: "Weak", hint: "subtle hue influence (recommended)", isDefault: true },
+          { label: "Strong", hint: "stronger hue influence in neutrals" },
         ],
-        flag: "--neutral-tint subtle | strong",
-        why: "How much of your colour bleeds into the neutrals. It moves the gray ramp and what is built on it. Chromatic accent scales stay unchanged; #000000, #010101, #FEFEFE and #FFFFFF are hueless exceptions whose accent scales also move. Subtle needs no flag.",
+        flag: "--neutral-tint none | weak | strong",
+        why: "None is achromatic; Weak and Strong derive neutrals with increasing hue influence. Weak is the custom palette default. Every export must pass Tintful quality checks.",
       },
     ],
   },
@@ -183,9 +184,9 @@ export const FLAGS: { flag: string; description: string }[] = [
   { flag: "-d, --defaults", description: "Skip every prompt and take the defaults - installs no skills" },
   { flag: "--default-palette", description: "Answer No to a custom palette and ship the default theme" },
   { flag: "--hex <color>", description: "Palette seed, with or without the #. Implies a custom palette" },
-  { flag: "--preset <name>", description: "shadcn | radix | css-variables" },
+  { flag: "--preset <name>", description: "shadcn | radix | canonical" },
   { flag: "--format <name>", description: "hex | rgb | hsl | hsl-values | oklab | oklch" },
-  { flag: "--neutral-tint <name>", description: "subtle | strong - affects the gray ramp, defaults to subtle" },
+  { flag: "--neutral-tint <name>", description: "none | weak | strong - affects the gray ramp, defaults to weak" },
   { flag: "--linter <name>", description: "eslint | biome | none" },
   { flag: "--pm <name>", description: "npm | pnpm | yarn | bun" },
   { flag: "--skills <list>", description: "recommended | all Larsen | comma-separated skill names" },
@@ -220,13 +221,18 @@ export const DESIGN_SYSTEM_FILES = [
   },
   {
     file: "theme.css",
-    role: "Color, generated for your seed. Light and dark, plus the document defaults.",
+    role: "Unmodified Tintful color tokens for light and dark, with audit sidecars.",
     tokens: [
       { group: "Semantic", detail: "background, foreground, primary, secondary, muted, accent, border, input, ring" },
-      { group: "Scales", detail: "--accent-1..12 and --gray-1..12" },
-      { group: "Status", detail: "success, danger, warning, info - each with foreground, muted, muted-foreground and border variants" },
-      { group: "Harmony", detail: "analogous and complementary, derived from your seed" },
+      { group: "Scales", detail: "Native adapter tokens; canonical exports include 12-step ramps" },
+      { group: "Status", detail: "Native shadcn feedback: destructive, success, warning and info with foreground and muted variants" },
+      { group: "Companion", detail: "Tintful selects a companion used by native secondary roles" },
     ],
+  },
+  {
+    file: "document.css",
+    role: "Consumer body and rule styling, separate from audited theme.css.",
+    tokens: [],
   },
   {
     file: "motion.css",
@@ -332,5 +338,8 @@ export const PROJECT_TREE = `my-app/
         ├── index.css
         ├── core.css       spacing · widths · radii · type · z
         ├── theme.css      color, light + dark
+        ├── theme.audit.json
+        ├── theme.manifest.json
+        ├── document.css   consumer styles
         ├── motion.css     durations · curves · reduced motion
         └── base.css       reset`;

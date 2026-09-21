@@ -20,6 +20,9 @@
 }
 
 .field {
+  border: 0;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
@@ -30,12 +33,12 @@
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  color: hsl(var(--foreground) / 0.45);
+  color: hsl(var(--muted-foreground));
 }
 
 .fieldHint {
   margin: 0;
-  color: hsl(var(--foreground) / 0.5);
+  color: hsl(var(--muted-foreground));
   font-size: var(--text-xs);
   line-height: var(--leading-body);
 }
@@ -67,12 +70,12 @@
   padding: var(--space-2) var(--space-3);
   border: var(--border-width) solid var(--card-border);
   border-radius: var(--radius-md);
-  background: hsl(var(--gray-1));
+  background: hsl(var(--background));
   transition: border-color var(--duration-fast) var(--ease-out);
 }
 
 .hexInput:focus-within {
-  border-color: hsl(var(--brand-solid) / 0.6);
+  border-color: hsl(var(--ring));
 }
 
 .hexInput[data-invalid="true"] {
@@ -100,9 +103,9 @@
 }
 
 .colourPicker {
-  border: var(--border-width) solid var(--card-border);
+  border: var(--border-width) solid hsl(var(--input));
   border-radius: var(--radius-md);
-  background: hsl(var(--gray-1));
+  background: hsl(var(--background));
   overflow: clip;
 }
 
@@ -113,7 +116,7 @@
   justify-content: space-between;
   gap: var(--space-3);
   padding: var(--space-2) var(--space-3);
-  color: hsl(var(--foreground) / 0.5);
+  color: hsl(var(--muted-foreground));
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   cursor: pointer;
@@ -133,7 +136,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  color: hsl(var(--foreground) / 0.82);
+  color: hsl(var(--muted-foreground));
 }
 
 .colourPickerDot {
@@ -160,7 +163,7 @@
   border: var(--border-width) solid transparent;
   border-radius: var(--radius-sm);
   background: transparent;
-  color: hsl(var(--foreground) / 0.65);
+  color: hsl(var(--muted-foreground));
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   text-align: left;
@@ -190,15 +193,15 @@
 .colourSource {
   margin: 0;
   padding: var(--space-1) var(--space-3) var(--space-3);
-  color: hsl(var(--foreground) / 0.45);
+  color: hsl(var(--muted-foreground));
   font-size: var(--text-xs);
   line-height: var(--leading-body);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .colourGrid button:hover:not([data-active="true"]) {
-    color: hsl(var(--foreground) / 0.85);
-    background: hsl(var(--gray-2));
+    color: hsl(var(--muted-foreground));
+    background: hsl(var(--muted));
   }
 }
 
@@ -211,10 +214,10 @@
 .segmented button {
   flex: 1 1 auto;
   padding: var(--space-2) var(--space-3);
-  border: var(--border-width) solid var(--card-border);
+  border: var(--border-width) solid hsl(var(--input));
   border-radius: var(--radius-sm);
-  background: hsl(var(--gray-1));
-  color: hsl(var(--foreground) / 0.55);
+  background: hsl(var(--background));
+  color: hsl(var(--muted-foreground));
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   cursor: pointer;
@@ -232,7 +235,7 @@
 
 .segmented button[data-active="true"] {
   color: hsl(var(--foreground));
-  border-color: hsl(var(--brand-solid) / 0.55);
+  border-color: hsl(var(--ring));
   background: hsl(var(--brand-solid) / 0.12);
 }
 
@@ -272,7 +275,7 @@
 .paneLabel {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  color: hsl(var(--foreground) / 0.45);
+  color: hsl(var(--muted-foreground));
 }
 
 .paneSurface {
@@ -308,7 +311,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  opacity: 0.75;
 }
 
 .roleChip {
@@ -342,7 +344,6 @@
   font-family: var(--font-mono);
   font-size: 0.68rem;
   color: currentColor;
-  opacity: 0.55;
 }
 
 .changeSummary {
@@ -363,7 +364,7 @@
 
 /* A zero is evidence too - it is the claim about the accent scale, on screen. */
 .changeCount[data-none="true"] {
-  opacity: 0.72;
+  color: inherit;
 }
 
 .changedSteps {
@@ -398,7 +399,7 @@
   padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
   border: var(--border-width) solid var(--card-border);
   border-radius: var(--radius-md);
-  background: hsl(var(--gray-1));
+  background: hsl(var(--background));
   min-width: 0;
 }
 
@@ -408,19 +409,19 @@
   overflow-x: auto;
   white-space: nowrap;
   font-size: var(--text-sm);
-  color: hsl(var(--foreground) / 0.85);
+  color: hsl(var(--muted-foreground));
 }
 
 .commandUnavailable {
   margin: 0;
-  color: hsl(var(--foreground) / 0.6);
+  color: hsl(var(--muted-foreground));
   font-size: var(--text-sm);
 }
 
 .details {
   border: var(--border-width) solid var(--card-border);
   border-radius: var(--radius-md);
-  background: hsl(var(--gray-1));
+  background: hsl(var(--background));
 }
 
 .details summary {
@@ -428,7 +429,7 @@
   cursor: pointer;
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  color: hsl(var(--foreground) / 0.6);
+  color: hsl(var(--muted-foreground));
   list-style: none;
 }
 
@@ -453,4 +454,30 @@
   margin: 0;
   color: hsl(var(--destructive));
   font-size: var(--text-sm);
+}
+
+.downloads {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.downloads button {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid hsl(var(--input));
+  border-radius: var(--radius-sm);
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  cursor: pointer;
+}
+.downloads button:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+.downloads p {
+  flex-basis: 100%;
+  color: hsl(var(--muted-foreground));
+  font-size: var(--text-xs);
 }

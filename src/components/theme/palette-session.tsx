@@ -31,6 +31,7 @@ type PaletteSession = {
   baseline: GeneratedTheme | null;
   busy: boolean;
   failed: boolean;
+  error: string | null;
   customPaletteActive: boolean;
   setCustomPaletteActive: (active: boolean) => void;
   updatePalette: (
@@ -43,7 +44,10 @@ const PaletteSessionContext = createContext<PaletteSession | null>(null);
 
 export function usePaletteSession(): PaletteSession {
   const session = useContext(PaletteSessionContext);
-  if (!session) throw new Error("usePaletteSession must be used inside PaletteSessionProvider.");
+  if (!session)
+    throw new Error(
+      "usePaletteSession must be used inside PaletteSessionProvider.",
+    );
   return session;
 }
 
@@ -72,6 +76,7 @@ export function PaletteSessionProvider({
   const [baseline, setBaseline] = useState<GeneratedTheme | null>(null);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [customPaletteActive, setCustomPaletteActive] = useState(false);
 
   const current = useRef(initialOptions);
@@ -91,6 +96,7 @@ export function PaletteSessionProvider({
       window.clearTimeout(debounce.current);
       const id = ++requestId.current;
       setFailed(false);
+      setError(null);
 
       if (!isValidHex(next.hex)) {
         setBusy(false);
@@ -99,28 +105,29 @@ export function PaletteSessionProvider({
 
       setBusy(true);
       debounce.current = window.setTimeout(() => {
-        // The site theme and both palette views change from the same accepted
-        // selection. SiteThemeProvider keeps owning its fixed shadcn/hsl-values
-        // stylesheet because page chrome must not depend on preview format.
-        setSelection({ hex: next.hex, neutralTint: next.neutralTint });
-
         const work: Promise<[GeneratedTheme, GeneratedTheme | null]> =
           next.neutralTint === "strong"
-            ? Promise.all([generate(next), generate({ ...next, neutralTint: "subtle" })])
+            ? Promise.all([
+                generate(next),
+                generate({ ...next, neutralTint: "weak" }).catch(() => null),
+              ])
             : generate(next).then((generated) => [generated, null]);
 
         work
           .then(([generated, subtle]) => {
             if (id !== requestId.current) return;
+            setSelection({ hex: next.hex, neutralTint: next.neutralTint });
             setTheme(generated);
             setBaseline(subtle);
             setBusy(false);
             setFailed(false);
+            setError(null);
           })
-          .catch(() => {
+          .catch((reason: unknown) => {
             if (id !== requestId.current) return;
             setBusy(false);
             setFailed(true);
+            setError(reason instanceof Error ? reason.message : String(reason));
           });
       }, delay);
     },
@@ -142,12 +149,26 @@ export function PaletteSessionProvider({
       baseline,
       busy,
       failed,
+      error,
       customPaletteActive,
       setCustomPaletteActive,
       updatePalette,
     }),
-    [options, theme, baseline, busy, failed, customPaletteActive, updatePalette],
+    [
+      options,
+      theme,
+      baseline,
+      busy,
+      failed,
+      error,
+      customPaletteActive,
+      updatePalette,
+    ],
   );
 
-  return <PaletteSessionContext.Provider value={value}>{children}</PaletteSessionContext.Provider>;
+  return (
+    <PaletteSessionContext.Provider value={value}>
+      {children}
+    </PaletteSessionContext.Provider>
+  );
 }

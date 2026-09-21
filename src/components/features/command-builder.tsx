@@ -20,7 +20,7 @@ import {
   type SkillsChoice,
 } from "@/lib/command-builder";
 import {
-  FORMATS,
+  formatsFor,
   PRESETS,
   isValidHex,
   paletteAuraColours,
@@ -61,7 +61,9 @@ const YES_NO = [
   { value: "no", label: "No" },
 ] as const;
 
-const RECOMMENDED_NAMES = SKILLS.filter((skill) => skill.recommended).map((skill) => skill.name);
+const RECOMMENDED_NAMES = SKILLS.filter((skill) => skill.recommended).map(
+  (skill) => skill.name,
+);
 
 /**
  * Every option the published CLI accepts, as controls, with the exact command
@@ -73,10 +75,17 @@ export function CommandBuilder() {
   const {
     options: paletteOptions,
     theme: paletteTheme,
+    busy,
+    failed,
+    error: paletteError,
     customPaletteActive,
     setCustomPaletteActive,
     updatePalette,
   } = usePaletteSession();
+
+  const paletteReady =
+    !customPaletteActive ||
+    (!busy && !failed && isValidHex(paletteOptions.hex));
 
   const [appName, setAppName] = useState("my-app");
   const [pm, setPm] = useState<PackageManager>(DEFAULT_PM);
@@ -97,12 +106,12 @@ export function CommandBuilder() {
   );
 
   const paletteBorder = useMemo(
-    () => paletteBorderGradient(paletteTheme, paletteOptions.format),
-    [paletteTheme, paletteOptions.format],
+    () => paletteBorderGradient(paletteTheme, paletteTheme.options.format),
+    [paletteTheme],
   );
   const aura = useMemo(
-    () => paletteAuraColours(paletteTheme, paletteOptions.format),
-    [paletteTheme, paletteOptions.format],
+    () => paletteAuraColours(paletteTheme, paletteTheme.options.format),
+    [paletteTheme],
   );
 
   /* The ring and the aura are both continuous, so they idle whenever the panel
@@ -123,16 +132,25 @@ export function CommandBuilder() {
       ? current.filter((entry) => entry !== name)
       : // Held in the collection's own order, so the flag reads the same
         // whichever chip you press first.
-        SKILLS.filter((skill) => skill.name === name || current.includes(skill.name)).map(
-          (skill) => skill.name,
-        );
+        SKILLS.filter(
+          (skill) => skill.name === name || current.includes(skill.name),
+        ).map((skill) => skill.name);
     lastPicked.current = next;
     setSkills({ kind: "pick", names: next });
   };
 
   const command = useMemo(
     () =>
-      buildScaffoldCommand({ appName, palette, pm, linter, skills, git, install, cnaVersion }),
+      buildScaffoldCommand({
+        appName,
+        palette,
+        pm,
+        linter,
+        skills,
+        git,
+        install,
+        cnaVersion,
+      }),
     [appName, palette, pm, linter, skills, git, install, cnaVersion],
   );
 
@@ -140,7 +158,8 @@ export function CommandBuilder() {
   const nameInvalid = trimmedName.length > 0 && !isValidAppName(trimmedName);
   const hexInvalid = palette.kind === "custom" && !isValidHex(palette.hex);
   const trimmedSpec = cnaVersion.trim();
-  const specInvalid = trimmedSpec.length > 0 && !isValidVersionSpec(trimmedSpec);
+  const specInvalid =
+    trimmedSpec.length > 0 && !isValidVersionSpec(trimmedSpec);
 
   const reveal = {
     initial: { opacity: 0, y: reduced ? 0 : -6 },
@@ -155,8 +174,8 @@ export function CommandBuilder() {
         <p className="label">The command</p>
         <h2 className="headline">Click the answers. Copy the command.</h2>
         <p className="lead">
-          Every option the scaffold takes, as a control. The copied command answers all of them and
-          runs without follow-up prompts.
+          Every option the scaffold takes, as a control. The copied command
+          answers all of them and runs without follow-up prompts.
         </p>
 
         <div className={styles.builder}>
@@ -165,21 +184,27 @@ export function CommandBuilder() {
               <label className={styles.fieldLabel} htmlFor="builder-name">
                 App name
               </label>
-              <div className={styles.input} data-invalid={nameInvalid ? "true" : undefined}>
+              <div
+                className={styles.input}
+                data-invalid={nameInvalid ? "true" : undefined}
+              >
                 <input
                   id="builder-name"
                   value={appName}
                   onChange={(event) => setAppName(event.target.value)}
                   spellCheck={false}
                   aria-invalid={nameInvalid}
-                  aria-describedby={nameInvalid ? "builder-name-error" : undefined}
+                  aria-describedby={
+                    nameInvalid ? "builder-name-error" : undefined
+                  }
                 />
               </div>
               {nameInvalid && (
                 <p className={styles.error} id="builder-name-error">
-                  Lowercase letters, digits, &apos;.&apos;, &apos;_&apos; and &apos;-&apos; only,
-                  starting with a letter or digit, up to 214 characters. The name stays out of the
-                  command until it matches.
+                  Lowercase letters, digits, &apos;.&apos;, &apos;_&apos; and
+                  &apos;-&apos; only, starting with a letter or digit, up to 214
+                  characters. The name stays out of the command until it
+                  matches.
                 </p>
               )}
             </div>
@@ -209,10 +234,26 @@ export function CommandBuilder() {
                     data-visible={auraInView ? "true" : undefined}
                     aria-hidden="true"
                   >
-                    <span className={styles.blob} data-layer="1" data-motion="decorative" />
-                    <span className={styles.blob} data-layer="2" data-motion="decorative" />
-                    <span className={styles.blob} data-layer="3" data-motion="decorative" />
-                    <span className={styles.blob} data-layer="4" data-motion="decorative" />
+                    <span
+                      className={styles.blob}
+                      data-layer="1"
+                      data-motion="decorative"
+                    />
+                    <span
+                      className={styles.blob}
+                      data-layer="2"
+                      data-motion="decorative"
+                    />
+                    <span
+                      className={styles.blob}
+                      data-layer="3"
+                      data-motion="decorative"
+                    />
+                    <span
+                      className={styles.blob}
+                      data-layer="4"
+                      data-motion="decorative"
+                    />
                   </div>
 
                   <div
@@ -225,15 +266,20 @@ export function CommandBuilder() {
                         id="builder-hex"
                         label="Seed HEX"
                         value={palette.hex}
-                        onChange={(hex) => updatePalette({ hex }, { delay: 200 })}
+                        onChange={(hex) =>
+                          updatePalette({ hex }, { delay: 200 })
+                        }
                         invalid={hexInvalid}
-                        describedBy={hexInvalid ? "builder-hex-error" : undefined}
+                        describedBy={
+                          hexInvalid ? "builder-hex-error" : undefined
+                        }
                         surface="raised"
                       />
                       {hexInvalid && (
                         <p className={styles.error} id="builder-hex-error">
-                          Enter a valid HEX colour, with or without the #. The palette flags stay
-                          out of the command until it is valid.
+                          Enter a valid HEX colour, with or without the #. The
+                          palette flags stay out of the command until it is
+                          valid.
                         </p>
                       )}
                     </div>
@@ -249,7 +295,7 @@ export function CommandBuilder() {
                       wide
                       legend="Colour format"
                       value={palette.format}
-                      options={FORMATS}
+                      options={formatsFor(palette.preset)}
                       onChange={(format) => updatePalette({ format })}
                     />
 
@@ -263,7 +309,12 @@ export function CommandBuilder() {
               )}
             </AnimatePresence>
 
-            <Segmented legend="Linter" value={linter} options={LINTERS} onChange={setLinter} />
+            <Segmented
+              legend="Linter"
+              value={linter}
+              options={LINTERS}
+              onChange={setLinter}
+            />
 
             <Segmented
               legend="Package manager"
@@ -278,7 +329,11 @@ export function CommandBuilder() {
               value={skills.kind}
               options={SKILL_CHOICES}
               onChange={(kind) =>
-                setSkills(kind === "pick" ? { kind: "pick", names: lastPicked.current } : { kind })
+                setSkills(
+                  kind === "pick"
+                    ? { kind: "pick", names: lastPicked.current }
+                    : { kind },
+                )
               }
             />
 
@@ -305,7 +360,9 @@ export function CommandBuilder() {
                       })}
                     </div>
                     {skills.names.length === 0 && (
-                      <p className={styles.fieldHint}>Nothing picked, so nothing is installed.</p>
+                      <p className={styles.fieldHint}>
+                        Nothing picked, so nothing is installed.
+                      </p>
                     )}
                   </fieldset>
                 </motion.div>
@@ -330,7 +387,10 @@ export function CommandBuilder() {
               <label className={styles.fieldLabel} htmlFor="builder-cna">
                 create-next-app version
               </label>
-              <div className={styles.input} data-invalid={specInvalid ? "true" : undefined}>
+              <div
+                className={styles.input}
+                data-invalid={specInvalid ? "true" : undefined}
+              >
                 <input
                   id="builder-cna"
                   value={cnaVersion}
@@ -339,17 +399,21 @@ export function CommandBuilder() {
                   spellCheck={false}
                   aria-invalid={specInvalid}
                   aria-describedby={
-                    specInvalid ? "builder-cna-hint builder-cna-error" : "builder-cna-hint"
+                    specInvalid
+                      ? "builder-cna-hint builder-cna-error"
+                      : "builder-cna-hint"
                   }
                 />
               </div>
               <p className={styles.fieldHint} id="builder-cna-hint">
                 The upstream Next.js scaffolder, passed through as
-                <code> create-next-app@&lt;spec&gt;</code>. Not this package&apos;s own version.
+                <code> create-next-app@&lt;spec&gt;</code>. Not this
+                package&apos;s own version.
               </p>
               {specInvalid && (
                 <p className={styles.error} id="builder-cna-error">
-                  A tag or an exact version - letters, digits, &apos;.&apos; and &apos;-&apos;.
+                  A tag or an exact version - letters, digits, &apos;.&apos; and
+                  &apos;-&apos;.
                 </p>
               )}
             </div>
@@ -360,7 +424,7 @@ export function CommandBuilder() {
               <span id="builder-command-label" className={styles.commandLabel}>
                 Your command
               </span>
-              <CopyCommandButton command={command} />
+              {paletteReady && <CopyCommandButton command={command} />}
             </header>
             {/* The whole point of the section. Announced politely so a change
                 supersedes the last one instead of queueing a backlog. */}
@@ -369,13 +433,20 @@ export function CommandBuilder() {
               aria-live="polite"
               aria-labelledby="builder-command-label"
             >
-              <code>{command}</code>
+              {paletteReady ? (
+                <code>{command}</code>
+              ) : (
+                <span role="status">
+                  {paletteError ??
+                    "Choose a valid palette and wait for its quality checks."}
+                </span>
+              )}
             </pre>
           </div>
 
           <p className={styles.note}>
-            The command answers every control. <code>--defaults</code> closes the prompt flow, and
-            selected overrides are added explicitly.
+            The command answers every control. <code>--defaults</code> closes
+            the prompt flow, and selected overrides are added explicitly.
           </p>
         </div>
       </div>
@@ -383,7 +454,10 @@ export function CommandBuilder() {
   );
 }
 
-type SegmentedOption<T extends string> = { readonly value: T; readonly label: string };
+type SegmentedOption<T extends string> = {
+  readonly value: T;
+  readonly label: string;
+};
 
 /**
  * The palette demo's control, kept identical so the page has one segmented

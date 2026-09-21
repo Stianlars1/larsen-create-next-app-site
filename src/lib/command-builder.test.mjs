@@ -10,7 +10,7 @@ const selectedAnswers = {
     hex: "#006045",
     preset: "shadcn",
     format: "hsl-values",
-    neutralTint: "subtle",
+    neutralTint: "weak",
   },
   pm: "npm",
   linter: "eslint",
@@ -29,7 +29,7 @@ test("the copied command answers every selected control without npm or CLI promp
   assert.deepEqual(tokens, [
     "npx",
     "--yes",
-    "@larsen-utvikling/create-next-app@0.6.0",
+    "@larsen-utvikling/create-next-app@0.7.0",
     "daniel",
     "--defaults",
     "--hex",
@@ -55,7 +55,7 @@ test("non-default controls remain explicit overrides of the unattended baseline"
   assert.deepEqual(tokens, [
     "npx",
     "--yes",
-    "@larsen-utvikling/create-next-app@0.6.0",
+    "@larsen-utvikling/create-next-app@0.7.0",
     "daniel",
     "--defaults",
     "--pm",

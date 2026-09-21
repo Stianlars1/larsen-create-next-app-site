@@ -29,7 +29,7 @@
   align-items: baseline;
   gap: var(--space-3);
   font-size: var(--text-sm);
-  color: hsl(var(--foreground) / 0.8);
+  color: hsl(var(--muted-foreground));
   margin-bottom: var(--space-5);
 }
 
@@ -81,7 +81,7 @@
 
 .px {
   text-align: right;
-  color: hsl(var(--foreground) / 0.5);
+  color: hsl(var(--muted-foreground));
 }
 
 /* ---------------- Type ---------------- */

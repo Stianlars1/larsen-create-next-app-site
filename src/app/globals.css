@@ -37,9 +37,9 @@
      too: anything that has to occlude what sits behind it composites a lift
      over --page-bg rather than inventing its own opaque colour.
      A hair off pure black keeps large flat areas from banding. */
-  --page-bg: hsl(0 0% 3.5%);
-  --surface-1: hsl(0 0% 100% / 0.024);
-  --surface-2: hsl(0 0% 100% / 0.04);
+  --page-bg: hsl(var(--background));
+  --surface-1: hsl(var(--popover));
+  --surface-2: hsl(var(--card));
   --hairline: hsl(0 0% 100% / 0.07);
   --hairline-strong: hsl(0 0% 100% / 0.13);
   /* The edge of a card, a code block or the consent bar. Referenced by three
@@ -47,26 +47,16 @@
      border shorthands invalid at computed-value time and drew no edge at all. */
   --card-border: var(--hairline);
 
-  /*
-   * The accent, split by role.
-   *
-   * --brand-blue paints text and focus rings, so it has to stay readable on a
-   * near-black page. --brand-solid paints surfaces - fills, borders, the two
-   * gradient washes - where the colour itself is the point and nothing has to
-   * be read through it.
-   *
-   * They are the same value in the shipped theme, because that seed's own
-   * accent-9 is already legible. They separate only when a visitor generates a
-   * palette: see BRAND_TOKENS in components/theme/site-theme.tsx, where solid
-   * takes accent-9 (the colour they typed) and blue takes accent-11 (the
-   * scale's readable-on-dark step, 9:1 or better for every seed).
-   */
-  --brand-solid: var(--brand-blue);
+  /* Page roles refer to Tintful's audited semantic roles. */
+  --brand-blue: var(--foreground);
+  --brand-solid: var(--primary);
+  --brand-blue-soft: var(--accent);
+  --brand-blue-subtle: var(--muted);
 
   /* Text tiers */
   --ink: hsl(var(--foreground));
-  --ink-muted: hsl(var(--foreground) / 0.56);
-  --ink-faint: hsl(var(--foreground) / 0.38);
+  --ink-muted: hsl(var(--muted-foreground));
+  --ink-faint: hsl(var(--muted-foreground));
 }
 
 /* Dark-first: the brand is black and white, and code belongs on dark */

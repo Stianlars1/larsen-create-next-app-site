@@ -10,27 +10,27 @@ import {
   normalizeHex,
   paletteAuraColours,
   paletteBorderGradient,
-  rampkitHarmonyUrl,
+  tintfulUrl,
 } from "./palette.ts";
 
 const base = {
   hex: "#4DA0FF",
   preset: "shadcn",
   format: "hsl-values",
-  neutralTint: "subtle",
+  neutralTint: "weak",
 };
 
-test("the command omits the default subtle neutral tint", () => {
+test("the command omits the default weak neutral tint", () => {
   assert.equal(
     buildCommand(base),
-    "npx --yes @larsen-utvikling/create-next-app@0.6.0 my-app --defaults --hex 4DA0FF",
+    "npx --yes @larsen-utvikling/create-next-app@0.7.0 my-app --defaults --hex 4DA0FF",
   );
 });
 
 test("the command emits the strong neutral tint", () => {
   assert.equal(
     buildCommand({ ...base, neutralTint: "strong" }),
-    "npx --yes @larsen-utvikling/create-next-app@0.6.0 my-app --defaults --hex 4DA0FF --neutral-tint strong",
+    "npx --yes @larsen-utvikling/create-next-app@0.7.0 my-app --defaults --hex 4DA0FF --neutral-tint strong",
   );
 });
 
@@ -45,16 +45,16 @@ test("the command is absent for invalid HEX and expands valid shorthand", () => 
   assert.equal(buildCommand({ ...base, hex: "#abcd" }), null);
   assert.equal(
     buildCommand({ ...base, hex: "#AbC" }),
-    "npx --yes @larsen-utvikling/create-next-app@0.6.0 my-app --defaults --hex AABBCC",
+    "npx --yes @larsen-utvikling/create-next-app@0.7.0 my-app --defaults --hex AABBCC",
   );
 });
 
-test("the Rampkit harmony URL follows the current valid HEX", () => {
+test("the Tintful link is only available with a valid seed", () => {
   assert.equal(
-    rampkitHarmonyUrl("#4da0ff"),
-    "https://rampkit.app/?hex=4DA0FF&harmonized=true",
+    tintfulUrl("#4da0ff"),
+    "https://tintful.app/",
   );
-  assert.equal(rampkitHarmonyUrl("not-a-colour"), null);
+  assert.equal(tintfulUrl("not-a-colour"), null);
 });
 
 test("the main demo starts from the CLI default without a tint flag", () => {
@@ -62,7 +62,7 @@ test("the main demo starts from the CLI default without a tint flag", () => {
     hex: "#4DA0FF",
     preset: "shadcn",
     format: "hsl-values",
-    neutralTint: "subtle",
+    neutralTint: "weak",
   });
   assert.equal(buildCommand(DEFAULT_DEMO_OPTIONS).includes("--neutral-tint"), false);
 });
@@ -97,17 +97,17 @@ test("the approved named colour shortcuts are unique valid HEX seeds", () => {
 });
 
 test("changed scale steps are counted from actual generated token values", () => {
-  const before = { "gray-1": "0 0% 1%", "gray-2": "0 0% 2%", "accent-1": "x" };
-  const after = { "gray-1": "0 0% 1%", "gray-2": "220 4% 2%", "accent-1": "y" };
+  const before = { "cpe-ramp-neutral-1": "0 0% 1%", "cpe-ramp-neutral-2": "0 0% 2%", "cpe-ramp-brand-primary-1": "x" };
+  const after = { "cpe-ramp-neutral-1": "0 0% 1%", "cpe-ramp-neutral-2": "220 4% 2%", "cpe-ramp-brand-primary-1": "y" };
 
   assert.equal(countChangedScaleSteps(before, after, "gray"), 1);
   assert.equal(countChangedScaleSteps(before, after, "accent"), 1);
-  assert.deepEqual(changedScaleSteps(before, after, "gray"), ["gray-2"]);
+  assert.deepEqual(changedScaleSteps(before, after, "gray"), ["cpe-ramp-neutral-2"]);
 });
 
 test("changed scale steps are formatted as compact ranges", () => {
   assert.equal(
-    formatChangedScaleSteps(["gray-1", "gray-3", "gray-4", "gray-5", "gray-6", "gray-7", "gray-8", "gray-9", "gray-10", "gray-11"]),
+    formatChangedScaleSteps(["cpe-ramp-neutral-1", "cpe-ramp-neutral-3", "cpe-ramp-neutral-4", "cpe-ramp-neutral-5", "cpe-ramp-neutral-6", "cpe-ramp-neutral-7", "cpe-ramp-neutral-8", "cpe-ramp-neutral-9", "cpe-ramp-neutral-10", "cpe-ramp-neutral-11"]),
     "1, 3-11",
   );
   assert.equal(formatChangedScaleSteps([]), "");
@@ -117,7 +117,7 @@ test("changed-step formatting works in supported browsers without toSorted", () 
   const descriptor = Object.getOwnPropertyDescriptor(Array.prototype, "toSorted");
   delete Array.prototype.toSorted;
   try {
-    assert.equal(formatChangedScaleSteps(["gray-4", "gray-2", "gray-3"]), "2-4");
+    assert.equal(formatChangedScaleSteps(["cpe-ramp-neutral-4", "cpe-ramp-neutral-2", "cpe-ramp-neutral-3"]), "2-4");
   } finally {
     if (descriptor) Object.defineProperty(Array.prototype, "toSorted", descriptor);
   }
@@ -128,14 +128,14 @@ test("the command palette border follows all four generated scales in order", ()
     Object.fromEntries(
       ["accent", "gray"].flatMap((scale) =>
         Array.from({ length: 12 }, (_, index) => [
-          `${scale}-${index + 1}`,
+          `cpe-ramp-${scale === "accent" ? "brand-primary" : "neutral"}-${index + 1}`,
           `${mode}-${scale}-${index + 1}`,
         ]),
       ),
     );
 
   const gradient = paletteBorderGradient(
-    { css: "", dark: tokens("dark"), light: tokens("light") },
+    { css: "", ramps: { dark: tokens("dark"), light: tokens("light") } },
     "hex",
   );
   const ordered = [
@@ -161,12 +161,12 @@ test("the command palette border follows all four generated scales in order", ()
 test("the palette border wraps bare HSL values as CSS colours", () => {
   const tokens = Object.fromEntries(
     ["accent", "gray"].flatMap((scale) =>
-      Array.from({ length: 12 }, (_, index) => [`${scale}-${index + 1}`, "212 100% 65%"]),
+      Array.from({ length: 12 }, (_, index) => [`cpe-ramp-${scale === "accent" ? "brand-primary" : "neutral"}-${index + 1}`, "212 100% 65%"]),
     ),
   );
 
   assert.match(
-    paletteBorderGradient({ css: "", dark: tokens, light: tokens }, "hsl-values"),
+    paletteBorderGradient({ css: "", ramps: { dark: tokens, light: tokens } }, "hsl-values"),
     /hsl\(212 100% 65%\)/,
   );
 });
@@ -174,18 +174,18 @@ test("the palette border wraps bare HSL values as CSS colours", () => {
 test("the palette border reads its start angle from the sweep property", () => {
   const tokens = Object.fromEntries(
     ["accent", "gray"].flatMap((scale) =>
-      Array.from({ length: 12 }, (_, index) => [`${scale}-${index + 1}`, "#4da0ff"]),
+      Array.from({ length: 12 }, (_, index) => [`cpe-ramp-${scale === "accent" ? "brand-primary" : "neutral"}-${index + 1}`, "#4da0ff"]),
     ),
   );
 
   assert.match(
-    paletteBorderGradient({ css: "", dark: tokens, light: tokens }, "hex"),
+    paletteBorderGradient({ css: "", ramps: { dark: tokens, light: tokens } }, "hex"),
     /^conic-gradient\(from var\(--palette-angle, 225deg\),/,
   );
   // The fallback has to stay a valid gradient too, or an empty theme paints
   // nothing at all rather than a hairline.
   assert.match(
-    paletteBorderGradient({ css: "", dark: {}, light: {} }, "hex"),
+    paletteBorderGradient({ css: "", ramps: { dark: {}, light: {} } }, "hex"),
     /^conic-gradient\(from var\(--palette-angle, 225deg\),/,
   );
 });
@@ -195,14 +195,14 @@ test("the aura takes vivid accent steps from both modes and no gray", () => {
     Object.fromEntries(
       ["accent", "gray"].flatMap((scale) =>
         Array.from({ length: 12 }, (_, index) => [
-          `${scale}-${index + 1}`,
+          `cpe-ramp-${scale === "accent" ? "brand-primary" : "neutral"}-${index + 1}`,
           `${mode}-${scale}-${index + 1}`,
         ]),
       ),
     );
 
   const colours = paletteAuraColours(
-    { css: "", dark: tokens("dark"), light: tokens("light") },
+    { css: "", ramps: { dark: tokens("dark"), light: tokens("light") } },
     "hex",
   );
 
@@ -221,15 +221,15 @@ test("the aura takes vivid accent steps from both modes and no gray", () => {
 
 test("the aura wraps bare HSL values and survives a theme with no accent scale", () => {
   const tokens = Object.fromEntries(
-    Array.from({ length: 12 }, (_, index) => [`accent-${index + 1}`, "212 100% 65%"]),
+    Array.from({ length: 12 }, (_, index) => [`cpe-ramp-brand-primary-${index + 1}`, "212 100% 65%"]),
   );
 
   assert.deepEqual(
-    paletteAuraColours({ css: "", dark: tokens, light: tokens }, "hsl-values"),
+    paletteAuraColours({ css: "", ramps: { dark: tokens, light: tokens } }, "hsl-values"),
     Array.from({ length: 4 }, () => "hsl(212 100% 65%)"),
   );
   assert.deepEqual(
-    paletteAuraColours({ css: "", dark: {}, light: {} }, "hex"),
+    paletteAuraColours({ css: "", ramps: { dark: {}, light: {} } }, "hex"),
     Array.from({ length: 4 }, () => "var(--hairline-strong)"),
   );
 });

@@ -155,7 +155,7 @@
 
 @media (hover: hover) and (pointer: fine) {
   .builderLink:hover {
-    color: hsl(var(--accent-12));
+    color: hsl(var(--foreground));
   }
 }
 
@@ -184,7 +184,7 @@
 }
 
 .version strong {
-  color: hsl(var(--foreground) / 0.75);
+  color: hsl(var(--muted-foreground));
   font-weight: 500;
 }
 

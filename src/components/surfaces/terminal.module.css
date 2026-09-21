@@ -40,7 +40,7 @@
 
 .command {
   margin: 0 0 var(--space-3);
-  color: hsl(var(--foreground) / 0.9);
+  color: hsl(var(--muted-foreground));
   display: flex;
   gap: var(--space-3);
   white-space: nowrap;
@@ -88,7 +88,7 @@
 }
 
 .line[data-shown="false"] .glyph {
-  color: hsl(var(--foreground) / 0.3);
+  color: hsl(var(--muted-foreground));
 }
 
 /* The question is the flexible column and truncates before it can wrap */
@@ -100,7 +100,7 @@
 }
 
 .answer {
-  color: hsl(var(--foreground) / 0.95);
+  color: hsl(var(--muted-foreground));
   white-space: nowrap;
 }
 
@@ -120,7 +120,7 @@
 }
 
 .glyphDone {
-  color: hsl(var(--foreground) / 0.4);
+  color: hsl(var(--muted-foreground));
 }
 
 @media (max-width: 34rem) {
