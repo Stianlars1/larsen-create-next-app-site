@@ -17,7 +17,7 @@
 
 .eyebrow {
   margin: 0;
-  color: hsl(var(--foreground-subtle));
+  color: hsl(var(--muted-foreground));
   font-size: var(--text-xs);
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -33,7 +33,7 @@
 .copy,
 .error {
   margin: 0;
-  color: hsl(var(--foreground-subtle));
+  color: hsl(var(--muted-foreground));
   font-size: var(--text-sm);
   line-height: 1.5;
 }

@@ -43,7 +43,7 @@ function PaletteControls() {
 function renderPaletteControls() {
   return render(
     <PaletteSessionProvider
-      initialOptions={{ hex: "#4DA0FF", preset: "shadcn", format: "hsl-values", neutralTint: "subtle" }}
+      initialOptions={{ hex: "#4DA0FF", preset: "shadcn", format: "hsl-values", neutralTint: "weak" }}
       initialTheme={theme}
     >
       <PaletteControls />
@@ -71,7 +71,7 @@ describe("PaletteSessionProvider analytics", () => {
           surface: "palette_demo",
           preset: "shadcn",
           format: "hsl-values",
-          neutral_tint: "subtle",
+          neutral_tint: "weak",
         },
       }),
     );

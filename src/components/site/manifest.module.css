@@ -48,5 +48,5 @@
 }
 
 .after {
-  color: hsl(var(--foreground) / 0.88);
+  color: hsl(var(--muted-foreground));
 }

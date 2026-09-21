@@ -1,24 +1,4 @@
-/*
- * Two hues over three weights of ink. The accent carries the CLI's own
- * vocabulary - flags, token names, folders - and a warm colour carries the
- * parts you choose. Everything else is ink, because the brand is black and
- * white with one accent and a coloured terminal would say otherwise.
- *
- * Both hues have to survive the palette demo re-theming the page, so they were
- * measured against both code surfaces - the terminal's hsl(0 0% 5%) and the
- * block's hsl(var(--gray-1)) - for all five seeds the demo offers:
- *
- *   accent-11                8.9-10.6 dark   5.1-7.2 light
- *   warning-muted-foreground 14.1-15.3 dark  9.9-10.5 light
- *   foreground / 0.92        15.5 dark       14.8 light
- *   ink-muted                6.2 dark        4.4 light
- *   ink-faint                3.4 dark        2.5 light  <- structure, never words
- *
- * --complementary is the obvious pick for the warm role and the wrong one: it
- * is 9.7:1 for the shipped seed but 3.6:1 for #22C55E. The token used instead
- * is contrast-first by construction, and the engine keeps its hue away from
- * the accent, so the two never converge on a warm seed.
- */
+/* Native Tintful foreground roles; final code surfaces are independently verified. */
 
 /*
  * The single wrapper every call renders. It stays a plain inline box on
@@ -30,16 +10,11 @@
   white-space: inherit;
 }
 
-/* Box drawing is a graphical structure, so 3.4:1 clears the 3:1 floor */
+/* Box drawing uses the same readable muted ink as secondary text. */
 .branch {
   color: var(--ink-faint);
 }
 
-/*
- * The prompt and the line continuation read as characters, not decoration -
- * the backslash is the thing that tells you the command carries on - so they
- * sit at ink-muted's 6.2:1 rather than ink-faint's 3.4:1.
- */
 .prompt,
 .continuation {
   color: var(--ink-muted);
@@ -50,7 +25,7 @@
 .pkg,
 .selector,
 .file {
-  color: hsl(var(--foreground) / 0.92);
+  color: hsl(var(--muted-foreground));
 }
 
 /* The vocabulary the CLI and the design system define */
@@ -58,7 +33,7 @@
 .atrule,
 .prop,
 .dir {
-  color: hsl(var(--accent-11));
+  color: hsl(var(--foreground));
 }
 
 /* The parts you pick: an app name, a flag's answer, a colour value */

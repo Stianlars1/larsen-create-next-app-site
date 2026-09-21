@@ -37,8 +37,7 @@ export function NeutralTintDisclosure({
           ))}
         </div>
         <p>
-          Subtle is the CLI default and needs no flag. Strong adds more seed hue to the grays.
-          Accent colours stay unchanged, except for #000000, #010101, #FEFEFE and #FFFFFF.
+          Weak is the CLI default and needs no flag. None uses achromatic neutrals; Strong adds more hue influence. All selections use Tintful.
         </p>
       </div>
     </details>

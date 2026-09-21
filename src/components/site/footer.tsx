@@ -25,7 +25,7 @@ export function Footer() {
             <a href={REPO_URL}>GitHub</a>
             <TrackedNpmLink surface="footer">npm</TrackedNpmLink>
             <a href={SKILLS_URL}>Larsen Skills</a>
-            <a href="https://rampkit.app">rampkit</a>
+            <a href="https://tintful.app">Tintful</a>
           </nav>
           <p>
             MIT licensed. Built by <a href={AUTHOR_URL}>Stian Larsen - Larsen Utvikling</a>.

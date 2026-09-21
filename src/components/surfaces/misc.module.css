@@ -177,7 +177,7 @@
 
 .skill code {
   font-size: var(--text-sm);
-  color: hsl(var(--foreground) / 0.92);
+  color: hsl(var(--muted-foreground));
 }
 
 .skill em {

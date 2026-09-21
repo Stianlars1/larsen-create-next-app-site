@@ -3,7 +3,7 @@ import { isValidHex, type Format, type NeutralTint, type Preset } from "./palett
 
 export const DEFAULT_PRESET: Preset = "shadcn";
 export const DEFAULT_FORMAT: Format = "hsl-values";
-export const DEFAULT_NEUTRAL_TINT: NeutralTint = "subtle";
+export const DEFAULT_NEUTRAL_TINT: NeutralTint = "weak";
 export const DEFAULT_CNA_VERSION = "latest";
 export const DEFAULT_PM = "npm";
 export const DEFAULT_LINTER = "eslint";

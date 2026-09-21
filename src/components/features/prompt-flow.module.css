@@ -83,7 +83,7 @@
 
 /* The default is marked with a dot, not a pill - quieter, and it scans faster */
 .choices li[data-default="true"] {
-  color: hsl(var(--foreground) / 0.9);
+  color: hsl(var(--muted-foreground));
 }
 
 .choices li[data-default="true"]::before {
@@ -135,7 +135,7 @@
 
 .step[data-nested="true"] .question {
   font-size: var(--text-base);
-  color: hsl(var(--foreground) / 0.85);
+  color: hsl(var(--muted-foreground));
 }
 
 @media (max-width: 34rem) {

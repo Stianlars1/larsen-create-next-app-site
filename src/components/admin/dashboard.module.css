@@ -22,7 +22,7 @@
 .chartCaption,
 .empty {
   margin: 0;
-  color: hsl(var(--foreground-subtle));
+  color: hsl(var(--muted-foreground));
   font-size: var(--text-sm);
   line-height: 1.5;
 }
@@ -67,7 +67,7 @@
 
 .periods a {
   padding: var(--space-2) var(--space-3);
-  color: hsl(var(--foreground-subtle));
+  color: hsl(var(--muted-foreground));
   font-size: var(--text-sm);
   text-decoration: none;
 }
@@ -131,7 +131,7 @@
 }
 
 .statLabel {
-  color: hsl(var(--foreground-subtle));
+  color: hsl(var(--muted-foreground));
   font-size: var(--text-xs);
 }
 
@@ -147,7 +147,7 @@
   padding: 0 var(--space-2);
   border-radius: var(--radius-full);
   background: var(--surface-2);
-  color: hsl(var(--foreground-subtle));
+  color: hsl(var(--muted-foreground));
   font-size: var(--text-xs);
 }
 
@@ -157,8 +157,8 @@
 }
 
 .status[data-status="down"] {
-  background: hsl(var(--danger-muted));
-  color: hsl(var(--danger-muted-foreground));
+  background: hsl(var(--destructive-muted));
+  color: hsl(var(--destructive-muted-foreground));
 }
 
 .chart {
@@ -173,14 +173,14 @@
 }
 
 .chartLine {
-  stroke: hsl(var(--accent-9));
+  stroke: hsl(var(--chart-1));
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 4;
 }
 
 .chartLine[data-series="1"] {
-  stroke: hsl(var(--accent-11));
+  stroke: hsl(var(--chart-2));
 }
 
 .chartLine[data-series="2"] {
@@ -222,7 +222,7 @@
   display: block;
   block-size: 100%;
   border-radius: inherit;
-  background: hsl(var(--accent-9));
+  background: hsl(var(--chart-1));
 }
 
 .healthList > div {
@@ -239,7 +239,7 @@
 }
 
 .healthList dt {
-  color: hsl(var(--foreground-subtle));
+  color: hsl(var(--muted-foreground));
 }
 
 @media (max-width: 60rem) {

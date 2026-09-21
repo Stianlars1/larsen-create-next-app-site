@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
+import { PACKAGE_VERSION } from "../content";
 import { createNpmClient } from "./npm";
 
 function json(body: unknown, status = 200): Response {
@@ -36,8 +37,8 @@ describe("npm admin data", () => {
         ],
       }),
       json({
-        "dist-tags": { latest: "0.6.0" },
-        time: { "0.6.0": "2026-08-21T10:00:00.000Z" },
+        "dist-tags": { latest: PACKAGE_VERSION },
+        time: { [PACKAGE_VERSION]: "2026-08-21T10:00:00.000Z" },
       }),
     );
 
@@ -58,8 +59,8 @@ describe("npm admin data", () => {
     expect(result.package).toMatchObject({
       ok: true,
       data: {
-        latestVersion: "0.6.0",
-        siteVersion: "0.6.0",
+        latestVersion: PACKAGE_VERSION,
+        siteVersion: PACKAGE_VERSION,
         drift: false,
       },
     });
@@ -74,8 +75,8 @@ describe("npm admin data", () => {
       json({ downloads: 2 }),
       json({ downloads: [{ day: "2026-08-24", downloads: 3 }] }),
       json({
-        "dist-tags": { latest: "0.7.0" },
-        time: { "0.7.0": "2026-08-25T10:00:00.000Z" },
+        "dist-tags": { latest: "999.0.0" },
+        time: { "999.0.0": "2026-08-25T10:00:00.000Z" },
       }),
     );
 
@@ -91,15 +92,15 @@ describe("npm admin data", () => {
       json({ downloads: 2 }),
       json({ downloads: [] }),
       json({
-        "dist-tags": { latest: "0.6.0" },
-        time: { "0.6.0": "2026-08-21T10:00:00.000Z" },
+        "dist-tags": { latest: PACKAGE_VERSION },
+        time: { [PACKAGE_VERSION]: "2026-08-21T10:00:00.000Z" },
       }),
     );
 
     const result = await createNpmClient(request).getSnapshot();
 
     expect(result.downloads).toEqual({ ok: false, reason: "unreachable" });
-    expect(result.package).toMatchObject({ ok: true, data: { latestVersion: "0.6.0" } });
+    expect(result.package).toMatchObject({ ok: true, data: { latestVersion: PACKAGE_VERSION } });
   });
 
   it("keeps downloads when registry metadata is invalid", async () => {
@@ -107,7 +108,7 @@ describe("npm admin data", () => {
       json({ downloads: 1 }),
       json({ downloads: 2 }),
       json({ downloads: [{ day: "2026-08-24", downloads: 3 }] }),
-      json({ "dist-tags": { latest: "0.6.0" }, time: {} }),
+      json({ "dist-tags": { latest: PACKAGE_VERSION }, time: {} }),
     );
 
     const result = await createNpmClient(request).getSnapshot();

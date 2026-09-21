@@ -55,7 +55,7 @@
 .cardRole {
   margin: var(--space-3) 0 0;
   font-size: var(--text-sm);
-  color: hsl(var(--foreground) / 0.82);
+  color: hsl(var(--muted-foreground));
 }
 
 .cardDetail {
@@ -169,7 +169,7 @@
      colour shift, so these stay at the page's own legible tiers. */
   .file {
     font-size: var(--text-sm);
-    color: hsl(var(--foreground) / 0.5);
+    color: hsl(var(--muted-foreground));
     transition: color var(--duration-fast) var(--ease-out);
   }
 

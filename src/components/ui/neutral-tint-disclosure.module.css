@@ -1,8 +1,8 @@
 .control {
   min-width: 0;
-  border: var(--border-width) solid var(--card-border, var(--hairline));
+  border: var(--border-width) solid hsl(var(--input));
   border-radius: var(--radius-md);
-  background: hsl(var(--gray-1));
+  background: hsl(var(--background));
   overflow: clip;
 }
 
@@ -50,12 +50,12 @@
 .label {
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  color: hsl(var(--foreground) / 0.48);
+  color: hsl(var(--muted-foreground));
 }
 
 .value {
   margin-left: auto;
-  color: hsl(var(--foreground) / 0.78);
+  color: hsl(var(--muted-foreground));
 }
 
 .body {
@@ -67,17 +67,17 @@
 
 .options {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-1);
 }
 
 .options button {
   min-height: 44px;
   padding: var(--space-2) var(--space-3);
-  border: var(--border-width) solid var(--card-border, var(--hairline));
+  border: var(--border-width) solid hsl(var(--input));
   border-radius: var(--radius-sm);
-  background: hsl(var(--gray-2));
-  color: hsl(var(--foreground) / 0.58);
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   cursor: pointer;
@@ -94,7 +94,7 @@
 
 .options button[data-active="true"] {
   color: hsl(var(--foreground));
-  border-color: hsl(var(--brand-solid) / 0.55);
+  border-color: hsl(var(--ring));
   background: hsl(var(--brand-solid) / 0.12);
 }
 
@@ -105,14 +105,14 @@
 
 .body p {
   margin: 0;
-  color: hsl(var(--foreground) / 0.5);
+  color: hsl(var(--muted-foreground));
   font-size: var(--text-xs);
   line-height: var(--leading-body);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .options button:hover:not([data-active="true"]) {
-    color: hsl(var(--foreground) / 0.85);
+    color: hsl(var(--muted-foreground));
     border-color: var(--hairline-strong);
   }
 }

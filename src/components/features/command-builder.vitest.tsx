@@ -6,8 +6,8 @@ const { trackProductEventMock } = vi.hoisted(() => ({ trackProductEventMock: vi.
 vi.mock("@/lib/analytics/events", () => ({ trackProductEvent: trackProductEventMock }));
 vi.mock("@/components/theme/palette-session", () => ({
   usePaletteSession: () => ({
-    options: { hex: "#4DA0FF", preset: "shadcn", format: "hsl-values", neutralTint: "subtle" },
-    theme: { css: "", dark: {}, light: {} },
+    options: { hex: "#4DA0FF", preset: "shadcn", format: "hsl-values", neutralTint: "weak" },
+    theme: { css: "", dark: {}, light: {}, ramps: { light: {}, dark: {} }, options: { hex: "#4DA0FF", preset: "shadcn", format: "hsl-values", neutralTint: "weak" } },
     customPaletteActive: false,
     setCustomPaletteActive: vi.fn(),
     updatePalette: vi.fn(),

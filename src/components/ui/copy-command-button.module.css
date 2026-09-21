@@ -79,7 +79,7 @@
 
 @media (hover: hover) and (pointer: fine) {
   .button:hover {
-    color: hsl(var(--foreground) / 0.9);
+    color: hsl(var(--muted-foreground));
     background: var(--surface-2);
     border-color: var(--hairline);
   }

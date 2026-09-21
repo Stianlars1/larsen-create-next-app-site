@@ -10,62 +10,13 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { generate, normalizeHex, type NeutralTint, type TokenMap } from "@/lib/palette";
+import {
+  generate,
+  normalizeHex,
+  type NeutralTint,
+  type TokenMap,
+} from "@/lib/palette";
 
-/**
- * Lets the palette demo re-theme the entire page from the HEX somebody typed.
- *
- * The page keeps the package's baked strong theme.css unchanged. The server
- * adds the demo's subtle default as one generated override before first paint,
- * and this provider stays inert until a real interaction changes the selection.
- * Only then does the browser load the engine and rewrite that override.
- */
-
-/** The exact selection baked into theme.css. Only this pair removes the
- *  override, so #4DA0FF with subtle still renders its distinct gray ramp. */
-const BAKED_SELECTION = { hex: "#4da0ff", neutralTint: "strong" } as const;
-
-/**
- * --brand-blue and its two variants are the page's own tokens: theme.css
- * defines them by hand and a generated palette never emits them. Thirty-eight
- * declarations across fourteen stylesheets read --brand-blue, so a custom seed
- * has to bring its own or the page keeps a blue accent sitting on a red theme.
- *
- * The accent is split by role rather than mapped to one step, because one step
- * cannot serve both. accent-11 carries --brand-blue, which paints text and
- * focus rings: it is the scale's readable-on-dark step, measuring 9.0:1 to
- * 10.8:1 across the five demo seeds. accent-9 carries --brand-solid, which
- * paints fills, borders and the two gradient washes: it is literally the colour
- * the visitor typed, and nothing has to be read through it.
- *
- * Step 9 is what the baked --brand-blue already is (212 100% 65% is #4DA0FF's
- * dark accent-9), which is why the two are the same value until somebody
- * generates a palette. It cannot hold the text role for an arbitrary seed
- * though - its lightness tracks the seed, measuring 3.5:1 for #7C3AED against
- * 19.9:1 for white.
- *
- * -soft and -subtle take steps 5 and 3, which is where the baked pair already
- * sits: 213 52% 25% against accent-5's 211 81% 25%, and 213 50% 16% against
- * accent-3's 212 66% 16%.
- */
-const BRAND_TOKENS: Record<string, string> = {
-  "brand-blue": "accent-11",
-  "brand-solid": "accent-9",
-  "brand-blue-soft": "accent-5",
-  "brand-blue-subtle": "accent-3",
-};
-
-/**
- * The colour fade, at universal specificity on purpose: anything that declares
- * its own transition - buttons, the demo's swatches, the skill rows - outranks
- * `*` and keeps it, so a theme change never clobbers a running animation. Only
- * the properties that carry theme colour are listed; `all` here would put every
- * element on the page under a transition.
- *
- * prefers-reduced-motion is deliberately not branched on. motion.css defines
- * reduced motion as losing movement, not feedback, and keeps colour and opacity
- * changes; this transition moves nothing.
- */
 const SHIFT_RULE = `*, *::before, *::after {
   transition-property: color, background-color, border-color, fill;
   transition-duration: var(--duration-slow);
@@ -104,7 +55,10 @@ export type SiteTheme = {
 
 /** A no-op default rather than a thrown error: the palette demo has to keep
  *  working on its own if the provider is ever unmounted. */
-const SiteThemeContext = createContext<SiteTheme>({ selection: null, setSelection: () => {} });
+const SiteThemeContext = createContext<SiteTheme>({
+  selection: null,
+  setSelection: () => {},
+});
 
 export function useSiteTheme(): SiteTheme {
   return useContext(SiteThemeContext);
@@ -127,7 +81,9 @@ export function SiteThemeProvider({
   initialSelection,
   initialTokens,
 }: SiteThemeProviderProps) {
-  const [selection, setSelectionState] = useState<SiteThemeSelection | null>(initialSelection);
+  const [selection, setSelectionState] = useState<SiteThemeSelection | null>(
+    initialSelection,
+  );
   const sheet = useRef<HTMLStyleElement | null>(null);
   const settle = useRef<number | undefined>(undefined);
   const appliedSelection = useRef(selectionKey(initialSelection));
@@ -140,15 +96,21 @@ export function SiteThemeProvider({
    * clobber anything else that ever writes there.
    */
   const apply = useCallback((tokens: TokenMap | null) => {
-    const style = (sheet.current ??= document.head.appendChild(document.createElement("style")));
+    const style = (sheet.current ??= document.head.appendChild(
+      document.createElement("style"),
+    ));
     window.clearTimeout(settle.current);
 
-    style.textContent = tokens ? `${SHIFT_RULE}\n${rootBlock(tokens)}` : SHIFT_RULE;
-    if (tokens) document.documentElement.setAttribute("data-site-theme", "custom");
+    style.textContent = tokens
+      ? `${SHIFT_RULE}\n${rootBlock(tokens)}`
+      : SHIFT_RULE;
+    if (tokens)
+      document.documentElement.setAttribute("data-site-theme", "custom");
     else document.documentElement.removeAttribute("data-site-theme");
 
     settle.current = window.setTimeout(() => {
-      if (sheet.current) sheet.current.textContent = tokens ? rootBlock(tokens) : "";
+      if (sheet.current)
+        sheet.current.textContent = tokens ? rootBlock(tokens) : "";
     }, shiftMs());
   }, []);
 
@@ -159,11 +121,7 @@ export function SiteThemeProvider({
     }
     const normalized = normalizeHex(next.hex);
     if (!normalized) return;
-    setSelectionState(
-      normalized === BAKED_SELECTION.hex && next.neutralTint === BAKED_SELECTION.neutralTint
-        ? null
-        : { hex: normalized, neutralTint: next.neutralTint },
-    );
+    setSelectionState({ hex: normalized, neutralTint: next.neutralTint });
   }, []);
 
   useEffect(() => {
@@ -219,18 +177,18 @@ export function SiteThemeProvider({
   return (
     <>
       <style ref={sheet}>{rootBlock(initialTokens)}</style>
-      <SiteThemeContext.Provider value={value}>{children}</SiteThemeContext.Provider>
+      <SiteThemeContext.Provider value={value}>
+        {children}
+      </SiteThemeContext.Provider>
     </>
   );
 }
 
 /** The generated dark tokens plus the three the page defines itself. */
 function rootBlock(tokens: TokenMap): string {
-  const declarations = Object.entries(tokens).map(([name, value]) => `  --${name}: ${value};`);
-
-  for (const [token, step] of Object.entries(BRAND_TOKENS)) {
-    if (tokens[step]) declarations.push(`  --${token}: ${tokens[step]};`);
-  }
+  const declarations = Object.entries(tokens).map(
+    ([name, value]) => `  --${name}: ${value};`,
+  );
 
   return `:root[data-site-theme="custom"] {\n${declarations.join("\n")}\n}`;
 }

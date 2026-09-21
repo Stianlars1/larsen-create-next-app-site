@@ -1,7 +1,7 @@
 .block {
   border: var(--border-width) solid var(--card-border);
   border-radius: var(--radius-lg);
-  background: hsl(var(--gray-1));
+  background: hsl(var(--background));
   overflow: hidden;
 }
 
@@ -12,13 +12,13 @@
   gap: var(--space-3);
   padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
   border-bottom: var(--border-width) solid var(--card-border);
-  background: hsl(var(--gray-2));
+  background: hsl(var(--muted));
 }
 
 .label {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  color: hsl(var(--foreground) / 0.55);
+  color: hsl(var(--muted-foreground));
 }
 
 .pre {
@@ -27,7 +27,7 @@
   overflow-x: auto;
   font-size: var(--text-sm);
   line-height: var(--leading-tight);
-  color: hsl(var(--foreground) / 0.88);
+  color: hsl(var(--muted-foreground));
   tab-size: 2;
 }
 

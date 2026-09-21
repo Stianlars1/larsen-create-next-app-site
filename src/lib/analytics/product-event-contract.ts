@@ -34,9 +34,9 @@ export type ProductEvent =
       name: "palette_generator_used";
       data: {
         surface: "palette_demo" | "command_builder";
-        preset: "shadcn" | "radix" | "css-variables";
+        preset: "shadcn" | "radix" | "canonical";
         format: "hex" | "rgb" | "hsl" | "hsl-values" | "oklab" | "oklch";
-        neutral_tint: "subtle" | "strong";
+        neutral_tint: "none" | "weak" | "strong";
       };
     }
   | { name: "command_builder_used"; data: { control: CommandBuilderControl } }
@@ -84,11 +84,11 @@ export function isProductEvent(value: unknown): value is ProductEvent {
       return (
         hasOnlyKeys(value.data, ["surface", "preset", "format", "neutral_tint"]) &&
         (value.data.surface === "palette_demo" || value.data.surface === "command_builder") &&
-        ["shadcn", "radix", "css-variables"].includes(String(value.data.preset)) &&
+        ["shadcn", "radix", "canonical"].includes(String(value.data.preset)) &&
         ["hex", "rgb", "hsl", "hsl-values", "oklab", "oklch"].includes(
           String(value.data.format),
         ) &&
-        ["subtle", "strong"].includes(String(value.data.neutral_tint))
+        ["none", "weak", "strong"].includes(String(value.data.neutral_tint))
       );
     case "command_builder_used":
       return (
