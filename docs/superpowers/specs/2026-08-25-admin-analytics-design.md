@@ -7,7 +7,7 @@ Status: Approved in conversation
 
 The site is a public Next.js marketing and demo application deployed on Vercel. It already loads Vercel Web Analytics without consent and GA4 only after analytics consent. The new internal `/admin` surface must provide a small operator dashboard without introducing a user system, a new database, or a second product backend.
 
-Tinify's admin console is the reference for security boundaries, Umami access, isolated panel failures, and honest metric labeling. This site needs a deliberately smaller implementation because it has one operator, one public page, no customer accounts, no billing, and no application database.
+Tinify's admin console is a reference for security boundaries, isolated panel failures, and honest metric labeling only. Its deployment, credentials, Umami instance, and data are never shared with this site. This site needs a deliberately smaller implementation because it has one operator, one public page, no customer accounts, no billing, and no application database.
 
 ## Goals
 
@@ -64,23 +64,25 @@ The in-memory rate limit is an additional brake, not the primary security contro
 
 ### Umami
 
-Umami is the only source displayed in `/admin`. The site receives its own website entry in the existing self-hosted Umami instance.
+Umami Cloud is the only source displayed in `/admin`. The site receives its own Website record in the shared Umami Cloud account. Each application receives a distinct Website ID, so its traffic and events remain isolated even though billing and account management are shared.
 
-Umami follows the same approved policy as Tinify: its tracker is cookie-free, writes no browser storage, and mounts without analytics consent. This intentionally extends the repository rule that currently names only Vercel Analytics as always on. The implementation updates that rule to name both cookie-free providers and keeps GA4 as the only consent-gated provider. The dashboard therefore describes Umami as whole-audience aggregate traffic, subject to blockers and network failures, rather than consented traffic only.
+Umami follows the approved cookie-free policy: its tracker writes no browser storage and mounts without analytics consent. This intentionally extends the repository rule that currently names only Vercel Analytics as always on. The implementation updates that rule to name both cookie-free providers and keeps GA4 as the only consent-gated provider. The dashboard therefore describes Umami as whole-audience aggregate traffic, subject to blockers and network failures, rather than consented traffic only.
 
 Public tracking uses:
 
-- `NEXT_PUBLIC_UMAMI_SRC`
+- `NEXT_PUBLIC_UMAMI_SRC` set to `/stats/script.js`, which the app rewrites to
+  `https://cloud.umami.is/:path*`
+- `data-host-url` set to `/stats`, which routes collector requests to
+  `https://gateway.umami.is/api/:path*`
 - `NEXT_PUBLIC_UMAMI_WEBSITE_ID`
 
 Server-side dashboard queries use:
 
-- `UMAMI_API_URL`
+- `UMAMI_API_URL` set to `https://api.umami.is/v1`
 - `UMAMI_WEBSITE_ID`
-- `UMAMI_API_KEY`, when supported
-- `UMAMI_USERNAME` and `UMAMI_PASSWORD` as a self-hosted fallback
+- `UMAMI_API_KEY` sent as a Bearer token
 
-The server client authenticates once, caches a bearer token for less than its expected lifetime, retries one 401 after clearing the token, applies a four-second timeout, and never exposes credentials or provider response bodies to the browser.
+The server client uses the Cloud API key as a Bearer token, applies a four-second timeout, and never exposes credentials or provider response bodies to the browser.
 
 The dashboard uses the supported Umami endpoints for active visitors, summary statistics, pageview series, event series, and grouped metrics. "Active now" is labeled as unique visitors in the last five minutes, not as an exact count of open browser connections.
 
@@ -148,7 +150,7 @@ Every product-use tile uses the selected reporting window, with 30 days as the d
 - Successful command-copy event count is reported separately from command-copy reach and can be grouped by `surface`.
 - Successful stylesheet-copy event count is reported separately and is never added to command-copy visitors, because the same visitor may perform both actions.
 
-Event counts come from the Umami event series. Unique event visitors come from Umami statistics filtered by the exact event name. The implementation verifies that the running self-hosted Umami version supports this filtered visitor semantic before exposing the rate. If it does not, the affected reach value renders unavailable instead of substituting event count or adding non-distinct visitor totals.
+Event counts come from the Umami event series. Unique event visitors come from Umami statistics filtered by the exact event name. If the Cloud API cannot provide a required filtered metric, the affected reach value renders unavailable instead of substituting event count or adding non-distinct visitor totals.
 
 ### npm
 
@@ -223,7 +225,7 @@ Browser verification covers desktop and mobile unlock, invalid password feedback
 
 ## Rollout
 
-1. Create or reuse the dedicated Umami website entry without changing Tinify's website data.
+1. Create or reuse the dedicated Umami Cloud Website record without changing Tinify or any other Website record.
 2. Implement and verify locally with fake provider responses and local-only admin secrets.
 3. Add public Umami identifiers and server credentials to Vercel as sensitive environment variables.
 4. Add a new admin password and independently generated session secret to Vercel.

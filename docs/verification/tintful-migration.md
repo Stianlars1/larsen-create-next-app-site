@@ -1,58 +1,57 @@
 # Tintful migration verification
 
-Local verification on 2026-09-22. No deployment or npm publication is claimed.
+The site uses the CLI's shared integration with published tintful@0.1.1.
+Node >=22.20.0 is required. Native shadcn, Radix and canonical exports retain
+original CSS/audit/manifests. Worker previews share the same serialization.
 
-## Dependency and release order
+## Correction of the initial contrast report
 
-The site pins `@larsen-utvikling/create-next-app@0.7.0`, which depends on
-`tintful@0.1.1`. CLI source gitHead:
-`4a47ba0da029fa04bbc4484b2219c57f966320d0`.
+The initially reported 4.5997-4.5999 boundary failures were consumer verifier
+false negatives, not Tintful defects. Color.js's general XYZ-D65 luminance is
+not WCAG's normative weighted linear sRGB luminance. The corrected CLI verifier
+uses normative coefficients and accepts #7B534B, #5736FE and #FE9762 under all
+three neutrals. No Tintful change, lower target or rejection allowlist is needed.
 
-The installed and tested release candidate is:
-`/var/folders/h1/82t44wr13fj06v4fr9mkkfk40000gn/T/lu-release-candidate-84mmZk/larsen-utvikling-create-next-app-0.7.0.tgz`.
-SHA-256: `63b4004cf75eadc926b87540970fc18bf391901d9ba5cb6d7d0cc09815703763`.
+The original candidate hash 63b4004cf75eadc926b87540970fc18bf391901d9ba5cb6d7d0cc09815703763
+is superseded. Final released dependency identity and deployed state are recorded
+below after registry/deployment verification.
 
-The lockfile retains its exact integrity with the intended registry URL. This
-version is not yet published. Stian must publish that same verified tarball,
-then run `npm ci` and `node scripts/verify-cli-release.mjs --require-published`
-before deployment. The gate checks version, integrity and gitHead against npm.
-Hosted Vercel builds run the gate automatically. Its current rejection of the
-unpublished version was verified locally.
+## Scope and retained verification
 
-To reproduce local checks before publication, install the candidate explicitly
-with `npm install --no-save --package-lock=false <candidate>`; do not commit a
-machine-specific file dependency or treat this as a registry installation.
+The migration retains 18 named seed shortcuts, validates every requested export,
+and uses exact downloaded CSS bytes matching the CLI. Native canonical ramp maps
+power 48 swatches and gradients. Both demo and builder hide rejected outputs and
+show errors. Worker correlation, transport failures, restart and stale-result
+handling are tested. Consumer CSS no longer references removed legacy ramps.
 
-## Results
+The previous implementation passed 33 tests, lint, types, production build and
+browser checks at desktop and 390px widths. The current release also merges the
+remote main admin and privacy-safe analytics implementation rather than reverting
+those live features. The combined suite and build are rerun before deployment.
 
-- 33 tests passed, including 18 named seeds under all three neutrals, final
-  contrast, choices against engine capabilities, byte parity, removed-token
-  checks, Worker correlation, transport failures and restart.
-- ESLint, TypeScript and production build passed against the exact candidate.
-- All copied design-system files match CLI masters, including original audit
-  artifacts and separate consumer document styling.
-- Browser verified a bundler-managed Worker, rapid-input latest-result handling,
-  the named seed picker, Strong/Weak comparison, 48 swatches and native previews.
-- Actual browser downloads matched CLI CSS for cyan/Radix/RGB/weak,
-  emerald/shadcn/HSL-channels/weak and cyan/canonical/OKLAB/strong.
-- Clipboard command matched accepted options and 0.7.0.
-- Unsupported Radix HSL channels, Radix HEX fidelity failures, consumer-margin
-  failures and invalid HEX suppress exports/commands. Builder and demo both
-  explain the failure while retaining an explicitly labelled last passing view.
-- Emerald browser text-role measurements across canvas/muted/card were at least
-  8.8898:1; ring measurements across canvas/card/popover at least 4.8448:1.
-- Desktop and 390px mobile visuals inspected; no horizontal overflow at 390px.
+Passing palettes do not certify entire applications against WCAG. Actual Tintful
+Radix alpha-fidelity rejections remain enforced; they are separate from the
+retracted consumer-luminance finding. No implicit format fallback is permitted.
 
-Local browser console had expected unavailable Vercel Analytics endpoint errors
-and font preload warnings; no Worker/application exceptions were observed.
+Hosted builds require the CLI's published version, integrity and gitHead to
+match the installed package. Publish the verified CLI first, install it from
+npm, then deploy and verify this website.
 
-## Quality limitations
+## Corrected release candidate and combined checks
 
-A passing palette is not a full application WCAG certification. All exports
-require engine generation and export quality plus the shared consumer contrast
-gate. Tintful 0.1.1 can reject Radix exports because of alpha-equivalent fidelity.
-The shared consumer additionally rejects three HSL-channel seeds across all
-neutrals whose native text pairs measure 4.5997-4.5999, below the project's exact
-4.6 target despite the engine's passing status. It does not rewrite engine CSS.
-The 18 named picker colors pass their default shadcn configurations; each
-changed preset/format is checked anew and can be explicitly rejected.
+CLI PR #5 is merged at 497e1baaf23b90413f6a91a4132cd6937b6dd1e1.
+Candidate: /var/folders/h1/82t44wr13fj06v4fr9mkkfk40000gn/T/lu-release-candidate-ZfnKJN/larsen-utvikling-create-next-app-0.7.0.tgz.
+SHA-256: e389782fda81cf0a94076e4b5724ae3c5c50b422414ffa20836b44efb838bf89.
+
+CLI: 74 tests, 2,286/2,286 sweep exports, exact tarball smoke and full
+install/build smoke passed. Lowest normative text ratio: 4.60002238236111.
+Website after integrating remote main: 39 Node tests and 84 Vitest tests pass;
+lint, TypeScript and production build pass. Admin token references and product
+event enums are migrated to native Tintful roles/choices while preserving auth,
+analytics privacy boundaries and the existing proxy configuration.
+
+The npm publish attempt reached the browser 2FA gate but timed out before
+publication. Registry confirmed 0.7.0 absent afterward. Publication and website
+deployment await renewed owner authentication; no production change is claimed.
+The lockfile records the candidate integrity at its intended future registry URL;
+local checks used the exact tarball. Run npm ci and the registry gate after publish.

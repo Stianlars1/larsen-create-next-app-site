@@ -79,9 +79,10 @@ Emil Kowalski's site.
   larsenutvikling.no is the Norwegian one.
 - **Clarify, do not guess.** Ask Stian with concrete options when a decision
   has more than one defensible answer.
-- **Nothing is measured before consent.** Vercel Analytics is cookie-free and
-  always on; GA4 only mounts after the banner is accepted and only when
-  `NEXT_PUBLIC_GA_MEASUREMENT_ID` is set.
+- **Cookie-free traffic analytics is always on.** Vercel Analytics and Umami
+  use no cookies; GA4 only mounts after the banner is accepted and only when
+  `NEXT_PUBLIC_GA_MEASUREMENT_ID` is set. No analytics provider mounts under
+  `/admin`.
 
 ## Gotchas
 

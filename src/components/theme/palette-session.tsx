@@ -17,12 +17,17 @@ import {
   type GeneratedTheme,
   type PaletteOptions,
 } from "@/lib/palette";
+import { useProductEventOnce } from "@/lib/analytics/use-product-event-once";
+
+export type PaletteInteractionSource = "palette_demo" | "command_builder";
 
 type PaletteUpdateOptions = {
   /** Text and native colour inputs settle before the engine runs. */
   delay?: number;
   /** Every explicit palette edit opts the command builder into a custom palette. */
   activate?: boolean;
+  /** Identifies the public control that requested a user-triggered generation. */
+  source?: PaletteInteractionSource;
 };
 
 type PaletteSession = {
@@ -82,11 +87,12 @@ export function PaletteSessionProvider({
   const current = useRef(initialOptions);
   const debounce = useRef<number | undefined>(undefined);
   const requestId = useRef(0);
+  const trackFirstPaletteUse = useProductEventOnce();
 
   const updatePalette = useCallback(
     (
       patch: Partial<PaletteOptions>,
-      { delay = 0, activate = true }: PaletteUpdateOptions = {},
+      { delay = 0, activate = true, source }: PaletteUpdateOptions = {},
     ) => {
       const next = { ...current.current, ...patch };
       current.current = next;
@@ -117,6 +123,17 @@ export function PaletteSessionProvider({
           .then(([generated, subtle]) => {
             if (id !== requestId.current) return;
             setSelection({ hex: next.hex, neutralTint: next.neutralTint });
+            if (source) {
+              trackFirstPaletteUse({
+                name: "palette_generator_used",
+                data: {
+                  surface: source,
+                  preset: next.preset,
+                  format: next.format,
+                  neutral_tint: next.neutralTint,
+                },
+              });
+            }
             setTheme(generated);
             setBaseline(subtle);
             setBusy(false);
@@ -131,7 +148,7 @@ export function PaletteSessionProvider({
           });
       }, delay);
     },
-    [setSelection],
+    [setSelection, trackFirstPaletteUse],
   );
 
   useEffect(

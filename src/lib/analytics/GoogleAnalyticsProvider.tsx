@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import { readConsent, CONSENT_CHANGE_EVENT } from './consent';
 import type { ConsentState } from './consent';
-import { GA_MEASUREMENT_ID, updateGoogleConsent } from './google-analytics';
+import { getGoogleAnalyticsMeasurementId, updateGoogleConsent } from './google-analytics';
 import GoogleAnalytics from './GoogleAnalytics';
 import PageTracker from './PageTracker';
 
@@ -33,16 +33,14 @@ export default function GoogleAnalyticsProvider() {
         }
     }, [consent]);
 
-    if (!GA_MEASUREMENT_ID) return null;
+    if (!getGoogleAnalyticsMeasurementId() || consent !== 'granted') return null;
 
     return (
         <>
             <GoogleAnalytics />
-            {consent === 'granted' && (
-                <Suspense>
-                    <PageTracker />
-                </Suspense>
-            )}
+            <Suspense>
+                <PageTracker />
+            </Suspense>
         </>
     );
 }

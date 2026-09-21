@@ -1,8 +1,9 @@
 import { ArrowDown } from "lucide-react";
+import { TrackedNpmLink } from "@/components/analytics/tracked-npm-link";
 import { CopyCommandButton } from "@/components/ui/copy-command-button";
 import { Marquee } from "@/components/ui/marquee";
 import { Terminal } from "@/components/surfaces/terminal";
-import { INSTALL_COMMAND, NPM_URL, REPO_URL } from "@/lib/content";
+import { INSTALL_COMMAND, REPO_URL } from "@/lib/content";
 import styles from "./hero.module.css";
 
 /** Fetched at build and revalidated hourly, so the claim stays honest. */
@@ -41,12 +42,15 @@ export async function Hero() {
                 </span>
                 <Marquee className={styles.commandText}>{INSTALL_COMMAND}</Marquee>
               </code>
-              <CopyCommandButton command={INSTALL_COMMAND} />
+              <CopyCommandButton
+                command={INSTALL_COMMAND}
+                tracking={{ event: "command_copied", surface: "hero" }}
+              />
             </div>
 
             <nav className={styles.links} aria-label="Project links">
               <a href={REPO_URL}>GitHub</a>
-              <a href={NPM_URL}>npm</a>
+              <TrackedNpmLink surface="hero">npm</TrackedNpmLink>
             </nav>
           </div>
 

@@ -350,3 +350,10 @@ test("consumer CSS has no removed ramp references or translucent preview text", 
     assert.doesNotMatch(block[1], /opacity:/);
   }
 });
+
+test("the demo accepts the closest previously misclassified WCAG boundary seed", async () => {
+  const { generate } = await import("./palette.ts");
+  const theme = await generate({ hex: "#FE9762", preset: "shadcn", format: "hsl-values", neutralTint: "weak" });
+  assert.deepEqual(checkThemeContrast(theme.css), []);
+  assert.match(theme.css, /--destructive:/);
+});

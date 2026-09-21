@@ -27,6 +27,8 @@ import {
   paletteBorderGradient,
 } from "@/lib/palette";
 import { useInView } from "@/lib/use-in-view";
+import { useProductEventOnce } from "@/lib/analytics/use-product-event-once";
+import type { CommandBuilderControl } from "@/lib/analytics/events";
 import styles from "./command-builder.module.css";
 
 const EASE_OUT = [0.23, 1, 0.32, 1] as const;
@@ -96,6 +98,11 @@ export function CommandBuilder() {
   const [cnaVersion, setCnaVersion] = useState("");
 
   const lastPicked = useRef<string[]>(RECOMMENDED_NAMES);
+  const trackBuilderUse = useProductEventOnce();
+
+  const markBuilderUsed = (control: CommandBuilderControl) => {
+    trackBuilderUse({ name: "command_builder_used", data: { control } });
+  };
 
   const palette = useMemo<PaletteChoice>(
     () =>
@@ -127,6 +134,7 @@ export function CommandBuilder() {
   };
 
   const toggleSkill = (name: string) => {
+    markBuilderUsed("skills");
     const current = skills.kind === "pick" ? skills.names : [];
     const next = current.includes(name)
       ? current.filter((entry) => entry !== name)
@@ -191,7 +199,10 @@ export function CommandBuilder() {
                 <input
                   id="builder-name"
                   value={appName}
-                  onChange={(event) => setAppName(event.target.value)}
+                  onChange={(event) => {
+                    markBuilderUsed("app_name");
+                    setAppName(event.target.value);
+                  }}
                   spellCheck={false}
                   aria-invalid={nameInvalid}
                   aria-describedby={
@@ -213,7 +224,10 @@ export function CommandBuilder() {
               legend="Palette"
               value={palette.kind}
               options={PALETTE_CHOICES}
-              onChange={(kind) => setCustomPaletteActive(kind === "custom")}
+              onChange={(kind) => {
+                markBuilderUsed("palette");
+                setCustomPaletteActive(kind === "custom");
+              }}
             />
 
             <AnimatePresence initial={false}>
@@ -266,9 +280,10 @@ export function CommandBuilder() {
                         id="builder-hex"
                         label="Seed HEX"
                         value={palette.hex}
-                        onChange={(hex) =>
-                          updatePalette({ hex }, { delay: 200 })
-                        }
+                        onChange={(hex) => {
+                          markBuilderUsed("seed_hex");
+                          updatePalette({ hex }, { delay: 200, source: "command_builder" });
+                        }}
                         invalid={hexInvalid}
                         describedBy={
                           hexInvalid ? "builder-hex-error" : undefined
@@ -288,7 +303,10 @@ export function CommandBuilder() {
                       legend="Framework / style"
                       value={palette.preset}
                       options={PRESETS}
-                      onChange={(preset) => updatePalette({ preset })}
+                      onChange={(preset) => {
+                        markBuilderUsed("preset");
+                        updatePalette({ preset }, { source: "command_builder" });
+                      }}
                     />
 
                     <Segmented
@@ -296,13 +314,19 @@ export function CommandBuilder() {
                       legend="Colour format"
                       value={palette.format}
                       options={formatsFor(palette.preset)}
-                      onChange={(format) => updatePalette({ format })}
+                      onChange={(format) => {
+                        markBuilderUsed("format");
+                        updatePalette({ format }, { source: "command_builder" });
+                      }}
                     />
 
                     <NeutralTintDisclosure
                       wide
                       value={palette.neutralTint}
-                      onChange={(neutralTint) => updatePalette({ neutralTint })}
+                      onChange={(neutralTint) => {
+                        markBuilderUsed("neutral_tint");
+                        updatePalette({ neutralTint }, { source: "command_builder" });
+                      }}
                     />
                   </div>
                 </motion.div>
@@ -313,14 +337,20 @@ export function CommandBuilder() {
               legend="Linter"
               value={linter}
               options={LINTERS}
-              onChange={setLinter}
+              onChange={(value) => {
+                markBuilderUsed("linter");
+                setLinter(value);
+              }}
             />
 
             <Segmented
               legend="Package manager"
               value={pm}
               options={PACKAGE_MANAGERS}
-              onChange={setPm}
+              onChange={(value) => {
+                markBuilderUsed("package_manager");
+                setPm(value);
+              }}
             />
 
             <Segmented
@@ -328,13 +358,10 @@ export function CommandBuilder() {
               legend="Agent skills"
               value={skills.kind}
               options={SKILL_CHOICES}
-              onChange={(kind) =>
-                setSkills(
-                  kind === "pick"
-                    ? { kind: "pick", names: lastPicked.current }
-                    : { kind },
-                )
-              }
+              onChange={(kind) => {
+                markBuilderUsed("skills");
+                setSkills(kind === "pick" ? { kind: "pick", names: lastPicked.current } : { kind });
+              }}
             />
 
             <AnimatePresence initial={false}>
@@ -373,14 +400,20 @@ export function CommandBuilder() {
               legend="Git"
               value={git ? "yes" : "no"}
               options={YES_NO}
-              onChange={(value) => setGit(value === "yes")}
+              onChange={(value) => {
+                markBuilderUsed("git");
+                setGit(value === "yes");
+              }}
             />
 
             <Segmented
               legend="Install dependencies"
               value={install ? "yes" : "no"}
               options={YES_NO}
-              onChange={(value) => setInstall(value === "yes")}
+              onChange={(value) => {
+                markBuilderUsed("install");
+                setInstall(value === "yes");
+              }}
             />
 
             <div className={styles.field}>
@@ -394,7 +427,10 @@ export function CommandBuilder() {
                 <input
                   id="builder-cna"
                   value={cnaVersion}
-                  onChange={(event) => setCnaVersion(event.target.value)}
+                  onChange={(event) => {
+                    markBuilderUsed("cna_version");
+                    setCnaVersion(event.target.value);
+                  }}
                   placeholder={DEFAULT_CNA_VERSION}
                   spellCheck={false}
                   aria-invalid={specInvalid}
@@ -424,7 +460,10 @@ export function CommandBuilder() {
               <span id="builder-command-label" className={styles.commandLabel}>
                 Your command
               </span>
-              {paletteReady && <CopyCommandButton command={command} />}
+              {paletteReady && <CopyCommandButton
+                command={command}
+                tracking={{ event: "command_copied", surface: "command_builder" }}
+              />}
             </header>
             {/* The whole point of the section. Announced politely so a change
                 supersedes the last one instead of queueing a backlog. */}

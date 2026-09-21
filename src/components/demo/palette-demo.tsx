@@ -85,20 +85,20 @@ export function PaletteDemo() {
   }, [baseline, theme]);
 
   const onHexChange = (value: string) => {
-    updatePalette({ hex: value }, { delay: 200 });
+    updatePalette({ hex: value }, { delay: 200, source: "palette_demo" });
   };
 
   const onPresetChange = (value: Preset) => {
-    updatePalette({ preset: value });
+    updatePalette({ preset: value }, { source: "palette_demo" });
   };
 
   const onFormatChange = (value: Format) => {
-    updatePalette({ format: value });
+    updatePalette({ format: value }, { source: "palette_demo" });
   };
 
   const onNeutralTintChange = (value: typeof neutralTint) => {
     if (value === neutralTint) return;
-    updatePalette({ neutralTint: value });
+    updatePalette({ neutralTint: value }, { source: "palette_demo" });
   };
 
   return (
@@ -255,7 +255,10 @@ export function PaletteDemo() {
           {command && !busy && !failed ? (
             <>
               <code>{command}</code>
-              <CopyCommandButton command={command} />
+              <CopyCommandButton
+                command={command}
+                tracking={{ event: "command_copied", surface: "palette_demo" }}
+              />
             </>
           ) : (
             <p className={styles.commandUnavailable} role="status">
@@ -318,6 +321,7 @@ export function PaletteDemo() {
                 code={theme.css}
                 label="src/lib/design-system/theme.css"
                 copyable
+                copyTracking={{ event: "theme_css_copied", surface: "palette_demo" }}
                 scroll
                 language="css"
               />

@@ -157,12 +157,14 @@ export function CliSection() {
             <CodeBlock
               label="Everything default"
               copyable
+              copyTracking={{ event: "command_copied", surface: "cli_examples" }}
               language="shell"
               code={`${PACKAGE_EXEC} my-app --defaults`}
             />
             <CodeBlock
               label="Your colour, your tools"
               copyable
+              copyTracking={{ event: "command_copied", surface: "cli_examples" }}
               language="shell"
               code={
                 `${PACKAGE_EXEC} my-app \\\n  --defaults --hex 22C55E --preset shadcn \\\n  --pm pnpm --linter biome \\\n  --skills recommended`
