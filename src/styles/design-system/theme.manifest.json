@@ -2,12 +2,12 @@
   "requestSha256": "e7f97dbc346e623af8bf84251cf07b8451707d271e53178a09fb6e911a4de57e",
   "artifactSha256": [
     {
-      "artifactId": "artifact:d7f32d8e87f79c146638beec236361f2a79984a61ae0de07b9cacfe85953d205",
-      "sha256": "bcba71c4a0573d53851d7416f99a9d4739cf584e118f23b7ce4399b9af49ddbf"
+      "artifactId": "artifact:793e8858eaa1d75dc35fdbbffd4bb4dad0f42188f2c39e4071619a9ddf0f9aca",
+      "sha256": "e3bb1ecb9e9b2e5d89e057499b0a6242a14ef14a6407991b24a6efef311639a1"
     },
     {
-      "artifactId": "audit:d7e00018754c3e94c31b5df445808cbda6907f93593e7f63149263be099c337d",
-      "sha256": "cd727a66179c8b6e345a2664a79fa5f0d8042a53ead31cab44b0acda07c9a273"
+      "artifactId": "audit:4796dd67aecf8ad4d5be48749303eb4bc218fe8d95a1660fb978355adbfaa3f6",
+      "sha256": "7dd584a262fa6af54ef43a6f02bab2e1883c0c5c473575eb64046022ea185c00"
     }
   ],
   "adapterVersion": "shadcn@1",

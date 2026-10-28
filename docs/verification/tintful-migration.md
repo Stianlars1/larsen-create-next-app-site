@@ -67,3 +67,23 @@ The site installed 0.7.0 from npm and completed npm ci. The required publication
 gate passed against the public registry. The combined suite passes 39 Node tests
 and 84 Vitest tests; ESLint, TypeScript and production build pass. This supersedes
 the earlier authentication blocker. Live deployment is verified separately.
+
+## Tintful 0.3.0 candidate - 2026-10-28
+
+The 0.8.0 CLI candidate upgrades Tintful to 0.3.0 and regenerates the shipped
+CSS and audit files. The website preview uses the exact candidate tarball.
+Tests: 39 Node, 84 Vitest, ESLint, TypeScript and production build passed.
+A browser selection of Cyan rendered 48 swatches; the downloaded CSS was
+byte-identical to the CLI output. The CLI candidate passed 74 tests, the
+2,286-export sweep and real tarball scaffold/install/production-build smoke.
+
+CLI candidate SHA-256: e0265765d93e86b7e069e30b877676eae85ad42df447eb60c51bcc53b0314ced.
+The 0.8.0 package is not published. The lockfile records that candidate's
+integrity with its intended registry URL. The release gate prevents a hosted
+build until the exact package is published and verified. After publication run
+npm ci, the publication gate, and production deployment verification.
+
+npm audit reports GHSA-mrhx-c7xc-m3w5 in Tintful's pinned Zod 4.4.3; the same
+Zod version is used by the previously published Tintful 0.1.1. Whether this
+application's bounded generation inputs expose the vulnerable oversized-array
+path has not been established. Do not infer exploitability from npm audit alone.
