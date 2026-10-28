@@ -87,3 +87,11 @@ npm audit reports GHSA-mrhx-c7xc-m3w5 in Tintful's pinned Zod 4.4.3; the same
 Zod version is used by the previously published Tintful 0.1.1. Whether this
 application's bounded generation inputs expose the vulnerable oversized-array
 path has not been established. Do not infer exploitability from npm audit alone.
+
+### 0.8.0 publication
+
+The CLI 0.8.0 is published. The registry artifact was compared byte-for-byte
+with the verified release candidate; SHA-256 is
+`e0265765d93e86b7e069e30b877676eae85ad42df447eb60c51bcc53b0314ced` and
+gitHead is `86db0da345d2910c0924ce5a07b3c76fd8bfea4a`. The earlier unpublished
+status describes the preparation phase and is superseded by this confirmation.
